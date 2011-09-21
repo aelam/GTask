@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+<string name="prefkey_sync_type">0</string>
+<string name="prefkey_current_account">wanglun02@gmail.com</string>
+<boolean name="prefkey_notification_vibrate" value="true" />
+<boolean name="prefkey_time_format" value="true" />
+<string name="prefkey_date_format">MM/dd/yyyy</string>
+<boolean name="prefkey_all_list_tab_enabled" value="true" />
+</map>

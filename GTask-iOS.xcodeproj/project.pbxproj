@@ -1,0 +1,390 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		940ACC49142A407E00B0E92D /* GTaskSchema.sql in Resources */ = {isa = PBXBuildFile; fileRef = 940ACC48142A407C00B0E92D /* GTaskSchema.sql */; };
+		946C7F0914298A79004E97A9 /* NSMutableURLRequest+Shorten.m in Sources */ = {isa = PBXBuildFile; fileRef = 946C7F0814298A79004E97A9 /* NSMutableURLRequest+Shorten.m */; };
+		946C7F1E14298F8C004E97A9 /* RSimpleConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 946C7F1D14298F8B004E97A9 /* RSimpleConnection.m */; };
+		94C21FC814286C85007B3483 /* YAJL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94C21FC714286C85007B3483 /* YAJL.framework */; };
+		94DC62DA14273A5A00151B26 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94DC62D914273A5A00151B26 /* UIKit.framework */; };
+		94DC62DC14273A5A00151B26 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94DC62DB14273A5A00151B26 /* Foundation.framework */; };
+		94DC62DE14273A5A00151B26 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94DC62DD14273A5A00151B26 /* CoreGraphics.framework */; };
+		94DC62E414273A5A00151B26 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 94DC62E214273A5A00151B26 /* InfoPlist.strings */; };
+		94DC62E614273A5A00151B26 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC62E514273A5A00151B26 /* main.m */; };
+		94DC62EA14273A5A00151B26 /* RWAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC62E914273A5A00151B26 /* RWAppDelegate.m */; };
+		94DC62ED14273A5A00151B26 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 94DC62EB14273A5A00151B26 /* MainStoryboard_iPhone.storyboard */; };
+		94DC62F014273A5A00151B26 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 94DC62EE14273A5A00151B26 /* MainStoryboard_iPad.storyboard */; };
+		94DC62F314273A5A00151B26 /* RWMasterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC62F214273A5A00151B26 /* RWMasterViewController.m */; };
+		94DC62F614273A5A00151B26 /* RWDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC62F514273A5A00151B26 /* RWDetailViewController.m */; };
+		94DC633314273F7E00151B26 /* GDataScopes.plist in Resources */ = {isa = PBXBuildFile; fileRef = 94DC633214273F7E00151B26 /* GDataScopes.plist */; };
+		94DC633914273FBD00151B26 /* GDataEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC633614273FBD00151B26 /* GDataEngine.m */; };
+		94DC633A14273FBD00151B26 /* GDataLoginDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC633814273FBD00151B26 /* GDataLoginDialog.m */; };
+		94DC633D1427404500151B26 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94DC633C1427404500151B26 /* QuartzCore.framework */; };
+		94DC6341142741BA00151B26 /* NSString+Categories.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC6340142741BA00151B26 /* NSString+Categories.m */; };
+		94DC63451427466800151B26 /* UIWebView+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC63441427466800151B26 /* UIWebView+Blocks.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		940ACC48142A407C00B0E92D /* GTaskSchema.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = GTaskSchema.sql; sourceTree = "<group>"; };
+		946C7F0714298A79004E97A9 /* NSMutableURLRequest+Shorten.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+Shorten.h"; sourceTree = "<group>"; };
+		946C7F0814298A79004E97A9 /* NSMutableURLRequest+Shorten.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableURLRequest+Shorten.m"; sourceTree = "<group>"; };
+		946C7F1C14298F8B004E97A9 /* RSimpleConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSimpleConnection.h; path = "GTask-Core/RSimpleConnection.h"; sourceTree = SOURCE_ROOT; };
+		946C7F1D14298F8B004E97A9 /* RSimpleConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RSimpleConnection.m; path = "GTask-Core/RSimpleConnection.m"; sourceTree = SOURCE_ROOT; };
+		94C21FC714286C85007B3483 /* YAJL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = YAJL.framework; path = "GTask-Core/YAJL.framework"; sourceTree = "<group>"; };
+		94DC62D514273A5A00151B26 /* GTask-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "GTask-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		94DC62D914273A5A00151B26 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		94DC62DB14273A5A00151B26 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		94DC62DD14273A5A00151B26 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		94DC62E114273A5A00151B26 /* GTask-iOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GTask-iOS-Info.plist"; sourceTree = "<group>"; };
+		94DC62E314273A5A00151B26 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		94DC62E514273A5A00151B26 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		94DC62E714273A5A00151B26 /* GTask-iOS-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GTask-iOS-Prefix.pch"; sourceTree = "<group>"; };
+		94DC62E814273A5A00151B26 /* RWAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RWAppDelegate.h; sourceTree = "<group>"; };
+		94DC62E914273A5A00151B26 /* RWAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RWAppDelegate.m; sourceTree = "<group>"; };
+		94DC62EC14273A5A00151B26 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
+		94DC62EF14273A5A00151B26 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
+		94DC62F114273A5A00151B26 /* RWMasterViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RWMasterViewController.h; sourceTree = "<group>"; };
+		94DC62F214273A5A00151B26 /* RWMasterViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RWMasterViewController.m; sourceTree = "<group>"; };
+		94DC62F414273A5A00151B26 /* RWDetailViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RWDetailViewController.h; sourceTree = "<group>"; };
+		94DC62F514273A5A00151B26 /* RWDetailViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RWDetailViewController.m; sourceTree = "<group>"; };
+		94DC633214273F7E00151B26 /* GDataScopes.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = GDataScopes.plist; sourceTree = "<group>"; };
+		94DC633514273FBD00151B26 /* GDataEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDataEngine.h; sourceTree = "<group>"; };
+		94DC633614273FBD00151B26 /* GDataEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDataEngine.m; sourceTree = "<group>"; };
+		94DC633714273FBD00151B26 /* GDataLoginDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDataLoginDialog.h; sourceTree = "<group>"; };
+		94DC633814273FBD00151B26 /* GDataLoginDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDataLoginDialog.m; sourceTree = "<group>"; };
+		94DC633B1427402500151B26 /* GDataMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDataMacros.h; sourceTree = "<group>"; };
+		94DC633C1427404500151B26 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		94DC633F142741BA00151B26 /* NSString+Categories.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Categories.h"; sourceTree = "<group>"; };
+		94DC6340142741BA00151B26 /* NSString+Categories.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Categories.m"; sourceTree = "<group>"; };
+		94DC63421427429700151B26 /* NIFLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIFLog.h; sourceTree = "<group>"; };
+		94DC63431427466800151B26 /* UIWebView+Blocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+Blocks.h"; sourceTree = "<group>"; };
+		94DC63441427466800151B26 /* UIWebView+Blocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+Blocks.m"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		94DC62D214273A5A00151B26 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				94DC62DA14273A5A00151B26 /* UIKit.framework in Frameworks */,
+				94DC62DC14273A5A00151B26 /* Foundation.framework in Frameworks */,
+				94DC62DE14273A5A00151B26 /* CoreGraphics.framework in Frameworks */,
+				94DC633D1427404500151B26 /* QuartzCore.framework in Frameworks */,
+				94C21FC814286C85007B3483 /* YAJL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		94DC62CA14273A5A00151B26 = {
+			isa = PBXGroup;
+			children = (
+				94DC632C14273C2F00151B26 /* GTask-Core */,
+				94DC62DF14273A5A00151B26 /* GTask-iOS */,
+				94DC62D814273A5A00151B26 /* Frameworks */,
+				94DC62D614273A5A00151B26 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		94DC62D614273A5A00151B26 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				94DC62D514273A5A00151B26 /* GTask-iOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		94DC62D814273A5A00151B26 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				94C21FC714286C85007B3483 /* YAJL.framework */,
+				94DC633C1427404500151B26 /* QuartzCore.framework */,
+				94DC62D914273A5A00151B26 /* UIKit.framework */,
+				94DC62DB14273A5A00151B26 /* Foundation.framework */,
+				94DC62DD14273A5A00151B26 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		94DC62DF14273A5A00151B26 /* GTask-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				94DC62E814273A5A00151B26 /* RWAppDelegate.h */,
+				94DC62E914273A5A00151B26 /* RWAppDelegate.m */,
+				94DC62EB14273A5A00151B26 /* MainStoryboard_iPhone.storyboard */,
+				94DC62EE14273A5A00151B26 /* MainStoryboard_iPad.storyboard */,
+				94DC62F114273A5A00151B26 /* RWMasterViewController.h */,
+				94DC62F214273A5A00151B26 /* RWMasterViewController.m */,
+				94DC62F414273A5A00151B26 /* RWDetailViewController.h */,
+				94DC62F514273A5A00151B26 /* RWDetailViewController.m */,
+				94DC62E014273A5A00151B26 /* Supporting Files */,
+			);
+			path = "GTask-iOS";
+			sourceTree = "<group>";
+		};
+		94DC62E014273A5A00151B26 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				94DC62E114273A5A00151B26 /* GTask-iOS-Info.plist */,
+				94DC62E214273A5A00151B26 /* InfoPlist.strings */,
+				94DC62E514273A5A00151B26 /* main.m */,
+				94DC62E714273A5A00151B26 /* GTask-iOS-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		94DC632C14273C2F00151B26 /* GTask-Core */ = {
+			isa = PBXGroup;
+			children = (
+				94DC63421427429700151B26 /* NIFLog.h */,
+				94DC633E142741B400151B26 /* Categories */,
+				946C7F1C14298F8B004E97A9 /* RSimpleConnection.h */,
+				946C7F1D14298F8B004E97A9 /* RSimpleConnection.m */,
+				94DC633B1427402500151B26 /* GDataMacros.h */,
+				94DC633214273F7E00151B26 /* GDataScopes.plist */,
+				940ACC48142A407C00B0E92D /* GTaskSchema.sql */,
+				94DC633514273FBD00151B26 /* GDataEngine.h */,
+				94DC633614273FBD00151B26 /* GDataEngine.m */,
+				94DC633714273FBD00151B26 /* GDataLoginDialog.h */,
+				94DC633814273FBD00151B26 /* GDataLoginDialog.m */,
+			);
+			path = "GTask-Core";
+			sourceTree = "<group>";
+		};
+		94DC633E142741B400151B26 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				94DC633F142741BA00151B26 /* NSString+Categories.h */,
+				94DC6340142741BA00151B26 /* NSString+Categories.m */,
+				94DC63431427466800151B26 /* UIWebView+Blocks.h */,
+				94DC63441427466800151B26 /* UIWebView+Blocks.m */,
+				946C7F0714298A79004E97A9 /* NSMutableURLRequest+Shorten.h */,
+				946C7F0814298A79004E97A9 /* NSMutableURLRequest+Shorten.m */,
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		94DC62D414273A5A00151B26 /* GTask-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 94DC62F914273A5A00151B26 /* Build configuration list for PBXNativeTarget "GTask-iOS" */;
+			buildPhases = (
+				94DC62D114273A5A00151B26 /* Sources */,
+				94DC62D214273A5A00151B26 /* Frameworks */,
+				94DC62D314273A5A00151B26 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "GTask-iOS";
+			productName = "GTask-iOS";
+			productReference = 94DC62D514273A5A00151B26 /* GTask-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		94DC62CC14273A5A00151B26 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 94DC62CF14273A5A00151B26 /* Build configuration list for PBXProject "GTask-iOS" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 94DC62CA14273A5A00151B26;
+			productRefGroup = 94DC62D614273A5A00151B26 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				94DC62D414273A5A00151B26 /* GTask-iOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		94DC62D314273A5A00151B26 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				94DC62E414273A5A00151B26 /* InfoPlist.strings in Resources */,
+				94DC62ED14273A5A00151B26 /* MainStoryboard_iPhone.storyboard in Resources */,
+				94DC62F014273A5A00151B26 /* MainStoryboard_iPad.storyboard in Resources */,
+				94DC633314273F7E00151B26 /* GDataScopes.plist in Resources */,
+				940ACC49142A407E00B0E92D /* GTaskSchema.sql in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		94DC62D114273A5A00151B26 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				94DC62E614273A5A00151B26 /* main.m in Sources */,
+				94DC62EA14273A5A00151B26 /* RWAppDelegate.m in Sources */,
+				94DC62F314273A5A00151B26 /* RWMasterViewController.m in Sources */,
+				94DC62F614273A5A00151B26 /* RWDetailViewController.m in Sources */,
+				94DC633914273FBD00151B26 /* GDataEngine.m in Sources */,
+				94DC633A14273FBD00151B26 /* GDataLoginDialog.m in Sources */,
+				94DC6341142741BA00151B26 /* NSString+Categories.m in Sources */,
+				94DC63451427466800151B26 /* UIWebView+Blocks.m in Sources */,
+				946C7F0914298A79004E97A9 /* NSMutableURLRequest+Shorten.m in Sources */,
+				946C7F1E14298F8C004E97A9 /* RSimpleConnection.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		94DC62E214273A5A00151B26 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				94DC62E314273A5A00151B26 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		94DC62EB14273A5A00151B26 /* MainStoryboard_iPhone.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				94DC62EC14273A5A00151B26 /* en */,
+			);
+			name = MainStoryboard_iPhone.storyboard;
+			sourceTree = "<group>";
+		};
+		94DC62EE14273A5A00151B26 /* MainStoryboard_iPad.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				94DC62EF14273A5A00151B26 /* en */,
+			);
+			name = MainStoryboard_iPad.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		94DC62F714273A5A00151B26 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		94DC62F814273A5A00151B26 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		94DC62FA14273A5A00151B26 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/GTask-Core\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GTask-iOS/GTask-iOS-Prefix.pch";
+				INFOPLIST_FILE = "GTask-iOS/GTask-iOS-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		94DC62FB14273A5A00151B26 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/GTask-Core\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GTask-iOS/GTask-iOS-Prefix.pch";
+				INFOPLIST_FILE = "GTask-iOS/GTask-iOS-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		94DC62CF14273A5A00151B26 /* Build configuration list for PBXProject "GTask-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				94DC62F714273A5A00151B26 /* Debug */,
+				94DC62F814273A5A00151B26 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		94DC62F914273A5A00151B26 /* Build configuration list for PBXNativeTarget "GTask-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				94DC62FA14273A5A00151B26 /* Debug */,
+				94DC62FB14273A5A00151B26 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 94DC62CC14273A5A00151B26 /* Project object */;
+}

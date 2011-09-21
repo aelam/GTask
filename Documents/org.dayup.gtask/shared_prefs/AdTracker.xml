@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+<int name="ad_impressions" value="6" />
+<int name="ad_impressions_AdMob" value="3" />
+<int name="ad_impressions_AdSense" value="4" />
+</map>

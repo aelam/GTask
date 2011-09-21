@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>scope</key>
+		<string>Google Analytics Data API</string>
+		<key>url</key>
+		<string>https://www.google.com/analytics/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Google Base Data API</string>
+		<key>url</key>
+		<string>http://www.google.com/base/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Google Sites Data API</string>
+		<key>url</key>
+		<string>https://sites.google.com/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Blogger Data API</string>
+		<key>url</key>
+		<string>http://www.blogger.com/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Book Search Data API</string>
+		<key>url</key>
+		<string>http://www.google.com/base/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Calendar Data API</string>
+		<key>url</key>
+		<string>https://www.google.com/calendar/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Contacts Data API</string>
+		<key>url</key>
+		<string>https://www.google.com/m8/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Documents List Data API</string>
+		<key>url</key>
+		<string>https://docs.google.com/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Finance Data API</string>
+		<key>url</key>
+		<string>http://finance.google.com/finance/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Gmail Atom feed</string>
+		<key>url</key>
+		<string>https://mail.google.com/mail/feed/atom/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Health Data API</string>
+		<key>url</key>
+		<string>https://www.google.com/health/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Maps Data API</string>
+		<key>url</key>
+		<string>http://maps.google.com/maps/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Picasa Web Albums Data API</string>
+		<key>url</key>
+		<string>http://picasaweb.google.com/data/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Sidewiki Data API</string>
+		<key>url</key>
+		<string>http://www.google.com/sidewiki/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Spreadsheets Data API</string>
+		<key>url</key>
+		<string>https://spreadsheets.google.com/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Webmaster Tools API</string>
+		<key>url</key>
+		<string>http://www.google.com/webmasters/tools/feeds/</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>YouTube Data API</string>
+		<key>url</key>
+		<string>http://gdata.youtube.com</string>
+		<key>valid</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>scope</key>
+		<string>Google Task</string>
+		<key>url</key>
+		<string>https://www.googleapis.com/auth/tasks</string>
+		<key>valid</key>
+		<string>YES</string>
+	</dict>
+</array>
+</plist>
