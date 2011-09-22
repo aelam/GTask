@@ -23,13 +23,13 @@
 
 + (BOOL)isFirstLogIn;
 + (BOOL)isSessionValid;
-+ (void)logout;
 
-+ (NSArray *)scopesInfo;
+- (NSArray *)scopesInfo;
 
 - (id)init;
 - (void)authorizeWithResultBlock:(void(^)(GDataEngine *,id))resultBlock;
 //- (void)refreshToken;
+- (void)logout;
 - (void)fetchWithRequest:(NSMutableURLRequest *)request resultBlock:(void(^)(GDataEngine *,id))resultBlock;
 
 @end

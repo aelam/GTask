@@ -25,10 +25,6 @@
     UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonItemStyleDone target:self action:@selector(test)];
     self.navigationItem.rightBarButtonItem = item;
     [item release];
-
-    UIBarButtonItem *item2 = [[UIBarButtonItem alloc] initWithTitle:@"Logout" style:UIBarButtonItemStyleDone target:[GDataEngine class] action:@selector(logout)];
-    self.navigationItem.leftBarButtonItem = item2;
-    [item2 release];
     
     [super awakeFromNib];
 }
