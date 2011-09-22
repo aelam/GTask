@@ -32,8 +32,6 @@ static int kJsonError = 0x11;
 
 @interface GDataEngine (RefreshToken)
 
-//- (void)refrehAccessToken;
-//- (BOOL)saveTokensInUserDefaults;
 - (BOOL)saveTokensInUserDefaultsWithJson:(NSDictionary *)json;
 - (void)_fetchWithRequest:(NSMutableURLRequest *)request resultBlock:(void(^)(GDataEngine *,id))resultBlock;
 

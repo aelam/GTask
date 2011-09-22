@@ -7,7 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		940ACC49142A407E00B0E92D /* GTaskSchema.sql in Resources */ = {isa = PBXBuildFile; fileRef = 940ACC48142A407C00B0E92D /* GTaskSchema.sql */; };
+		94512AC5142B174B00903FC2 /* FMDatabase+Update.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ABC142B174B00903FC2 /* FMDatabase+Update.m */; };
+		94512AC6142B174B00903FC2 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ABE142B174B00903FC2 /* FMDatabase.m */; };
+		94512AC7142B174B00903FC2 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512AC0142B174B00903FC2 /* FMDatabaseAdditions.m */; };
+		94512AC8142B174B00903FC2 /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512AC2142B174B00903FC2 /* FMResultSet.m */; };
+		94512AC9142B174B00903FC2 /* GTask.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 94512AC3142B174B00903FC2 /* GTask.sqlite */; };
+		94512ACA142B174B00903FC2 /* GTaskSchema.sql in Resources */ = {isa = PBXBuildFile; fileRef = 94512AC4142B174B00903FC2 /* GTaskSchema.sql */; };
+		94512ACC142B1BA300903FC2 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 94512ACB142B1BA300903FC2 /* libsqlite3.dylib */; };
+		94512AD0142B1D1200903FC2 /* Task.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ACF142B1D1200903FC2 /* Task.m */; };
+		94512AD3142B1D3600903FC2 /* TaskList.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512AD2142B1D3600903FC2 /* TaskList.m */; };
 		946C7F0914298A79004E97A9 /* NSMutableURLRequest+Shorten.m in Sources */ = {isa = PBXBuildFile; fileRef = 946C7F0814298A79004E97A9 /* NSMutableURLRequest+Shorten.m */; };
 		946C7F1E14298F8C004E97A9 /* RSimpleConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 946C7F1D14298F8B004E97A9 /* RSimpleConnection.m */; };
 		94C21FC814286C85007B3483 /* YAJL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94C21FC714286C85007B3483 /* YAJL.framework */; };
@@ -30,7 +38,21 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		940ACC48142A407C00B0E92D /* GTaskSchema.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = GTaskSchema.sql; sourceTree = "<group>"; };
+		94512ABB142B174B00903FC2 /* FMDatabase+Update.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+Update.h"; sourceTree = "<group>"; };
+		94512ABC142B174B00903FC2 /* FMDatabase+Update.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+Update.m"; sourceTree = "<group>"; };
+		94512ABD142B174B00903FC2 /* FMDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabase.h; sourceTree = "<group>"; };
+		94512ABE142B174B00903FC2 /* FMDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabase.m; sourceTree = "<group>"; };
+		94512ABF142B174B00903FC2 /* FMDatabaseAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabaseAdditions.h; sourceTree = "<group>"; };
+		94512AC0142B174B00903FC2 /* FMDatabaseAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabaseAdditions.m; sourceTree = "<group>"; };
+		94512AC1142B174B00903FC2 /* FMResultSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMResultSet.h; sourceTree = "<group>"; };
+		94512AC2142B174B00903FC2 /* FMResultSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMResultSet.m; sourceTree = "<group>"; };
+		94512AC3142B174B00903FC2 /* GTask.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = GTask.sqlite; sourceTree = "<group>"; };
+		94512AC4142B174B00903FC2 /* GTaskSchema.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = GTaskSchema.sql; sourceTree = "<group>"; };
+		94512ACB142B1BA300903FC2 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
+		94512ACE142B1D1200903FC2 /* Task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Task.h; sourceTree = "<group>"; };
+		94512ACF142B1D1200903FC2 /* Task.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Task.m; sourceTree = "<group>"; };
+		94512AD1142B1D3600903FC2 /* TaskList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaskList.h; sourceTree = "<group>"; };
+		94512AD2142B1D3600903FC2 /* TaskList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TaskList.m; sourceTree = "<group>"; };
 		946C7F0714298A79004E97A9 /* NSMutableURLRequest+Shorten.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+Shorten.h"; sourceTree = "<group>"; };
 		946C7F0814298A79004E97A9 /* NSMutableURLRequest+Shorten.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableURLRequest+Shorten.m"; sourceTree = "<group>"; };
 		946C7F1C14298F8B004E97A9 /* RSimpleConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSimpleConnection.h; path = "GTask-Core/RSimpleConnection.h"; sourceTree = SOURCE_ROOT; };
@@ -71,6 +93,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94512ACC142B1BA300903FC2 /* libsqlite3.dylib in Frameworks */,
 				94DC62DA14273A5A00151B26 /* UIKit.framework in Frameworks */,
 				94DC62DC14273A5A00151B26 /* Foundation.framework in Frameworks */,
 				94DC62DE14273A5A00151B26 /* CoreGraphics.framework in Frameworks */,
@@ -82,6 +105,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		94512ABA142B174B00903FC2 /* FMDataBase */ = {
+			isa = PBXGroup;
+			children = (
+				94512ABB142B174B00903FC2 /* FMDatabase+Update.h */,
+				94512ABC142B174B00903FC2 /* FMDatabase+Update.m */,
+				94512ABD142B174B00903FC2 /* FMDatabase.h */,
+				94512ABE142B174B00903FC2 /* FMDatabase.m */,
+				94512ABF142B174B00903FC2 /* FMDatabaseAdditions.h */,
+				94512AC0142B174B00903FC2 /* FMDatabaseAdditions.m */,
+				94512AC1142B174B00903FC2 /* FMResultSet.h */,
+				94512AC2142B174B00903FC2 /* FMResultSet.m */,
+				94512AC3142B174B00903FC2 /* GTask.sqlite */,
+				94512AC4142B174B00903FC2 /* GTaskSchema.sql */,
+			);
+			path = FMDataBase;
+			sourceTree = "<group>";
+		};
+		94512ACD142B1CF800903FC2 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				94512AD1142B1D3600903FC2 /* TaskList.h */,
+				94512AD2142B1D3600903FC2 /* TaskList.m */,
+				94512ACE142B1D1200903FC2 /* Task.h */,
+				94512ACF142B1D1200903FC2 /* Task.m */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		94DC62CA14273A5A00151B26 = {
 			isa = PBXGroup;
 			children = (
@@ -103,6 +154,7 @@
 		94DC62D814273A5A00151B26 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				94512ACB142B1BA300903FC2 /* libsqlite3.dylib */,
 				94C21FC714286C85007B3483 /* YAJL.framework */,
 				94DC633C1427404500151B26 /* QuartzCore.framework */,
 				94DC62D914273A5A00151B26 /* UIKit.framework */,
@@ -142,13 +194,14 @@
 		94DC632C14273C2F00151B26 /* GTask-Core */ = {
 			isa = PBXGroup;
 			children = (
-				94DC63421427429700151B26 /* NIFLog.h */,
+				94512ACD142B1CF800903FC2 /* Model */,
+				94512ABA142B174B00903FC2 /* FMDataBase */,
 				94DC633E142741B400151B26 /* Categories */,
+				94DC63421427429700151B26 /* NIFLog.h */,
 				946C7F1C14298F8B004E97A9 /* RSimpleConnection.h */,
 				946C7F1D14298F8B004E97A9 /* RSimpleConnection.m */,
 				94DC633B1427402500151B26 /* GDataMacros.h */,
 				94DC633214273F7E00151B26 /* GDataScopes.plist */,
-				940ACC48142A407C00B0E92D /* GTaskSchema.sql */,
 				94DC633514273FBD00151B26 /* GDataEngine.h */,
 				94DC633614273FBD00151B26 /* GDataEngine.m */,
 				94DC633714273FBD00151B26 /* GDataLoginDialog.h */,
@@ -224,7 +277,8 @@
 				94DC62ED14273A5A00151B26 /* MainStoryboard_iPhone.storyboard in Resources */,
 				94DC62F014273A5A00151B26 /* MainStoryboard_iPad.storyboard in Resources */,
 				94DC633314273F7E00151B26 /* GDataScopes.plist in Resources */,
-				940ACC49142A407E00B0E92D /* GTaskSchema.sql in Resources */,
+				94512AC9142B174B00903FC2 /* GTask.sqlite in Resources */,
+				94512ACA142B174B00903FC2 /* GTaskSchema.sql in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,6 +299,12 @@
 				94DC63451427466800151B26 /* UIWebView+Blocks.m in Sources */,
 				946C7F0914298A79004E97A9 /* NSMutableURLRequest+Shorten.m in Sources */,
 				946C7F1E14298F8C004E97A9 /* RSimpleConnection.m in Sources */,
+				94512AC5142B174B00903FC2 /* FMDatabase+Update.m in Sources */,
+				94512AC6142B174B00903FC2 /* FMDatabase.m in Sources */,
+				94512AC7142B174B00903FC2 /* FMDatabaseAdditions.m in Sources */,
+				94512AC8142B174B00903FC2 /* FMResultSet.m in Sources */,
+				94512AD0142B1D1200903FC2 /* Task.m in Sources */,
+				94512AD3142B1D3600903FC2 /* TaskList.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
