@@ -29,7 +29,6 @@ static int kJsonError = 0x11;
 
 ////////////////////////////////////////////////////
 
-static NSArray *_scopesInfo = nil;
 
 @interface GDataEngine (RefreshToken)
 
@@ -72,9 +71,10 @@ static NSArray *_scopesInfo = nil;
 }
 
 
-- (NSArray *)scopesInfo {
++ (NSArray *)scopesInfo {
+    static NSArray *_scopesInfo = nil;
     if (_scopesInfo == nil) {
-        _scopesInfo = [NSArray arrayWithContentsOfFile:[[NSBundle mainBundle]pathForResource:@"GDataScopes" ofType:@"plist"]];
+        _scopesInfo = [[NSArray arrayWithContentsOfFile:[[NSBundle mainBundle]pathForResource:@"GDataScopes" ofType:@"plist"]] retain];
     }
     return _scopesInfo;
 }
@@ -88,14 +88,13 @@ static NSArray *_scopesInfo = nil;
     return self;
 }
 
-- (void)logout {
++ (void)logout {
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:USER_DEFAULTS_EXPIRATION_TIMESTAMP];
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:USER_DEFAULTS_ACCESS_TOKEN];
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:USER_DEFAULTS_REFRESH_TOKEN];
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:USER_DEFAULTS_GOOGLE_SCOPE];
-    
-    [[NSUserDefaults standardUserDefaults] synchronize];
 
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)askAccessTokenWithCode:(NSString *)code {
@@ -180,7 +179,7 @@ static NSArray *_scopesInfo = nil;
     }
     else if ([GDataEngine isFirstLogIn]) {
         NIF_INFO(@"请求AccessToken...");
-        NSArray *scopeInfo = [self scopesInfo];
+        NSArray *scopeInfo = [GDataEngine scopesInfo];
         NSMutableArray *scopes = [NSMutableArray array];
         for (NSDictionary *aScope in scopeInfo) {
             BOOL valid = [[aScope objectForKey:@"valid"] boolValue];
