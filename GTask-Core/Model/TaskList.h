@@ -11,7 +11,7 @@
 @interface TaskList : NSObject
 
 
-@property (assign,readonly) NSInteger localListId;
+@property (assign) NSInteger localListId;
 @property (copy)  NSString *serverListId;
 @property (copy)  NSString *kind;
 @property (copy)  NSString *title;
@@ -25,5 +25,8 @@
 @property (assign)  double serverModifyTime;
 @property (assign)  double localModifyTime;
 @property (retain)  NSMutableArray *tasks;
+
+- (NSMutableArray *)taskListsFromDBWithSortType:(NSInteger)sortType;
+- (BOOL)saveTaskListFromJSON:(NSArray *)json;
 
 @end

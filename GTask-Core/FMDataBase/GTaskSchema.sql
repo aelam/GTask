@@ -1,7 +1,7 @@
 
 DROP TABLE IF EXISTS "task_lists";
 CREATE TABLE task_lists (
-    local_list_id           INTEGER PRIMARY KEY,
+    local_list_id           INTEGER PRIMARY KEY AUTOINCREMENT,
     server_list_id          TEXT,
     kind                    TEXT,
     self_link               TEXT,
