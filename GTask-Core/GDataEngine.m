@@ -112,12 +112,10 @@ static int kJsonError = 0x11;
 - (void)fetchWithRequest:(NSMutableURLRequest *)request resultBlock:(void(^)(GDataEngine *,id))resultBlock {
     if ([GDataEngine isSessionValid]) {
         if (request == nil) {           // 只是登陆
-            NIF_INFO();
-            resultBlock(self,@"已经登陆");
+                        resultBlock(self,@"已经登陆");
         } else {
             [self _fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
-                NIF_INFO();
-                resultBlock(self,result);
+                                resultBlock(self,result);
             }];
         }
     }
@@ -139,16 +137,13 @@ static int kJsonError = 0x11;
             BOOL rs = [self saveTokensInUserDefaultsWithJson:json];
             if (!rs) {
                 NSError *error = [[[NSError alloc] initWithDomain:@"!!SAVE TOKEN ERROR" code:kJsonError userInfo:nil] autorelease];
-                NIF_INFO();
-                resultBlock(self,error);
+                                resultBlock(self,error);
             } else {
                 if (request == nil) {
-                    NIF_INFO();
-                    resultBlock(self,@"已经登陆");
+                                        resultBlock(self,@"已经登陆");
                 } else { 
                     [self _fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
-                        NIF_INFO();
-                        resultBlock(self,result);
+                                                resultBlock(self,result);
                     }];
                 }
             }
@@ -208,26 +203,23 @@ static int kJsonError = 0x11;
                     BOOL rs = [self saveTokensInUserDefaultsWithJson:json];
                     if (!rs) {
                         NSError *error = [[[NSError alloc] initWithDomain:@"JSON PARSE ERROR 1" code:kJsonError userInfo:nil] autorelease];
-                        NIF_INFO();
-                        resultBlock(self,error);
+                                                resultBlock(self,error);
                     } else {
                         if (request == nil) {
                             resultBlock(self,@"已经登陆");
                         } else { 
                             [self _fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
-                                NIF_INFO(@"-------------- %@",request);
                                 resultBlock(self,result);
                             }];
                         }
                     }
                 } fail:^(RSimpleConnection *connection, NSError *error) {
-                    NIF_INFO();
+                    
                     resultBlock(self,error);
                 }];                
             }
         } fail:^(UIWebView *webView, NSError *error) {
-            NIF_INFO();
-            resultBlock(self,error);
+                        resultBlock(self,error);
         }];
     } 
 }
