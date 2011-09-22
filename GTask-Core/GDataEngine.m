@@ -95,29 +95,6 @@ static int kJsonError = 0x11;
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-- (void)askAccessTokenWithCode:(NSString *)code {
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:kAskAuthTokenURL]];
-    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:
-                            kClientID,@"client_id",
-                            code,@"code",
-                            kClientSecret,@"client_secret",
-                            kRedirectURI,@"redirect_uri",
-                            @"authorization_code",@"grant_type",
-                            nil];
-    [request attachPostParams:params];
-    RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:request tag:RSimpleConnectionTagFirst];
-    [connection startWithBlocksStart:^(RSimpleConnection *connection) {
-        NIF_TRACE(@" start");
-        
-    } finish:^(RSimpleConnection *connection, NSDictionary *json) {
-        NIF_TRACE(@" finish : %@",json);
-    } fail:^(RSimpleConnection *connection, NSError *error) {
-        NIF_TRACE(@"%@ %@",connection,error);
-    }];
-    
-}
-
-
 - (void)authorizeWithResultBlock:(void(^)(GDataEngine *,id))resultBlock {
     [self fetchWithRequest:nil resultBlock:^(GDataEngine *engine, id result) {
         resultBlock(engine,result);
@@ -135,9 +112,11 @@ static int kJsonError = 0x11;
 - (void)fetchWithRequest:(NSMutableURLRequest *)request resultBlock:(void(^)(GDataEngine *,id))resultBlock {
     if ([GDataEngine isSessionValid]) {
         if (request == nil) {           // 只是登陆
+            NIF_INFO();
             resultBlock(self,@"已经登陆");
         } else {
             [self _fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
+                NIF_INFO();
                 resultBlock(self,result);
             }];
         }
@@ -145,27 +124,30 @@ static int kJsonError = 0x11;
     else if(![GDataEngine isSessionValid] && ![GDataEngine isFirstLogIn]){  //refresh
         // 刷新accessToken
         NIF_INFO(@"刷新AccessToken...");
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:kAskAuthTokenURL]];
+        NSMutableURLRequest *_request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:kAskAuthTokenURL]];
         NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:
                                 kClientID,@"client_id",
                                 kClientSecret,@"client_secret",
                                 self.refreshToken,@"refresh_token",
                                 @"refresh_token",@"grant_type",
                                 nil];
-        [request attachPostParams:params];
-        RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:request tag:RSimpleConnectionTagFirst];
+        [_request attachPostParams:params];
+        RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:_request tag:RSimpleConnectionTagFirst];
         [connection startWithBlocksStart:^(RSimpleConnection *connection) {
             
         } finish:^(RSimpleConnection *connection, NSDictionary *json) {
             BOOL rs = [self saveTokensInUserDefaultsWithJson:json];
             if (!rs) {
                 NSError *error = [[[NSError alloc] initWithDomain:@"!!SAVE TOKEN ERROR" code:kJsonError userInfo:nil] autorelease];
+                NIF_INFO();
                 resultBlock(self,error);
             } else {
                 if (request == nil) {
+                    NIF_INFO();
                     resultBlock(self,@"已经登陆");
                 } else { 
                     [self _fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
+                        NIF_INFO();
                         resultBlock(self,result);
                     }];
                 }
@@ -210,7 +192,7 @@ static int kJsonError = 0x11;
                 
                 NSString *code = [[codeFragile componentsSeparatedByString:seperator] objectAtIndex:1];
                 
-                NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:kAskAuthTokenURL]];
+                NSMutableURLRequest *_request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:kAskAuthTokenURL]];
                 NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:
                                         kClientID,@"client_id",
                                         code,@"code",
@@ -218,29 +200,33 @@ static int kJsonError = 0x11;
                                         kRedirectURI,@"redirect_uri",
                                         @"authorization_code",@"grant_type",
                                         nil];
-                [request attachPostParams:params];
-                RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:request tag:RSimpleConnectionTagFirst];
+                [_request attachPostParams:params];
+                RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:_request tag:RSimpleConnectionTagFirst];
                 [connection startWithBlocksStart:^(RSimpleConnection *connection) {
                     
                 } finish:^(RSimpleConnection *connection, NSDictionary *json) {
                     BOOL rs = [self saveTokensInUserDefaultsWithJson:json];
                     if (!rs) {
                         NSError *error = [[[NSError alloc] initWithDomain:@"JSON PARSE ERROR 1" code:kJsonError userInfo:nil] autorelease];
+                        NIF_INFO();
                         resultBlock(self,error);
                     } else {
                         if (request == nil) {
                             resultBlock(self,@"已经登陆");
                         } else { 
                             [self _fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
+                                NIF_INFO(@"-------------- %@",request);
                                 resultBlock(self,result);
                             }];
                         }
                     }
                 } fail:^(RSimpleConnection *connection, NSError *error) {
+                    NIF_INFO();
                     resultBlock(self,error);
                 }];                
             }
         } fail:^(UIWebView *webView, NSError *error) {
+            NIF_INFO();
             resultBlock(self,error);
         }];
     } 
