@@ -12,9 +12,10 @@
 
 
 @property (assign,readonly) NSInteger localListId;
-@property (copy) NSString *serverListId;
+@property (copy)  NSString *serverListId;
 @property (copy)  NSString *kind;
 @property (copy)  NSString *title;
+@property (copy)  NSString *link;
 @property (assign)  BOOL     isDefault;
 @property (assign)  BOOL     isDeleted;
 @property (assign)  BOOL    isCleared;

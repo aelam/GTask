@@ -25,6 +25,7 @@
 @synthesize due = _due;
 @synthesize serverModifyTime = _serverModifyTime;
 @synthesize localModifyTime = _localModifyTime;
+@synthesize link = _link;
 
 
 
@@ -32,6 +33,7 @@
     [_serverTaskId release];
     [_title release];
     [_notes release];
+    [_link release];
     [super dealloc];
 }
 

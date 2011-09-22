@@ -23,14 +23,14 @@
 @synthesize serverModifyTime = _serverModifyTime;
 @synthesize localModifyTime = _localModifyTime;
 @synthesize tasks = _tasks;
-
-
+@synthesize link = _link;
 
 - (void)dealloc {
     [_serverListId release];
     [_kind release];
     [_title release];
     [_tasks release];
+    [_link release];
     [super dealloc];
 }
 
