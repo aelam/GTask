@@ -13,5 +13,6 @@
 @interface RWMasterViewController : UITableViewController
 
 @property (strong, nonatomic) RWDetailViewController *detailViewController;
+@property (strong, nonatomic) NSMutableArray *taskLists;
 
 @end

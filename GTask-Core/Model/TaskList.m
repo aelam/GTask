@@ -26,7 +26,7 @@
 @synthesize tasks = _tasks;
 @synthesize link = _link;
 
-- (NSMutableArray *)taskListsFromDBWithSortType:(NSInteger)sortType {
++ (NSMutableArray *)taskListsFromDBWithSortType:(NSInteger)sortType {
     NSMutableArray *taskLists = [NSMutableArray array];
     FMDatabase *db = [FMDatabase database];
     if (![db open]) {
@@ -53,25 +53,29 @@
             [list release];
         }
         [db close];            
+        return taskLists;
     }
-    return taskLists;
 }
 
-- (BOOL)saveTaskListFromJSON:(NSArray *)json {
++ (BOOL)saveTaskListFromJSON:(NSDictionary *)json {
     FMDatabase *db = [FMDatabase database];
     if (![db open]) {
         NSLog(@"Could not open db.");
 		return NO;
     } else {
         BOOL rs = NO;
-        for (NSDictionary*item in json) {
+        NSArray *items = [json objectForKey:@"items"];
+        for (NSDictionary*item in items) {
             NSString *_id = [item objectForKey:@"id"];
             NSString *kind = [item objectForKey:@"kind"];
             NSString *link = [item objectForKey:@"selfLink"];
             NSString *title = [item objectForKey:@"title"];
 
-            NSString *sql = [NSString stringWithFormat:@"INSERT INTO task_lists (server_list_id,kind,self_link,title) VALUES (%@,%@,%@,%d)",_id,kind,link,title];
-    
+            double timeStamp = [[NSDate date] timeIntervalSince1970];
+            NIF_TRACE(@"timeStamp : %0.0f", timeStamp);
+            
+            NSString *sql = [NSString stringWithFormat:@"INSERT INTO task_lists (server_list_id,kind,self_link,title,latest_sync_timestamp) VALUES ('%@','%@','%@','%@',%0.0f)",_id,kind,link,title,timeStamp];
+            NIF_INFO(@"save to DB sql : %@", sql);
             rs = [db executeUpdate:sql];
             NIF_INFO(@"%d", rs);
         }

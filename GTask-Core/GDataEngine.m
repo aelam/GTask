@@ -32,7 +32,7 @@ static int kJsonError = 0x11;
 
 @interface GDataEngine (RefreshToken)
 
-- (BOOL)saveTokensInUserDefaultsWithJson:(NSDictionary *)json;
+- (BOOL)_saveTokensInUserDefaultsWithJson:(NSDictionary *)json;
 - (void)_fetchWithRequest:(NSMutableURLRequest *)request resultBlock:(void(^)(GDataEngine *,id))resultBlock;
 
 @end
@@ -134,7 +134,7 @@ static int kJsonError = 0x11;
         [connection startWithBlocksStart:^(RSimpleConnection *connection) {
             
         } finish:^(RSimpleConnection *connection, NSDictionary *json) {
-            BOOL rs = [self saveTokensInUserDefaultsWithJson:json];
+            BOOL rs = [self _saveTokensInUserDefaultsWithJson:json];
             if (!rs) {
                 NSError *error = [[[NSError alloc] initWithDomain:@"!!SAVE TOKEN ERROR" code:kJsonError userInfo:nil] autorelease];
                                 resultBlock(self,error);
@@ -200,7 +200,7 @@ static int kJsonError = 0x11;
                 [connection startWithBlocksStart:^(RSimpleConnection *connection) {
                     
                 } finish:^(RSimpleConnection *connection, NSDictionary *json) {
-                    BOOL rs = [self saveTokensInUserDefaultsWithJson:json];
+                    BOOL rs = [self _saveTokensInUserDefaultsWithJson:json];
                     if (!rs) {
                         NSError *error = [[[NSError alloc] initWithDomain:@"JSON PARSE ERROR 1" code:kJsonError userInfo:nil] autorelease];
                                                 resultBlock(self,error);
@@ -252,7 +252,7 @@ static int kJsonError = 0x11;
 }
 
 
-- (BOOL)saveTokensInUserDefaultsWithJson:(NSDictionary *)json {
+- (BOOL)_saveTokensInUserDefaultsWithJson:(NSDictionary *)json {
     
     self.accessToken = [json objectForKey:@"access_token"];
     NSString *refresh = [json objectForKey:@"refresh_token"];

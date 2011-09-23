@@ -26,7 +26,7 @@
 @property (assign)  double localModifyTime;
 @property (retain)  NSMutableArray *tasks;
 
-- (NSMutableArray *)taskListsFromDBWithSortType:(NSInteger)sortType;
-- (BOOL)saveTaskListFromJSON:(NSArray *)json;
++ (NSMutableArray *)taskListsFromDBWithSortType:(NSInteger)sortType;
++ (BOOL)saveTaskListFromJSON:(NSDictionary *)json;
 
 @end

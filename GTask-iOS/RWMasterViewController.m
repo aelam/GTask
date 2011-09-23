@@ -10,10 +10,12 @@
 #import "RWDetailViewController.h"
 //#import "GDataLoginDialog.h"
 #import "GDataEngine.h"
+#import "TaskList.h"
 
 @implementation RWMasterViewController
 
 @synthesize detailViewController = _detailViewController;
+@synthesize taskLists = _taskLists;
 
 - (void)awakeFromNib
 {
@@ -42,6 +44,12 @@
      NIF_TRACE(@"%@",result);
      if ([result isKindOfClass:[NSError class]]) {
      NIF_TRACE(@"--- %d", [(NSError *)result code]);
+     } else if ([result isKindOfClass:[NSDictionary class]]) {
+         BOOL rs = [TaskList saveTaskListFromJSON:result];
+         NIF_INFO(@"%d", rs);
+         self.taskLists = [TaskList taskListsFromDBWithSortType:1];
+         NIF_TRACE(@"%@", self.taskLists);
+         [self.tableView reloadData];
      }
      
      UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tip" message:[result description] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
@@ -64,6 +72,7 @@
 - (void)dealloc
 {
     [_detailViewController release];
+    [_taskLists release];
     [super dealloc];
 }
 
@@ -120,6 +129,25 @@
     } else {
         return YES;
     }
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return [self.taskLists count];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *kCellIndentifier = @"kCellIndentifier";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellIndentifier];
+    if(cell == nil) {
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:kCellIndentifier] autorelease];
+    }
+    
+    TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
+    cell.textLabel.text = list.title;
+    cell.detailTextLabel.text = list.kind;
+    
+    
+    return cell;
 }
 
 /*
