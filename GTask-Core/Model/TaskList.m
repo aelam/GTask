@@ -74,10 +74,16 @@
             double timeStamp = [[NSDate date] timeIntervalSince1970];
             NIF_TRACE(@"timeStamp : %0.0f", timeStamp);
             
-            NSString *sql = [NSString stringWithFormat:@"INSERT INTO task_lists (server_list_id,kind,self_link,title,latest_sync_timestamp) VALUES ('%@','%@','%@','%@',%0.0f)",_id,kind,link,title,timeStamp];
-            NIF_INFO(@"save to DB sql : %@", sql);
-            rs = [db executeUpdate:sql];
-            NIF_INFO(@"%d", rs);
+            FMResultSet *set = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE server_list_id = '%@'",_id]];
+            if ([set next]) {
+                NIF_INFO(@"已经存在记录了");
+            } else {
+                NSString *sql = [NSString stringWithFormat:@"INSERT INTO task_lists (server_list_id,kind,self_link,title,latest_sync_timestamp) VALUES ('%@','%@','%@','%@',%0.0f)",_id,kind,link,title,timeStamp];
+                NIF_INFO(@"save to DB sql : %@", sql);
+                rs = [db executeUpdate:sql];
+                NIF_INFO(@"%d", rs);                
+            }
+            
         }
         return rs;
     }

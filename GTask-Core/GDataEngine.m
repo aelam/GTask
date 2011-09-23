@@ -274,7 +274,6 @@ static int kJsonError = 0x11;
 - (void)dealloc {
     [_accessToken release];  _accessToken = nil;
     [_refreshToken release]; _refreshToken = nil;
-    _sessionDelegate = nil;
     [super dealloc];
 }
 

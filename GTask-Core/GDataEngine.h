@@ -9,12 +9,8 @@
 #import <UIKit/UIkit.h>
 #import "GDataLoginDialog.h"
 
-@protocol GDataSessionDelegate;
-
 @interface GDataEngine : NSObject { 
     
-    id<GDataSessionDelegate> _sessionDelegate;      // weak
-
 }
 
 @property (nonatomic, copy)    NSString    *accessToken;
@@ -28,30 +24,8 @@
 + (NSArray *)scopesInfo;
 
 - (id)init;
+
 - (void)authorizeWithResultBlock:(void(^)(GDataEngine *,id))resultBlock;
-//- (void)refreshToken;
 - (void)fetchWithRequest:(NSMutableURLRequest *)request resultBlock:(void(^)(GDataEngine *,id))resultBlock;
-
-@end
-
-
-
-@protocol GDataSessionDelegate <NSObject>
-
-@optional
-/**
- * Called when the user successfully logged in.
- */
-- (void)googleDidLogin;
-
-/**
- * Called when the user dismissed the dialog without logging in.
- */
-- (void)googleNotLogin:(BOOL)cancelled;
-
-/**
- * Called when the user logged out.
- */
-- (void)googleDidLogout;
 
 @end

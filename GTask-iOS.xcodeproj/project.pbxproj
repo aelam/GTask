@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9447F619142C862A002B32DF /* GTaskEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9447F618142C862A002B32DF /* GTaskEngine.m */; };
 		94512AC5142B174B00903FC2 /* FMDatabase+Update.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ABC142B174B00903FC2 /* FMDatabase+Update.m */; };
 		94512AC6142B174B00903FC2 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ABE142B174B00903FC2 /* FMDatabase.m */; };
 		94512AC7142B174B00903FC2 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512AC0142B174B00903FC2 /* FMDatabaseAdditions.m */; };
@@ -38,6 +39,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9447F617142C862A002B32DF /* GTaskEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTaskEngine.h; sourceTree = "<group>"; };
+		9447F618142C862A002B32DF /* GTaskEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTaskEngine.m; sourceTree = "<group>"; };
 		94512ABB142B174B00903FC2 /* FMDatabase+Update.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+Update.h"; sourceTree = "<group>"; };
 		94512ABC142B174B00903FC2 /* FMDatabase+Update.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+Update.m"; sourceTree = "<group>"; };
 		94512ABD142B174B00903FC2 /* FMDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabase.h; sourceTree = "<group>"; };
@@ -204,6 +207,8 @@
 				94DC633214273F7E00151B26 /* GDataScopes.plist */,
 				94DC633514273FBD00151B26 /* GDataEngine.h */,
 				94DC633614273FBD00151B26 /* GDataEngine.m */,
+				9447F617142C862A002B32DF /* GTaskEngine.h */,
+				9447F618142C862A002B32DF /* GTaskEngine.m */,
 				94DC633714273FBD00151B26 /* GDataLoginDialog.h */,
 				94DC633814273FBD00151B26 /* GDataLoginDialog.m */,
 			);
@@ -305,6 +310,7 @@
 				94512AC8142B174B00903FC2 /* FMResultSet.m in Sources */,
 				94512AD0142B1D1200903FC2 /* Task.m in Sources */,
 				94512AD3142B1D3600903FC2 /* TaskList.m in Sources */,
+				9447F619142C862A002B32DF /* GTaskEngine.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

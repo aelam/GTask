@@ -9,8 +9,9 @@
 #import "RWMasterViewController.h"
 #import "RWDetailViewController.h"
 //#import "GDataLoginDialog.h"
-#import "GDataEngine.h"
+//#import "GDataEngine.h"
 #import "TaskList.h"
+#import "GTaskEngine.h"
 
 @implementation RWMasterViewController
 
@@ -36,7 +37,7 @@
 }
 
 - (void)test {
-    
+/*    
     NSURL *url = [NSURL URLWithString:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     GDataEngine *engine = [[[GDataEngine alloc] init] autorelease];
@@ -51,11 +52,17 @@
          NIF_TRACE(@"%@", self.taskLists);
          [self.tableView reloadData];
      }
-     
-     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tip" message:[result description] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-     [alert show];
-     [alert release];
-     }];
+  */
+    GTaskEngine *engine = [[[GTaskEngine alloc] init] autorelease];
+    [engine fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *result) {
+        self.taskLists = result;
+        [self.tableView reloadData];
+    }];
+    
+//     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tip" message:[result description] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+//     [alert show];
+//     [alert release];
+//     }];
 /*    [engine authorizeWithResultBlock:^(GDataEngine *engine, id result) {
         NIF_TRACE(@"%@",result);
         if ([result isKindOfClass:[NSError class]]) {
