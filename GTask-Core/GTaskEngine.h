@@ -13,13 +13,18 @@
 
 @interface GTaskEngine : GDataEngine
 
++ (GTaskEngine *)sharedEngine;
++ (GTaskEngine *)engine;
+
 // Lists
+- (NSMutableArray *)localTaskListsWithSortType:(NSInteger)sortType;
+
 - (void)fetchServerTaskListsWithResultHander:(void(^)(GTaskEngine *,NSMutableArray *))resultHander;
 - (void)localTaskLists;
 - (void)syncTaskList;
 
 // Tasks
-- (void)fetchServerTasksFromList:(TaskList *)aList resultHander:(void(^)(GTaskEngine *,NSMutableArray *))resultHander;
+- (void)fetchServerTasksForList:(TaskList *)aList resultHander:(void(^)(GTaskEngine *,NSMutableArray *))resultHander;
 - (void)localTasks;
 - (void)syncTasks;
 

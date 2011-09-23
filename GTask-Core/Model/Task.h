@@ -10,19 +10,21 @@
 
 @interface Task : NSObject
 
-@property (assign,readonly) NSInteger localTaskId;
-@property (assign,readonly) NSInteger localListId;
-@property (assign,readonly) NSInteger localParentId;
+@property (assign) NSInteger localTaskId;
+@property (assign) NSInteger localListId;
+@property (assign) NSInteger localParentId;
 @property (copy)  NSString *serverTaskId;
 @property (copy)  NSString *title;
 @property (copy)  NSString *notes;
 @property (copy)  NSString *link;
 @property (assign)  BOOL     isUpdated;
 @property (assign)  BOOL     isDeleted;
-@property (assign)  BOOL    isCleared;
+@property (assign)  BOOL     isCompleted;
+@property (assign)  BOOL     isCleared;
 @property (assign)  BOOL     isHidden;
+@property (assign)  NSInteger status;
 @property (assign)  double  completedTimestamp;
-@property (assign)  double  reminder_timestamp;
+@property (assign)  double  reminderTimestamp;
 @property (assign)  double  due;
 @property (assign)  double serverModifyTime;
 @property (assign)  double localModifyTime;

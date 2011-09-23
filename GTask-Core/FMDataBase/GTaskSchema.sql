@@ -25,6 +25,7 @@ CREATE TABLE tasks (
     local_list_id       INTEGER,    --LOCAL??
     local_parent_id	    INTEGER NOT NULL,--??
 
+    self_link           TEXT,
     title               TEXT,
     notes               TEXT,
     is_updated          INTEGER,

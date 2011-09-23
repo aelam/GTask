@@ -157,6 +157,14 @@
     return cell;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
+    [[GTaskEngine engine] fetchServerTasksForList:list resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
+        NIF_INFO(@"%@",result);
+    }];
+}
+
 /*
 // Override to support conditional editing of the table view.
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
