@@ -123,8 +123,12 @@
     }
     
     Task *task = [self.tasks objectAtIndex:indexPath.row];
+
+    NSDate *date = [NSDate dateWithTimeIntervalSince1970:task.serverModifyTime];
+
     cell.textLabel.text = task.title;
-    cell.detailTextLabel.text = task.serverTaskId;
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"%d:%d  - %@", task.localTaskId,task.localParentId,[date description]];
+    //cell.detailTextLabel.text = task.serverTaskId;
     
     return cell;
 }
