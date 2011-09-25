@@ -7,6 +7,9 @@
 //
 
 #import "RWDetailViewController.h"
+#import "Task.h"
+
+#import <objc/runtime.h>
 
 @interface RWDetailViewController ()
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
@@ -18,12 +21,14 @@
 @synthesize detailItem = _detailItem;
 @synthesize detailDescriptionLabel = _detailDescriptionLabel;
 @synthesize masterPopoverController = _masterPopoverController;
+@synthesize tasks = _tasks;
 
 - (void)dealloc
 {
     [_detailItem release];
     [_detailDescriptionLabel release];
     [_masterPopoverController release];
+    [_tasks release];
     [super dealloc];
 }
 
@@ -77,6 +82,7 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    [self.tableView reloadData];
     [super viewWillAppear:animated];
 }
 
@@ -105,6 +111,24 @@
     }
 }
 
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return [self.tasks count];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *kCellIndentifier = @"kCellIndentifier";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellIndentifier];
+    if(cell == nil) {
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:kCellIndentifier] autorelease];
+    }
+    
+    Task *task = [self.tasks objectAtIndex:indexPath.row];
+    cell.textLabel.text = task.title;
+    cell.detailTextLabel.text = task.serverTaskId;
+    
+    return cell;
+}
+
 #pragma mark - Split view
 
 - (void)splitViewController:(UISplitViewController *)splitController willHideViewController:(UIViewController *)viewController withBarButtonItem:(UIBarButtonItem *)barButtonItem forPopoverController:(UIPopoverController *)popoverController
@@ -120,5 +144,15 @@
     [self.navigationItem setLeftBarButtonItem:nil animated:YES];
     self.masterPopoverController = nil;
 }
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    unsigned int color;
+    object_getInstanceVariable(self.tableView, "_lastSelectedRow", (void**)&color);
+    NSLog(@"%d",color);
+//    NSLog(@"(%0.0f,%0.0f),(%0.0f,%0.0f)",doubleOut.origin.x,doubleOut.origin.x,doubleOut.size.width,doubleOut.size.height);
+    
+}
+
+
 
 @end

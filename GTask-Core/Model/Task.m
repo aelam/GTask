@@ -29,7 +29,11 @@
 @synthesize localModifyTime = _localModifyTime;
 @synthesize link = _link;
 
-
+//- (NSString *)description {
+//    return [NSString stringWithFormat:
+//            @"localTaskId : %d\n\
+//            localListId   : %@,",1,@"3"];
+//}
 
 - (void)dealloc {
     [_serverTaskId release];

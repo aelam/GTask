@@ -17,15 +17,32 @@
 + (GTaskEngine *)engine;
 
 // Lists
-- (NSMutableArray *)localTaskListsWithSortType:(NSInteger)sortType;
 
 - (void)fetchServerTaskListsWithResultHander:(void(^)(GTaskEngine *,NSMutableArray *))resultHander;
-- (void)localTaskLists;
-- (void)syncTaskList;
+
+- (NSMutableArray *)localTaskLists;
+- (NSMutableArray *)localTaskListsWithSortType:(NSInteger)sortType;
+- (void)syncTaskLists;
+
+- (void)addTaskList:(TaskList *)alist;
+- (void)deleteTaskList:(TaskList *)aList;
+- (void)modifyTaskList:(TaskList *)aList;
+
+- (void)updateTaskList:(TaskList *)aList;
 
 // Tasks
 - (void)fetchServerTasksForList:(TaskList *)aList resultHander:(void(^)(GTaskEngine *,NSMutableArray *))resultHander;
-- (void)localTasks;
+
+- (NSMutableArray *)localAllTasks;
+- (NSMutableArray *)localTasksForList:(TaskList *)aList;
+
 - (void)syncTasks;
+- (void)syncTasksForList:(TaskList *)aList;
+
+- (void)addTask:(Task *)aTask forList:(TaskList *)alist;
+- (void)deleteTask:(Task *)aTask forList:(TaskList *)aList;
+- (void)modifyTask:(Task *)aTask forList:(TaskList *)aList;
+
+- (void)updateTask:(Task *)aTask;
 
 @end

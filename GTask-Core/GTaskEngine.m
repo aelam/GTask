@@ -110,6 +110,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     }    
 }
 
+- (NSMutableArray *)localTaskLists{
+    return [self localTaskListsWithSortType:1];
+}
 
 - (NSMutableArray *)localTaskListsWithSortType:(NSInteger)sortType {
     NSMutableArray *taskLists = nil;
@@ -172,6 +175,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             [tasks addObject:task];
             [task release];
         }
+        [db close];            
         return tasks;
     }
 }
@@ -201,10 +205,6 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         if ([result isKindOfClass:[NSError class]]) {
             NIF_TRACE(@"--- %d", [(NSError *)result code]);
         } else if ([result isKindOfClass:[NSDictionary class]]) {
-//            BOOL rs = [self _saveTaskListsFromJSON:result];
-//            NIF_INFO(@"%d", rs);
-//            NSMutableArray *taskLists = [self localTaskListsWithSortType:1];
-//            resultHander(self,taskLists);
             BOOL rs = [self _saveTasksForTaskList:aList fromJSON:result];
             NSMutableArray *tasks = [self localTasksForList:aList];
             resultHander(self,tasks);
