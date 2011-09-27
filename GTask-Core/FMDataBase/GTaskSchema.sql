@@ -24,6 +24,7 @@ CREATE TABLE tasks (
 
     local_list_id       INTEGER,    --LOCAL??
     local_parent_id	    INTEGER NOT NULL,--??
+    pre_sibling_id      INTEGER,
 
     self_link           TEXT,
     title               TEXT,
