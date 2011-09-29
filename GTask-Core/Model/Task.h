@@ -29,6 +29,8 @@
 @property (assign)  double serverModifyTime;
 @property (assign)  double localModifyTime;
 
+@property (retain) Task     *parentTask;
+@property (retain) Task     *previousSiblingTask;
 
 
 

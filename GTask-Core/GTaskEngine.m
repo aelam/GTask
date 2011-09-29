@@ -18,6 +18,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 @interface GTaskEngine (Private)
 
 - (BOOL)_saveTaskListsFromJSON:(NSDictionary *)json;
+- (BOOL)_syncParentIdWithItems:(NSArray *)items;
 
 
 @end
@@ -84,24 +85,21 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             NSString *link = [item objectForKey:@"selfLink"];
             NSString *title = [item objectForKey:@"title"];
             NSString *parentId = [item objectForKey:@"parent"];
-//            NSString *updated = [item objectForKey:@"updated"];
+            NSString *position = [item objectForKey:@"position"];
+            
+            NIF_INFO(@"%@", position);
             
             double updated = [[NSDate dateFromRFC3339:[item objectForKey:@"updated"]] timeIntervalSince1970];
                         
             NSInteger localParentId = -1;
-//            if (parentId) {
-//                FMResultSet *set1 = [db executeQuery:@"SELECT local_task_id FROM tasks WHERE server_task_id = '%@'",parentId];
-//                if ([set1 next]) {
-//                    localParentId = [set1 intForColumn:@"local_task_id"];
-//                }                
-//            }
+
             if (parentId) {
                 [parentItems addObject:item];                
             }
             
             FMResultSet *set = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE server_task_id = '%@'",_id]];
             if ([set next]) {
-                NIF_INFO(@"已经存在记录了");
+//                NIF_INFO(@"已经存在记录了");
             } else {
                 NSString *sql = [NSString stringWithFormat:@"INSERT INTO tasks (server_task_id,local_list_id,local_parent_id,notes,self_link,title,server_modify_timestamp) VALUES ('%@',%d,%d,'%@','%@','%@',%0.0f)",_id,aList.localListId,localParentId,notes?notes:@"",link,title,updated];
                 NIF_INFO(@"save to DB sql : %@", sql);
@@ -188,7 +186,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 		return nil;
     } else {
         tasks = [NSMutableArray array];
-        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d ORDER BY server_modify_timestamp DESC",aList.localListId]];
+        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d ORDER BY local_task_id",aList.localListId]];
         while ([rs next]) {
             Task *task = [[Task alloc] init];
             task.localTaskId = [rs intForColumn:@"local_task_id"];

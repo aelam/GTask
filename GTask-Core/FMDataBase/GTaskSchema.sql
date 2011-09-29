@@ -23,7 +23,7 @@ CREATE TABLE tasks (
     server_task_id      TEXT,
 
     local_list_id       INTEGER,    --LOCAL??
-    local_parent_id	    INTEGER NOT NULL,--??
+    local_parent_id     INTEGER NOT NULL,--??
     pre_sibling_id      INTEGER,
 
     self_link           TEXT,
@@ -41,5 +41,5 @@ CREATE TABLE tasks (
 
     server_modify_timestamp	INTEGER,
     local_modify_timestamp	INTEGER
---    position
+    server_position         INTEGER
 );

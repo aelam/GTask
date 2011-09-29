@@ -29,6 +29,9 @@
 @synthesize localModifyTime = _localModifyTime;
 @synthesize link = _link;
 
+@synthesize parentTask = _parentTask;
+@synthesize previousSiblingTask = _previousSiblingTask;
+
 - (NSString *)description {
     return [NSString stringWithFormat:
             @"localTaskId   : %d\n\
@@ -40,6 +43,8 @@
     [_title release];
     [_notes release];
     [_link release];
+    [_parentTask release];
+    [_previousSiblingTask release];
     [super dealloc];
 }
 

@@ -126,6 +126,13 @@
 
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:task.serverModifyTime];
 
+    NSLog(@"parent :%d", task.localParentId);
+    if (task.localParentId == -1) {
+        cell.indentationLevel = 0;
+    } else {
+        cell.indentationLevel = 1;
+    }
+    
     cell.textLabel.text = task.title;
     cell.detailTextLabel.text = [NSString stringWithFormat:@"%d:%d  - %@", task.localTaskId,task.localParentId,[date description]];
     //cell.detailTextLabel.text = task.serverTaskId;
