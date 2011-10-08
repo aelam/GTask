@@ -69,7 +69,7 @@
     // construct a date string in the NSDate format
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     NSString *dateStr = [NSString stringWithFormat:@"%@ %@ %@%@%@", datePart, timePart, tzSignPart, tzHourPart, tzMinPart];
-    [dateFormatter setDateFormat:@"YYYY-MM-dd hh:mm:ss +0000"];
+    [dateFormatter setDateFormat:@"YYYY-MM-dd HH:mm:ss +0000"];
     NSDate *date = [dateFormatter dateFromString:dateStr];
     [dateFormatter release];
     return date;

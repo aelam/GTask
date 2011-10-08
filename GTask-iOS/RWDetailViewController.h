@@ -8,11 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@interface RWDetailViewController : UITableViewController <UISplitViewControllerDelegate>
+@interface RWDetailViewController : UIViewController <UISplitViewControllerDelegate,UITableViewDelegate,UITableViewDataSource>
 
 @property (strong, nonatomic) id detailItem;
 
 @property (strong, nonatomic) IBOutlet UILabel *detailDescriptionLabel;
+@property (strong, nonatomic) IBOutlet UITableView *tableView;
 
 @property (strong, nonatomic) NSMutableArray *tasks;
 

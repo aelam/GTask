@@ -28,14 +28,7 @@ fi
 echo "UPDATE BUNDLE SQLITE FILE..."
 cat "$SQL_FILE" | sqlite3 "$SQLITE_FILE_IN_BUNDLE"
 echo "DONE!"
-
-
-echo ""$SIMULATOR_PATH""
 cd "$SIMULATOR_PATH"
 
-echo "11"
-find "$PWD" -type d -name "$APP_NAME"| echo $0
+find "$PWD" -name "$SQLITE_FILE_IN_BUNDLE" | xargs -I ']' rm -rf ']'
 
-echo "22"
-
-#cd ${SIMULATOR_PATH}

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		940AFFBD144000C5009F7F4A /* update_schema.sh in Resources */ = {isa = PBXBuildFile; fileRef = 940AFFBC144000C5009F7F4A /* update_schema.sh */; };
+		940AFFC1144036EB009F7F4A /* GTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 940AFFC0144036EB009F7F4A /* GTableViewCell.m */; };
 		944270DE142F98BC0071E363 /* NSDate+RFC3339.m in Sources */ = {isa = PBXBuildFile; fileRef = 944270DD142F98BC0071E363 /* NSDate+RFC3339.m */; };
 		9447F619142C862A002B32DF /* GTaskEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9447F618142C862A002B32DF /* GTaskEngine.m */; };
 		94512AC5142B174B00903FC2 /* FMDatabase+Update.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ABC142B174B00903FC2 /* FMDatabase+Update.m */; };
@@ -40,6 +42,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		940AFFBC144000C5009F7F4A /* update_schema.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = update_schema.sh; sourceTree = "<group>"; };
+		940AFFBF144036EB009F7F4A /* GTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTableViewCell.h; sourceTree = "<group>"; };
+		940AFFC0144036EB009F7F4A /* GTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTableViewCell.m; sourceTree = "<group>"; };
 		944270DC142F98BB0071E363 /* NSDate+RFC3339.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+RFC3339.h"; sourceTree = "<group>"; };
 		944270DD142F98BC0071E363 /* NSDate+RFC3339.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+RFC3339.m"; sourceTree = "<group>"; };
 		9447F617142C862A002B32DF /* GTaskEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTaskEngine.h; sourceTree = "<group>"; };
@@ -124,6 +129,7 @@
 				94512AC2142B174B00903FC2 /* FMResultSet.m */,
 				94512AC3142B174B00903FC2 /* GTask.sqlite */,
 				94512AC4142B174B00903FC2 /* GTaskSchema.sql */,
+				940AFFBC144000C5009F7F4A /* update_schema.sh */,
 			);
 			path = FMDataBase;
 			sourceTree = "<group>";
@@ -135,6 +141,8 @@
 				94512AD2142B1D3600903FC2 /* TaskList.m */,
 				94512ACE142B1D1200903FC2 /* Task.h */,
 				94512ACF142B1D1200903FC2 /* Task.m */,
+				940AFFBF144036EB009F7F4A /* GTableViewCell.h */,
+				940AFFC0144036EB009F7F4A /* GTableViewCell.m */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -289,6 +297,7 @@
 				94DC633314273F7E00151B26 /* GDataScopes.plist in Resources */,
 				94512AC9142B174B00903FC2 /* GTask.sqlite in Resources */,
 				94512ACA142B174B00903FC2 /* GTaskSchema.sql in Resources */,
+				940AFFBD144000C5009F7F4A /* update_schema.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,6 +326,7 @@
 				94512AD3142B1D3600903FC2 /* TaskList.m in Sources */,
 				9447F619142C862A002B32DF /* GTaskEngine.m in Sources */,
 				944270DE142F98BC0071E363 /* NSDate+RFC3339.m in Sources */,
+				940AFFC1144036EB009F7F4A /* GTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

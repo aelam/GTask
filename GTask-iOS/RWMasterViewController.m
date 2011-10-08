@@ -8,8 +8,6 @@
 
 #import "RWMasterViewController.h"
 #import "RWDetailViewController.h"
-//#import "GDataLoginDialog.h"
-//#import "GDataEngine.h"
 #import "TaskList.h"
 #import "GTaskEngine.h"
 
@@ -34,6 +32,12 @@
     self.navigationItem.leftBarButtonItem = item2;
     [item2 release];
     
+    self.navigationController.toolbarHidden = NO;
+    
+    UIBarButtonItem *item22 = [[[UIBarButtonItem alloc]initWithTitle:@"test" style:UIBarButtonItemStyleDone target:self action:@selector(test)] autorelease];
+    self.toolbarItems = [NSArray arrayWithObject:item22];
+    
+//    self.toolbarItems = [NSArray arrayWithObject:@"test"];
     [super awakeFromNib];
 }
 
@@ -98,7 +102,14 @@
 	// Do any additional setup after loading the view, typically from a nib.
     self.detailViewController = (RWDetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        [self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+        @try {
+            [self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+        }
+        @catch (NSException *exception) {
+            
+        }
+        @finally {
+        }
     }
 }
 
@@ -162,14 +173,22 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    if ([[self.navigationController.viewControllers lastObject] isKindOfClass:[RWDetailViewController class]]) {
+        return;
+    }
+    
     TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
-    [[GTaskEngine engine] fetchServerTasksForList:list resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
-        NIF_INFO(@"%@",result);
-        self.detailViewController.tasks = result;
+    self.detailViewController.tasks = [[GTaskEngine engine] localTasksForList:list];
+    if (self.detailViewController.tasks) {
         [self.navigationController pushViewController:self.detailViewController animated:YES];
-    }];
-//    self.detailViewController.tasks = [[GTaskEngine engine] localTasksForList:list];
-//    [self.navigationController pushViewController:self.detailViewController animated:YES];
+    } else {
+        [[GTaskEngine engine] fetchServerTasksForList:list resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
+            NIF_INFO(@"%@",result);
+            self.detailViewController.tasks = result;
+            [self.navigationController pushViewController:self.detailViewController animated:YES];
+        }];
+    }
 }
 
 - (RWDetailViewController *)detailViewController {
@@ -208,13 +227,13 @@
 }
 */
 
-/*
+
 // Override to support conditional rearranging of the table view.
 - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Return NO if you do not want the item to be re-orderable.
     return YES;
 }
-*/
+
 
 @end

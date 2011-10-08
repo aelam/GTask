@@ -15,6 +15,15 @@
 static NSString *kTaskListsURL = @"https://www.googleapis.com/tasks/v1/users/@me/lists";
 static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%@/tasks";
 
+
+NSComparisonResult intSort(NSDictionary* num1, id num2, void *context){
+    int v1 = [[num1 objectForKey:@"position"] intValue];
+    int v2 = [[num2 objectForKey:@"position"] intValue];
+    if (v1 < v2) return NSOrderedAscending;
+    else if (v1 == v2) return NSOrderedSame;
+    else return NSOrderedDescending;    
+}
+
 @interface GTaskEngine (Private)
 
 - (BOOL)_saveTaskListsFromJSON:(NSDictionary *)json;
@@ -70,6 +79,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     }
 }
 
+/*
 - (BOOL)_saveTasksForTaskList:(TaskList *)aList fromJSON:(NSDictionary *)json {
     FMDatabase *db = [FMDatabase database];
     if (![db open]) {
@@ -78,7 +88,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     } else {
         BOOL rs = NO;
         NSArray *items = [json objectForKey:@"items"];
+//        [self testArray:items];
         NSMutableArray *parentItems = [NSMutableArray array];
+
         for (NSDictionary*item in items) {
             NSString *_id = [item objectForKey:@"id"];
             NSString *notes = [item objectForKey:@"notes"];
@@ -86,8 +98,6 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             NSString *title = [item objectForKey:@"title"];
             NSString *parentId = [item objectForKey:@"parent"];
             NSString *position = [item objectForKey:@"position"];
-            
-            NIF_INFO(@"%@", position);
             
             double updated = [[NSDate dateFromRFC3339:[item objectForKey:@"updated"]] timeIntervalSince1970];
                         
@@ -114,6 +124,68 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         }
         [db close];
         [self _syncParentIdWithItems:parentItems];
+        return rs;
+    }    
+}*/
+
+- (BOOL)_saveTasksForTaskList:(TaskList *)aList fromJSON:(NSDictionary *)json {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NSLog(@"Could not open db.");
+		return NO;
+    } else {
+        BOOL rs = NO;
+        NSArray *items = [json objectForKey:@"items"];
+        //        [self testArray:items];
+        NSMutableArray *parentItems = [NSMutableArray array];
+        
+        NSInteger order = 0;
+        for (NSDictionary*item in items) {
+            NSString *_id = [item objectForKey:@"id"];
+            NSString *notes = [item objectForKey:@"notes"];
+            NSString *link = [item objectForKey:@"selfLink"];
+            NSString *title = [item objectForKey:@"title"];
+            NSString *parentId = [item objectForKey:@"parent"];
+            NSString *position = [item objectForKey:@"position"];
+            
+            double updated = [[NSDate dateFromRFC3339:[item objectForKey:@"updated"]] timeIntervalSince1970];
+            
+            NSInteger localParentId = -1;
+
+            FMResultSet *parentSet = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE server_task_id = '%@'",parentId]];
+            if ([parentSet next]) {
+                localParentId = [parentSet intForColumn:@"local_task_id"];
+            } else {
+                
+            }
+            
+            NIF_INFO(@"---------------- localParentId : %d", localParentId);
+            
+            FMResultSet *set = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE server_task_id = '%@'",_id]];
+            if ([set next]) {
+                //                NIF_INFO(@"已经存在记录了");
+                double local_modify_timestamp = [set doubleForColumn:@"local_modify_timestamp"];
+                double server_modify_timestamp = [set doubleForColumn:@"server_modify_timestamp"];
+                if (local_modify_timestamp > server_modify_timestamp) {
+                    
+                }
+                
+            } else {
+                NSString *sql = [NSString stringWithFormat:@"INSERT INTO tasks (server_task_id,local_list_id,local_parent_id,notes,self_link,title,server_modify_timestamp,display_order) VALUES ('%@',%d,%d,'%@','%@','%@',%0.0f,%d)",_id,aList.localListId,localParentId,notes?notes:@"",link,title,updated,order];
+                NIF_INFO(@"save to DB sql : %@", sql);
+                //rs = [db executeUpdate:sql];
+                NSError *error = nil;
+                rs = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
+                if (error) {
+                    NIF_INFO(@"%@", error);
+                }
+                NIF_INFO(@"%d", rs);   
+            }
+            order++;
+
+        }
+        [db close];
+//        [self _syncParentIdWithItems:parentItems];
         return rs;
     }    
 }
@@ -186,7 +258,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 		return nil;
     } else {
         tasks = [NSMutableArray array];
-        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d ORDER BY local_task_id",aList.localListId]];
+        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d ORDER BY display_order",aList.localListId]];
         while ([rs next]) {
             Task *task = [[Task alloc] init];
             task.localTaskId = [rs intForColumn:@"local_task_id"];
@@ -208,7 +280,8 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             [tasks addObject:task];
             [task release];
         }
-        [db close];            
+        [db close]; 
+        if([tasks count] == 0) return nil;
         return tasks;
     }
 }
@@ -245,5 +318,22 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     }];
 }
 
+/*
+- (void)testArray:(NSArray *)array {
+    NSArray *another;
+//    another = [array sortUsingFunction:intSort context:NULL];
+    another = [array sortedArrayUsingComparator:^NSComparisonResult(NSDictionary *obj1, NSDictionary *obj2) {
+        int v1 = [[obj1 objectForKey:@"position"] intValue];
+        int v2 = [[obj2 objectForKey:@"position"] intValue];
+        if (v1 < v2) return NSOrderedAscending;
+        else if (v1 == v2) return NSOrderedSame;
+        else return NSOrderedDescending;    
+
+    }];
+    NIF_INFO(@"%@", array);
+    NSLog(@"-----------------------------------");
+    NIF_INFO(@"%@", another);
+}
+*/
 
 @end

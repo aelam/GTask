@@ -35,7 +35,8 @@
 - (NSString *)description {
     return [NSString stringWithFormat:
             @"localTaskId   : %d\n\
-            updated         : %0.0f",self.localTaskId,self.serverModifyTime];
+            parent          : %d\n\
+            updated         : %0.0f",self.localTaskId,self.localParentId,self.serverModifyTime];
 }
 
 - (void)dealloc {
