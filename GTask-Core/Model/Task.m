@@ -28,15 +28,43 @@
 @synthesize serverModifyTime = _serverModifyTime;
 @synthesize localModifyTime = _localModifyTime;
 @synthesize link = _link;
+@synthesize displayOrder = _displayOrder;
 
 @synthesize parentTask = _parentTask;
 @synthesize previousSiblingTask = _previousSiblingTask;
 
 - (NSString *)description {
     return [NSString stringWithFormat:
-            @"localTaskId   : %d\n\
-            parent          : %d\n\
-            updated         : %0.0f",self.localTaskId,self.localParentId,self.serverModifyTime];
+            @"localTaskId   : %d\
+            parent          : %d\
+            updated         : %0.0f\
+            displayOrder    : %d",self.localTaskId,self.localParentId,self.serverModifyTime,self.displayOrder];
+}
+
+- (id)copyWithZone:(id)zone {
+    Task *task = [[Task alloc] init];
+    task.localListId = self.localListId;
+    task.localTaskId = self.localTaskId;
+    task.localListId = self.localListId;
+    task.localParentId = self.localParentId;
+    task.serverTaskId = self.serverTaskId;
+    task.title = self.title;
+    task.notes = self.notes;
+    task.link = self.link;
+    task.isUpdated = self.isUpdated;
+    task.isDeleted = self.isDeleted;
+    task.isCompleted = self.isCompleted;
+    task.isCleared = self.isCleared;
+    task.isHidden = self.isHidden;
+    task.status = self.status;
+    task.completedTimestamp = self.completedTimestamp;
+    task.reminderTimestamp = self.reminderTimestamp;
+    task.due = self.due;
+    task.serverModifyTime = self.serverModifyTime;
+    task.localModifyTime = self.localModifyTime;
+    task.displayOrder = self.displayOrder;
+
+    return [task autorelease];
 }
 
 - (void)dealloc {

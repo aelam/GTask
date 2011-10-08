@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+@class TaskList;
+@class GEditViewController;
+
 @interface RWDetailViewController : UIViewController <UISplitViewControllerDelegate,UITableViewDelegate,UITableViewDataSource>
 
 @property (strong, nonatomic) id detailItem;
@@ -16,5 +19,8 @@
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
 
 @property (strong, nonatomic) NSMutableArray *tasks;
+@property (strong, nonatomic) TaskList *taskList;
+
+@property (strong, nonatomic) IBOutlet GEditViewController *editViewController;
 
 @end

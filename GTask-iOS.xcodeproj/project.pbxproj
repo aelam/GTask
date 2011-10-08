@@ -39,6 +39,7 @@
 		94DC633D1427404500151B26 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94DC633C1427404500151B26 /* QuartzCore.framework */; };
 		94DC6341142741BA00151B26 /* NSString+Categories.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC6340142741BA00151B26 /* NSString+Categories.m */; };
 		94DC63451427466800151B26 /* UIWebView+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC63441427466800151B26 /* UIWebView+Blocks.m */; };
+		94FA4BCF1440B07700235F9A /* GEditViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 94FA4BCD1440B07700235F9A /* GEditViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -97,6 +98,8 @@
 		94DC63421427429700151B26 /* NIFLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIFLog.h; sourceTree = "<group>"; };
 		94DC63431427466800151B26 /* UIWebView+Blocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+Blocks.h"; sourceTree = "<group>"; };
 		94DC63441427466800151B26 /* UIWebView+Blocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+Blocks.m"; sourceTree = "<group>"; };
+		94FA4BCC1440B07700235F9A /* GEditViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GEditViewController.h; sourceTree = "<group>"; };
+		94FA4BCD1440B07700235F9A /* GEditViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GEditViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -189,6 +192,8 @@
 				94DC62F214273A5A00151B26 /* RWMasterViewController.m */,
 				94DC62F414273A5A00151B26 /* RWDetailViewController.h */,
 				94DC62F514273A5A00151B26 /* RWDetailViewController.m */,
+				94FA4BCC1440B07700235F9A /* GEditViewController.h */,
+				94FA4BCD1440B07700235F9A /* GEditViewController.m */,
 				94DC62E014273A5A00151B26 /* Supporting Files */,
 			);
 			path = "GTask-iOS";
@@ -327,6 +332,7 @@
 				9447F619142C862A002B32DF /* GTaskEngine.m in Sources */,
 				944270DE142F98BC0071E363 /* NSDate+RFC3339.m in Sources */,
 				940AFFC1144036EB009F7F4A /* GTableViewCell.m in Sources */,
+				94FA4BCF1440B07700235F9A /* GEditViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -365,6 +371,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -384,6 +391,7 @@
 					"-ObjC",
 					"-all_load",
 				);
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -394,6 +402,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -407,6 +416,7 @@
 					"-ObjC",
 					"-all_load",
 				);
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;

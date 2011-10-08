@@ -42,43 +42,12 @@
 }
 
 - (void)test {
-/*    
-    NSURL *url = [NSURL URLWithString:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    GDataEngine *engine = [[[GDataEngine alloc] init] autorelease];
-    [engine fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
-     NIF_TRACE(@"%@",result);
-     if ([result isKindOfClass:[NSError class]]) {
-     NIF_TRACE(@"--- %d", [(NSError *)result code]);
-     } else if ([result isKindOfClass:[NSDictionary class]]) {
-         BOOL rs = [TaskList saveTaskListFromJSON:result];
-         NIF_INFO(@"%d", rs);
-         self.taskLists = [TaskList taskListsFromDBWithSortType:1];
-         NIF_TRACE(@"%@", self.taskLists);
-         [self.tableView reloadData];
-     }
-  */
     GTaskEngine *engine = [[[GTaskEngine alloc] init] autorelease];
     [engine fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *result) {
         self.taskLists = result;
         [self.tableView reloadData];
     }];
-    
-//     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tip" message:[result description] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-//     [alert show];
-//     [alert release];
-//     }];
-/*    [engine authorizeWithResultBlock:^(GDataEngine *engine, id result) {
-        NIF_TRACE(@"%@",result);
-        if ([result isKindOfClass:[NSError class]]) {
-            NIF_TRACE(@"--- %d", [(NSError *)result code]);
-        }
-        
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tip" message:[result description] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-        [alert show];
-        [alert release];
-    }];
-*/
+
 }
 
 - (void)dealloc
@@ -101,6 +70,11 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     self.detailViewController = (RWDetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
+    if (!self.detailViewController) {
+        self.detailViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kDetailViewControllerIdentifier"];
+    }
+    NIF_INFO(@"%@", self.detailViewController);
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         @try {
             [self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
@@ -174,29 +148,24 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
+        
+    NIF_INFO(@"%@", self.storyboard);
+//    [self.storyboard instantiateInitialViewController]
     if ([[self.navigationController.viewControllers lastObject] isKindOfClass:[RWDetailViewController class]]) {
         return;
     }
-    
     TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
-    self.detailViewController.tasks = [[GTaskEngine engine] localTasksForList:list];
-    if (self.detailViewController.tasks) {
-        [self.navigationController pushViewController:self.detailViewController animated:YES];
-    } else {
-        [[GTaskEngine engine] fetchServerTasksForList:list resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
-            NIF_INFO(@"%@",result);
-            self.detailViewController.tasks = result;
-            [self.navigationController pushViewController:self.detailViewController animated:YES];
-        }];
-    }
+    self.detailViewController.taskList = list;
+    [self.navigationController pushViewController:self.detailViewController animated:YES];
+    
 }
 
-- (RWDetailViewController *)detailViewController {
-    if (_detailViewController == nil) {
-        _detailViewController = [[RWDetailViewController alloc] init];
-    }
-    return _detailViewController;
-}
+//- (RWDetailViewController *)detailViewController {
+//    if (_detailViewController == nil) {
+//        _detailViewController = [[RWDetailViewController alloc] init];
+//    }
+//    return _detailViewController;
+//}
 
 /*
 // Override to support conditional editing of the table view.
@@ -220,12 +189,12 @@
 }
 */
 
-/*
+
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
 {
+
 }
-*/
 
 
 // Override to support conditional rearranging of the table view.

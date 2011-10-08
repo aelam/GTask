@@ -15,15 +15,6 @@
 static NSString *kTaskListsURL = @"https://www.googleapis.com/tasks/v1/users/@me/lists";
 static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%@/tasks";
 
-
-NSComparisonResult intSort(NSDictionary* num1, id num2, void *context){
-    int v1 = [[num1 objectForKey:@"position"] intValue];
-    int v2 = [[num2 objectForKey:@"position"] intValue];
-    if (v1 < v2) return NSOrderedAscending;
-    else if (v1 == v2) return NSOrderedSame;
-    else return NSOrderedDescending;    
-}
-
 @interface GTaskEngine (Private)
 
 - (BOOL)_saveTaskListsFromJSON:(NSDictionary *)json;
@@ -277,6 +268,8 @@ NSComparisonResult intSort(NSDictionary* num1, id num2, void *context){
             task.reminderTimestamp = [rs doubleForColumn:@"reminder_timestamp"];
             task.due = [rs doubleForColumn:@"due"];
             task.serverModifyTime = [rs doubleForColumn:@"server_modify_timestamp"];
+            task.displayOrder = [rs intForColumn:@"display_order"];
+            
             [tasks addObject:task];
             [task release];
         }
@@ -318,22 +311,36 @@ NSComparisonResult intSort(NSDictionary* num1, id num2, void *context){
     }];
 }
 
-/*
-- (void)testArray:(NSArray *)array {
-    NSArray *another;
-//    another = [array sortUsingFunction:intSort context:NULL];
-    another = [array sortedArrayUsingComparator:^NSComparisonResult(NSDictionary *obj1, NSDictionary *obj2) {
-        int v1 = [[obj1 objectForKey:@"position"] intValue];
-        int v2 = [[obj2 objectForKey:@"position"] intValue];
-        if (v1 < v2) return NSOrderedAscending;
-        else if (v1 == v2) return NSOrderedSame;
-        else return NSOrderedDescending;    
+- (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex forTasks:(NSMutableArray *)tasks {
 
-    }];
-    NIF_INFO(@"%@", array);
-    NSLog(@"-----------------------------------");
-    NIF_INFO(@"%@", another);
+    Task *fromTask = [[tasks objectAtIndex:fromIndex] retain];
+    Task *toTask = [tasks objectAtIndex:toIndex];
+    fromTask.displayOrder = toTask.displayOrder;
+    
+//    Task *temp = toTask;
+//    toTask = fromTask;
+    
+    
+    // 上移动
+    if (fromIndex > toIndex) {        
+        for(int i = toIndex+1;i <= fromIndex;i++) {
+            Task *task = [tasks objectAtIndex:i];
+            task.displayOrder = i + 1;
+        }        
+        
+        [tasks removeObject:fromTask];
+        [tasks insertObject:fromTask atIndex:toIndex];
+        
+    } else {    //  下移动
+        for(int i = fromIndex+1;i <= toIndex;i++) {
+            Task *task = [tasks objectAtIndex:i];
+            task.displayOrder = i - 1;
+        }        
+
+        [tasks removeObject:fromTask];
+        [tasks insertObject:fromTask atIndex:toIndex];
+    }
+    [fromTask release];
 }
-*/
 
 @end

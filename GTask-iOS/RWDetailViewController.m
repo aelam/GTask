@@ -7,7 +7,9 @@
 //
 
 #import "RWDetailViewController.h"
+#import "GEditViewController.h"
 #import "Task.h"
+#import "GTaskEngine.h"
 #import "GTableViewCell.h"
 
 @interface RWDetailViewController ()
@@ -22,6 +24,8 @@
 @synthesize tableView = _tableView;
 @synthesize masterPopoverController = _masterPopoverController;
 @synthesize tasks = _tasks;
+@synthesize taskList = _taskList;
+@synthesize editViewController = _editViewController;
 
 - (void)dealloc
 {
@@ -30,6 +34,8 @@
     [_tableView release];
     [_masterPopoverController release];
     [_tasks release];
+    [_taskList release];
+    [_editViewController release];
     [super dealloc];
 }
 
@@ -83,7 +89,9 @@
 	// Do any additional setup after loading the view, typically from a nib.
     [self configureView];    
     self.tableView.editing = YES;
+    self.tableView.allowsSelectionDuringEditing = YES;
     self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    
 }
 
 - (void)viewDidUnload
@@ -95,7 +103,16 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    self.tasks = [[GTaskEngine engine] localTasksForList:self.taskList];
     [self.tableView reloadData];
+    if (!self.tasks) {
+        [[GTaskEngine engine] fetchServerTasksForList:self.taskList resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
+            self.tasks = result;
+            [self.tableView reloadData];
+        }];
+    }
+
+//    NIF_INFO(@"%@",self.tasks);
     [super viewWillAppear:animated];
 }
 
@@ -184,6 +201,15 @@
     }
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (!self.editViewController) {
+        self.editViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGEditViewController"];
+    }
+    NIF_INFO(@"%@", self.editViewController);
+    self.editViewController.task = [self.tasks objectAtIndex:indexPath.row];
+    [self.navigationController pushViewController:self.editViewController animated:YES];
+}
 
 //
 //
@@ -204,6 +230,8 @@
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
 {
+//    [[GTaskEngine engine] moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row fromTask:self.tasks];
+    [[GTaskEngine engine]moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row forTasks:self.tasks];
 }
 
 
@@ -221,8 +249,16 @@
 	return YES;
 }
 
-- (void)tableView:(UITableView *)tableView didSwipeCellAtIndexPath:(NSIndexPath *)indexPath {
-    NIF_INFO();
+- (void)tableView:(UITableView *)tableView didSwipeCellAtIndexPath:(NSIndexPath *)indexPath direction:(UISwipeGestureRecognizerDirection) direction{
+    NIF_INFO(@"%@ -- %d",indexPath,direction);
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    if (direction == UISwipeGestureRecognizerDirectionLeft) {
+        if(cell.indentationLevel>0){
+            cell.indentationLevel--;   
+        }
+    } else if(direction == UISwipeGestureRecognizerDirectionRight) {
+        cell.indentationLevel++;
+    }
 }
 
 
