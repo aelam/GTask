@@ -16,5 +16,8 @@
 
 @property (retain) IBOutlet UILabel *titleLabel;
 
+@property (assign) NSInteger integer;
+@property (assign) char charcter;
+@property (assign) char *charcter_t;
 
 @end

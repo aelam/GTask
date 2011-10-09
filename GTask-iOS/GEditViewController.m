@@ -8,11 +8,15 @@
 
 #import "GEditViewController.h"
 #import "Task.h"
+#import <objc/runtime.h>
 
 @implementation GEditViewController
 
 @synthesize task = _task;
 @synthesize titleLabel = _titleLabel;
+@synthesize integer;
+@synthesize charcter;
+@synthesize charcter_t;
 
 - (void)dealloc {
     [_task release];
@@ -40,8 +44,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
     
+    [self printProperties];
 }
 
 - (void)viewDidUnload
