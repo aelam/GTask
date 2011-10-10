@@ -15,6 +15,7 @@
 @interface RWDetailViewController ()
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
 - (void)configureView;
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths;
 @end
 
 @implementation RWDetailViewController
@@ -184,7 +185,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView indentationLevelForRowAtIndexPath:(NSIndexPath *)indexPath {
     Task *task = [self.tasks objectAtIndex:indexPath.row];
-    if (task.localParentId == -1) {
+    if (task.localParentId == -2 ||task.localParentId == -2 ) {
         return 0;
     } else if (indexPath.row > 0) {
         Task *task_ = [self.tasks objectAtIndex:indexPath.row -1];
@@ -226,15 +227,18 @@
 //}
 
 
-
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
 {
 //    [[GTaskEngine engine] moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row fromTask:self.tasks];
     [[GTaskEngine engine]moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row forTasks:self.tasks];
+//    [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[NSArray arrayWithObject:toIndexPath] afterDelay:0.3];
+    [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.3];
 }
 
-
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths {
+    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
+}
 
 // Override to support conditional rearranging of the table view.
 - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath

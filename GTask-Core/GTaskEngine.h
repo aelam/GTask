@@ -11,6 +11,12 @@
 @class TaskList;
 @class Task;
 
+typedef enum {
+    TaskUpgradeLevelUpLevel     = 1,
+    TaskUpgradeLevelDownLevel   = -1,
+    TaskUpgradeLevelNoChange    = 0,
+}TaskUpgradeLevel;
+
 @interface GTaskEngine : GDataEngine
 
 + (GTaskEngine *)sharedEngine;

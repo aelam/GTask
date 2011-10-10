@@ -7,6 +7,9 @@
 //
 
 #import "Task.h"
+#import "FMDatabase.h"
+
+#define INITIAL_INTEGER -2
 
 @implementation Task
 
@@ -31,14 +34,25 @@
 @synthesize displayOrder = _displayOrder;
 
 @synthesize parentTask = _parentTask;
-@synthesize previousSiblingTask = _previousSiblingTask;
+//@synthesize previousSiblingTask = _previousSiblingTask;
+
+- (id)init {
+    if (self = [super init]) {
+        _displayOrder = INITIAL_INTEGER;
+        _localParentId = INITIAL_INTEGER;
+    }
+    return self;
+}
 
 - (NSString *)description {
     return [NSString stringWithFormat:
-            @"localTaskId   : %d\
-            parent          : %d\
-            updated         : %0.0f\
-            displayOrder    : %d",self.localTaskId,self.localParentId,self.serverModifyTime,self.displayOrder];
+//            @"localTaskId   : %d\
+//            title           : %@\
+//            parent          : %d\
+//            updated         : %0.0f\
+//            displayOrder    : %d",self.localTaskId,self.title,self.localParentId,self.serverModifyTime,self.displayOrder];
+            @"localTaskId: %d title : %@ parent: %d\
+            displayOrder  : %d",self.localTaskId,self.title,self.localParentId,self.displayOrder];
 }
 
 - (id)copyWithZone:(id)zone {
@@ -67,14 +81,135 @@
     return [task autorelease];
 }
 
+- (void)updateDisplayOrder:(NSInteger)order {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NIF_ERROR(@"Could not open db.");
+    } else {
+        NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET display_order = %d WHERE local_task_id = %d",order,self.localTaskId];
+        BOOL update = [db executeUpdate:sql];
+        NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
+        [db close];
+    }
+
+    self.displayOrder = order;
+}
+
+- (void)updateLocalParentId:(NSInteger)aParentId {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NIF_ERROR(@"Could not open db.");
+    } else {
+        NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET local_parent_id = %d WHERE local_task_id = %d",aParentId,self.localTaskId];
+        BOOL update = [db executeUpdate:sql];
+        NIF_INFO(@"UPDATE PARENT_ID SUCCESS ? : %d", update);
+        [db close];
+    }
+    
+    self.localParentId = aParentId;
+}
+
+    
 - (void)dealloc {
     [_serverTaskId release];
     [_title release];
     [_notes release];
     [_link release];
     [_parentTask release];
-    [_previousSiblingTask release];
     [super dealloc];
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)isFirstTaskAtTasks:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return NO;
+    
+    return [[tasks objectAtIndex:0] isEqual:self];
+}
+
+- (BOOL)isLastTaskAtTasks:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return NO;
+    return [[tasks lastObject] isEqual:self];
+}
+
+- (BOOL) isFirstLevelTaskAtTasks:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return NO;    
+
+    if (self.localParentId == -1) return YES;
+    else return NO;
+        
+}
+
+- (Task *)parentTaskAtTask:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return nil;
+    if ([self isFirstLevelTaskAtTasks:tasks]) return nil;
+    else {
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"localTaskId = %d",self.localParentId];
+        NSArray *filteredParents = [tasks filteredArrayUsingPredicate:predicate];
+        if (filteredParents == nil || [filteredParents count] == 0) {
+            NIF_ERROR(@"THIS TASK SHOULD HAVE A PARENT!!");
+            return nil;
+        } else {
+            return [filteredParents objectAtIndex:0];
+        }
+    }
+}
+
+- (NSArray *)subTasksAtTasks:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return nil;
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"localParentId = %d",self.localTaskId];
+    NSArray *subtasks = [tasks filteredArrayUsingPredicate:predicate];
+    if (subtasks == nil || [subtasks count] == 0) {
+        //NIF_ERROR(@"THIS TASK SHOULD HAVE A PARENT!!");
+        return nil;
+    } else {
+        return subtasks;
+    }
+}
+
+
+// 前一任务 后一任务
+- (Task *)prevTaskAtTasks:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return nil;
+    
+    else if ([self isFirstTaskAtTasks:tasks]) {
+        return nil;
+    } else {
+        NSInteger index = [tasks indexOfObject:self];
+        return [tasks objectAtIndex:index - 1];
+    }
+}
+
+- (Task *)nextTaskAtTasks:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return nil;
+    
+    else if ([self isLastTaskAtTasks:tasks]) {
+        return nil;
+    } else {
+        NSInteger index = [tasks indexOfObject:self];
+        return [tasks objectAtIndex:index + 1];
+    }
+}
+
+// 同级别前一任务 同级别后一任务
+- (Task *)prevSiblingTaskAtTasks:(NSMutableArray *)tasks {
+    return nil;
+}
+
+- (Task *)nextSiblingTaskAtTasks:(NSMutableArray *)tasks {
+    return nil;
+}
+
+// 所有子任务 递归
+- (NSMutableArray *)allDescendantsAtTasks:(NSMutableArray *)tasks {
+    return nil;
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 @end

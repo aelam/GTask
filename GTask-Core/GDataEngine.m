@@ -173,6 +173,7 @@ static int kJsonError = 0x11;
         
         NSString *query = [NSString queryStringFromParams:params];
         NSURL *url = [NSURL URLWithString:[kDialogBaseURL stringByAppendingFormat:@"?%@",query]];
+        NIF_INFO(@"loginURL : %@", url);
         
         GDataLoginDialog *loginDialog = [[[GDataLoginDialog alloc] init] autorelease];
         [loginDialog loadWithURL:url blocksStart:^(UIWebView *webView) {

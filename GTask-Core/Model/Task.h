@@ -32,7 +32,32 @@
 @property (assign)  NSInteger displayOrder;
 
 @property (retain) Task     *parentTask;
-@property (retain) Task     *previousSiblingTask;
+//@property (retain) Task     *previousSiblingTask;
+
+- (void)updateDisplayOrder:(NSInteger)order;
+- (void)updateLocalParentId:(NSInteger)aParentId;
+
+//////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)isFirstTaskAtTasks:(NSMutableArray *)tasks;
+- (BOOL)isLastTaskAtTasks:(NSMutableArray *)tasks;
+
+- (BOOL) isFirstLevelTaskAtTasks:(NSMutableArray *)tasks;
+- (Task *)parentTaskAtTasks:(NSMutableArray *)tasks;
+- (NSArray *)subTasksAtTasks:(NSMutableArray *)tasks;
+
+// 前一任务 后一任务
+- (Task *)prevTaskAtTasks:(NSMutableArray *)tasks;
+- (Task *)nextTaskAtTasks:(NSMutableArray *)tasks;
+
+// 同级别前一任务 同级别后一任务
+- (Task *)prevSiblingTaskAtTasks:(NSMutableArray *)tasks;
+- (Task *)nextSiblingTaskAtTasks:(NSMutableArray *)tasks;
+
+// 所有子任务 递归
+- (NSMutableArray *)allDescendantsAtTasks:(NSMutableArray *)tasks;
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 
 

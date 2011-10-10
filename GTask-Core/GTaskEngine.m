@@ -284,7 +284,8 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     [self fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
         if ([result isKindOfClass:[NSError class]]) {
-            NIF_TRACE(@"--- %d", [(NSError *)result code]);
+            NIF_ERROR(@"--- %d", [(NSError *)result code]);
+            NIF_ERROR(@"--- %@", [(NSError *)result localizedDescription]);
         } else if ([result isKindOfClass:[NSDictionary class]]) {
             BOOL rs = [self _saveTaskListsFromJSON:result];
             NIF_INFO(@"%d", rs);
@@ -312,35 +313,81 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex forTasks:(NSMutableArray *)tasks {
-
+    
     Task *fromTask = [[tasks objectAtIndex:fromIndex] retain];
     Task *toTask = [tasks objectAtIndex:toIndex];
-    fromTask.displayOrder = toTask.displayOrder;
-    
-//    Task *temp = toTask;
-//    toTask = fromTask;
-    
-    
-    // 上移动
-    if (fromIndex > toIndex) {        
-        for(int i = toIndex+1;i <= fromIndex;i++) {
-            Task *task = [tasks objectAtIndex:i];
-            task.displayOrder = i + 1;
-        }        
-        
-        [tasks removeObject:fromTask];
-        [tasks insertObject:fromTask atIndex:toIndex];
-        
-    } else {    //  下移动
-        for(int i = fromIndex+1;i <= toIndex;i++) {
-            Task *task = [tasks objectAtIndex:i];
-            task.displayOrder = i - 1;
-        }        
 
-        [tasks removeObject:fromTask];
-        [tasks insertObject:fromTask atIndex:toIndex];
-    }
+    /**********************************
+     * 1. 移动到第一行 变成第一级任务 其子任务跟随
+     * 2. 移动到两个任务之间 这个任务及其子任务变成上级的子任务 此任务与原子任务平级
+     * 2. 
+     /
+    
+    
+    /**
+     - 1
+      - 2 <-
+      - 3  |
+     - 4   |
+     = 5  -
+     */
+//    if (toTask.localParentId != -1) {
+        [fromTask updateLocalParentId:toTask.localParentId];
+        NIF_TRACE(@"fromTask : %@ parent : %d", fromTask.title,fromTask.localParentId);
+//    }
+    
+    [tasks removeObject:fromTask];
+    [tasks insertObject:fromTask atIndex:toIndex];
     [fromTask release];
+    
+    int begin = MIN(fromTask.displayOrder, toTask.displayOrder);
+    int end = MAX(fromTask.displayOrder, toTask.displayOrder);
+    
+    for (int i = begin;i <= end;i++) {
+        Task *task = [tasks objectAtIndex:i];
+        [task updateDisplayOrder:i];
+    }
+}
+
+- (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks {
+    Task *task = [tasks objectAtIndex:index];
+    Task *previousTask = index > 0?[tasks objectAtIndex:index -1]:nil;
+    
+    /**
+     - 1
+      - 2
+      - 4
+       - 3
+        - 8
+       - 6
+     - 5
+     
+     */
+    if (level == TaskUpgradeLevelDownLevel) {
+        if (previousTask == nil) {
+            NIF_ERROR(@"NO task above this task!");
+            return NO;
+        } else if (task.localParentId == previousTask.localTaskId) {
+            NIF_ERROR(@"YOU HAVE ALREADY IT'S SON, CAN'T BECOME HIS GRANDSON");            
+            return NO;
+        } else {
+            task.localParentId = previousTask.localTaskId;
+            return YES;
+        }
+        
+    } else if (level == TaskUpgradeLevelDownLevel) {
+        if (task.localParentId == -1) {
+            NIF_ERROR(@"YOU'VE ALREADY IN 1ST LEVEL!");
+            return NO;
+        } else {
+            
+        }
+        
+    } else {
+        NIF_ERROR(@"MAKE SURE YOU NEED UPGRADE OR DOWNGRADE??");
+        return NO;
+    }
 }
 
 @end
+
