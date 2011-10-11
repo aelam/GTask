@@ -14,9 +14,9 @@
 
 @synthesize task = _task;
 @synthesize titleLabel = _titleLabel;
-@synthesize integer;
-@synthesize charcter;
-@synthesize charcter_t;
+@synthesize m_integer;
+@synthesize m_charcter;
+@synthesize m_charcter_t;
 
 - (void)dealloc {
     [_task release];
@@ -35,6 +35,11 @@
 #pragma mark - View lifecycle
 
 - (void)viewWillAppear:(BOOL)animated {
+
+    m_integer = 100;
+    m_charcter = '3';
+    m_charcter_t = "ddddd"; 
+
     [super viewWillAppear:animated];
     self.titleLabel.text = self.task.title;
     NIF_INFO(@"%@", self.task.title);

@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface NSObject (Description)
+@interface NSObject (Helper)
 
 - (void)printProperties;
 

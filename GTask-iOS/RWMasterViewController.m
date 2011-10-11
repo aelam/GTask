@@ -70,11 +70,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     self.detailViewController = (RWDetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
-    if (!self.detailViewController) {
-        self.detailViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kDetailViewControllerIdentifier"];
-    }
-    NIF_INFO(@"%@", self.detailViewController);
-    
+        
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         @try {
             [self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
@@ -148,24 +144,17 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-        
-    NIF_INFO(@"%@", self.storyboard);
-//    [self.storyboard instantiateInitialViewController]
-    if ([[self.navigationController.viewControllers lastObject] isKindOfClass:[RWDetailViewController class]]) {
-        return;
-    }
-    TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
-    self.detailViewController.taskList = list;
-    [self.navigationController pushViewController:self.detailViewController animated:YES];
-    
-}
 
-//- (RWDetailViewController *)detailViewController {
-//    if (_detailViewController == nil) {
-//        _detailViewController = [[RWDetailViewController alloc] init];
-//    }
-//    return _detailViewController;
-//}
+    @autoreleasepool {
+        if (!self.detailViewController) {
+            self.detailViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kDetailViewControllerIdentifier"];
+        }
+        
+        TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
+        self.detailViewController.taskList = list;
+        [self.navigationController pushViewController:self.detailViewController animated:YES];
+    }
+}
 
 /*
 // Override to support conditional editing of the table view.

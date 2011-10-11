@@ -44,15 +44,25 @@
     return self;
 }
 
+#define DESCRIPTION_LEVEL 1
+
 - (NSString *)description {
+#if DESCRIPTION_LEVEL == 3
     return [NSString stringWithFormat:
-//            @"localTaskId   : %d\
-//            title           : %@\
-//            parent          : %d\
-//            updated         : %0.0f\
-//            displayOrder    : %d",self.localTaskId,self.title,self.localParentId,self.serverModifyTime,self.displayOrder];
+            @"localTaskId   : %d\
+            title           : %@\
+            parent          : %d\
+            updated         : %0.0f\
+            displayOrder    : %d",self.localTaskId,self.title,self.localParentId,self.serverModifyTime,self.displayOrder];
+#elif DESCRIPTION_LEVEL == 2
+    return [NSString stringWithFormat:
             @"localTaskId: %d title : %@ parent: %d\
             displayOrder  : %d",self.localTaskId,self.title,self.localParentId,self.displayOrder];
+#elif DESCRIPTION_LEVEL == 1
+    return [NSString stringWithFormat:
+            @"id:%d title : %@ parent: %d displayOrder:%d",self.localTaskId,self.title,self.localParentId,self.displayOrder];
+#endif
+
 }
 
 - (id)copyWithZone:(id)zone {
@@ -140,6 +150,14 @@
         
 }
 
+- (BOOL)hasSonAtTasks:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return NO;    
+    NSArray *sons = [self sonsAtTasks:tasks];
+    if (!sons || [sons count]) return NO;
+    return YES;        
+}
+
+
 - (Task *)parentTaskAtTask:(NSMutableArray *)tasks {
     if (!tasks || [tasks count] == 0) return nil;
     if ([self isFirstLevelTaskAtTasks:tasks]) return nil;
@@ -155,7 +173,7 @@
     }
 }
 
-- (NSArray *)subTasksAtTasks:(NSMutableArray *)tasks {
+- (NSArray *)sonsAtTasks:(NSMutableArray *)tasks {
     if (!tasks || [tasks count] == 0) return nil;
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"localParentId = %d",self.localTaskId];
     NSArray *subtasks = [tasks filteredArrayUsingPredicate:predicate];
@@ -201,8 +219,18 @@
 }
 
 // 所有子任务 递归
-- (NSMutableArray *)allDescendantsAtTasks:(NSMutableArray *)tasks {
-    return nil;
+- (NSArray *)allDescendantsAtTasks:(NSMutableArray *)tasks {
+    NSMutableArray *descendants = [NSMutableArray array];
+    
+    NSArray *sons = [self sonsAtTasks:tasks];
+    for(Task *son in sons) {
+        [descendants addObject:son];
+        NSArray *sonz_sons = [son allDescendantsAtTasks:tasks];
+        if (sonz_sons && [sonz_sons count]) {
+            [descendants addObjectsFromArray:[son allDescendantsAtTasks:tasks]];            
+        } 
+    }
+    return descendants;    
 }
 
 

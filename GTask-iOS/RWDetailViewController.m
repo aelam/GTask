@@ -154,12 +154,14 @@
     }
     
     Task *task = [self.tasks objectAtIndex:indexPath.row];
-
+    
+    
+    NSArray *subTasks = [task allDescendantsAtTasks:self.tasks];
+    
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:task.serverModifyTime];
 
-    
-    cell.textLabel.text = task.title;
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"%d:%d  - %@", task.localTaskId,task.localParentId,[date description]];
+    cell.textLabel.text = [NSString stringWithFormat:@"%d - %@ ",[subTasks count],task.title];
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"order:%d id: %d parent :%d  - %@", task.displayOrder,task.localTaskId,task.localParentId,[date description]];
     //cell.detailTextLabel.text = task.serverTaskId;
     return cell;
 }
