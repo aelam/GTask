@@ -30,5 +30,7 @@ cat "$SQL_FILE" | sqlite3 "$SQLITE_FILE_IN_BUNDLE"
 echo "DONE!"
 cd "$SIMULATOR_PATH"
 
-find "$PWD" -name "$SQLITE_FILE_IN_BUNDLE" | xargs -I ']' rm -rf ']'
+find "$PWD" -name "$SQLITE_FILE_IN_BUNDLE"
+
+find "$PWD" -name "$SQLITE_FILE_IN_BUNDLE" | xargs -I ']' rm -rf "']'"
 

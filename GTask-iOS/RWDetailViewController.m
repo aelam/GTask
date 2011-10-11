@@ -186,6 +186,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView indentationLevelForRowAtIndexPath:(NSIndexPath *)indexPath {
+/*
     Task *task = [self.tasks objectAtIndex:indexPath.row];
     if (task.localParentId == -2 ||task.localParentId == -2 ) {
         return 0;
@@ -202,6 +203,19 @@
     } else {
         return 0;
     }
+*/
+    Task *task = [self.tasks objectAtIndex:indexPath.row];
+    Task *parent = [task parentTaskAtTasks:self.tasks];
+    if (task.localParentId == -2 ||task.localParentId == -1 ) {
+        return 0;
+    } else if(parent && [self.tasks containsObject:parent]) {
+        NSInteger parentIndex = [self.tasks indexOfObject:parent];
+        NSIndexPath *parentIndexPath = [NSIndexPath indexPathForRow:parentIndex inSection:indexPath.section];
+        return [self tableView:tableView indentationLevelForRowAtIndexPath:parentIndexPath] + 1;
+    } else {
+        return 0;
+    }
+
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -232,9 +246,8 @@
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
 {
-//    [[GTaskEngine engine] moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row fromTask:self.tasks];
+    
     [[GTaskEngine engine]moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row forTasks:self.tasks];
-//    [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[NSArray arrayWithObject:toIndexPath] afterDelay:0.3];
     [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.3];
 }
 
@@ -259,11 +272,15 @@
     NIF_INFO(@"%@ -- %d",indexPath,direction);
     UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
     if (direction == UISwipeGestureRecognizerDirectionLeft) {
-        if(cell.indentationLevel>0){
+        if([[GTaskEngine engine] upgradeTaskLevel:TaskUpgradeLevelUpLevel atIndex:indexPath.row forTasks:self.tasks]){
             cell.indentationLevel--;   
+            [self.tableView reloadData];
         }
     } else if(direction == UISwipeGestureRecognizerDirectionRight) {
-        cell.indentationLevel++;
+        if([[GTaskEngine engine] upgradeTaskLevel:TaskUpgradeLevelDownLevel atIndex:indexPath.row forTasks:self.tasks]) {
+            cell.indentationLevel++;            
+            [self.tableView reloadData];
+        }
     }
 }
 

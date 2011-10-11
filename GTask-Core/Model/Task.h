@@ -46,6 +46,10 @@
 - (Task *)parentTaskAtTasks:(NSMutableArray *)tasks;
 - (NSArray *)sonsAtTasks:(NSMutableArray *)tasks;
 
+
+- (NSArray *)siblingsAndMeTaskAtTasks:(NSMutableArray *)tasks;
+- (NSArray *)siblingsTaskAtTasks:(NSMutableArray *)tasks;
+
 // 前一任务 后一任务
 - (Task *)prevTaskAtTasks:(NSMutableArray *)tasks;
 - (Task *)nextTaskAtTasks:(NSMutableArray *)tasks;
@@ -53,6 +57,8 @@
 // 同级别前一任务 同级别后一任务
 - (Task *)prevSiblingTaskAtTasks:(NSMutableArray *)tasks;
 - (Task *)nextSiblingTaskAtTasks:(NSMutableArray *)tasks;
+
+- (NSArray *)youngerSiblingsTaskAtTasks:(NSMutableArray *)tasks;
 
 // 所有子任务 递归
 - (NSArray *)allDescendantsAtTasks:(NSMutableArray *)tasks;

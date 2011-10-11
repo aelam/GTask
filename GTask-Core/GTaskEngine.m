@@ -317,6 +317,10 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     Task *fromTask = [[tasks objectAtIndex:fromIndex] retain];
     Task *toTask = [tasks objectAtIndex:toIndex];
 
+    if ([[fromTask allDescendantsAtTasks:tasks] containsObject:toTask]) {
+        return;
+    }
+    
     /**********************************
      * 1. 移动到第一行 变成第一级任务 其子任务跟随
      * 2. 移动到两个任务之间 这个任务及其子任务变成上级的子任务 此任务与原子任务平级
@@ -324,24 +328,46 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
      /
     */
     
-    /**
-     - 1
-      - 2 <-
-      - 3  |
-     - 4   |
-     = 5  -
-     */
 //    if (toTask.localParentId != -1) {
         [fromTask updateLocalParentId:toTask.localParentId];
         NIF_TRACE(@"fromTask : %@ parent : %d", fromTask.title,fromTask.localParentId);
 //    }
+    NSArray *subTasks = [fromTask allDescendantsAtTasks:tasks];
     
-    [tasks removeObject:fromTask];
-    [tasks insertObject:fromTask atIndex:toIndex];
-    [fromTask release];
-    
-    int begin = MIN(fromTask.displayOrder, toTask.displayOrder);
-    int end = MAX(fromTask.displayOrder, toTask.displayOrder);
+    int begin = 0;
+    int end = 0;
+    if (fromTask.displayOrder > toTask.displayOrder) {
+        NIF_INFO(@"fromTask.displayOrder:%d > toTask.displayOrder: %d", fromTask.displayOrder ,toTask.displayOrder);
+        NSEnumerator *enumerator = [subTasks reverseObjectEnumerator];
+        Task *aTask = nil;
+        while (aTask = [enumerator nextObject]) {
+            [tasks removeObject:aTask];
+            [tasks insertObject:aTask atIndex:toIndex];
+        }
+
+        [tasks removeObject:fromTask];
+        [tasks insertObject:fromTask atIndex:toIndex];
+        [fromTask release];
+        
+        begin = toTask.displayOrder;
+        end = fromTask.displayOrder + [subTasks count];
+    } else {
+        NIF_INFO(@"fromTask.displayOrder:%d > toTask.displayOrder: %d", fromTask.displayOrder ,toTask.displayOrder);
+
+        [tasks removeObject:fromTask];
+        [tasks insertObject:fromTask atIndex:toIndex];
+        [fromTask release];
+
+        NSEnumerator *enumerator = [subTasks objectEnumerator];
+        Task *aTask = nil;
+        while (aTask = [enumerator nextObject]) {
+            [tasks removeObject:aTask];
+            [tasks insertObject:aTask atIndex:toIndex];
+        }
+        
+        begin = toTask.displayOrder;
+        end = fromTask.displayOrder;
+    }
     
     for (int i = begin;i <= end;i++) {
         Task *task = [tasks objectAtIndex:i];
@@ -351,36 +377,33 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 - (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks {
     Task *task = [tasks objectAtIndex:index];
-    Task *previousTask = index > 0?[tasks objectAtIndex:index -1]:nil;
+    Task *prevSiblingTask = [task prevSiblingTaskAtTasks:tasks];
     
-    /**
-     - 1
-      - 2
-      - 4
-       - 3
-        - 8
-       - 6
-     - 5
-     
-     */
     if (level == TaskUpgradeLevelDownLevel) {
-        if (previousTask == nil) {
+        if (prevSiblingTask == nil) {
             NIF_ERROR(@"NO task above this task!");
             return NO;
-        } else if (task.localParentId == previousTask.localTaskId) {
-            NIF_ERROR(@"YOU HAVE ALREADY IT'S SON, CAN'T BECOME HIS GRANDSON");            
-            return NO;
         } else {
-            task.localParentId = previousTask.localTaskId;
+            [task updateLocalParentId:prevSiblingTask.localTaskId];
             return YES;
         }
         
-    } else if (level == TaskUpgradeLevelDownLevel) {
+    } else if (level == TaskUpgradeLevelUpLevel) {
         if (task.localParentId == -1) {
             NIF_ERROR(@"YOU'VE ALREADY IN 1ST LEVEL!");
             return NO;
         } else {
+            Task *parent = [task parentTaskAtTasks:tasks];
+
+            NSArray *youngerSiblings = [task youngerSiblingsTaskAtTasks:tasks];
+            NIF_INFO(@"%@", youngerSiblings);
+            for(Task *sibling in youngerSiblings) {
+                [sibling updateLocalParentId:task.localTaskId];
+            }
             
+            [task updateLocalParentId:parent.localParentId];
+            
+            return YES;
         }
         
     } else {

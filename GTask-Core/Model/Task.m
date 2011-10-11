@@ -158,7 +158,7 @@
 }
 
 
-- (Task *)parentTaskAtTask:(NSMutableArray *)tasks {
+- (Task *)parentTaskAtTasks:(NSMutableArray *)tasks {
     if (!tasks || [tasks count] == 0) return nil;
     if ([self isFirstLevelTaskAtTasks:tasks]) return nil;
     else {
@@ -209,14 +209,63 @@
     }
 }
 
+- (NSArray *)siblingsAndMeTaskAtTasks:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return nil;
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"localParentId = %d",self.localParentId];
+    NSArray *siblings = [tasks filteredArrayUsingPredicate:predicate];
+    if(siblings == nil || [siblings count] == 0) {
+        return nil;
+    } else {
+        return siblings;
+    }
+}
+
+- (NSArray *)siblingsTaskAtTasks:(NSMutableArray *)tasks {
+    NSMutableArray *siblingsAndMe = [NSMutableArray arrayWithArray:[self siblingsAndMeTaskAtTasks:tasks]];
+    if (siblingsAndMe == nil) {
+        return nil;
+    } else if ([siblingsAndMe containsObject:self]) {
+        [siblingsAndMe removeObject:self];
+        return siblingsAndMe;
+    } else {
+        NIF_ERROR(@"THIS SIBLINGS SHOULD INCLUDE ME!");
+        return nil;
+    }
+}
+
+
+
 // 同级别前一任务 同级别后一任务
 - (Task *)prevSiblingTaskAtTasks:(NSMutableArray *)tasks {
-    return nil;
+    if (!tasks || [tasks count] == 0) return nil;
+    NSArray *siblingsAndMe = [self siblingsAndMeTaskAtTasks:tasks];
+    NSInteger indexOfMe = [siblingsAndMe indexOfObject:self];
+    NIF_INFO(@"indexOfMe : %d", indexOfMe);
+    if (indexOfMe > 0) {
+        return [siblingsAndMe objectAtIndex:(indexOfMe - 1)];
+    } else {
+        return nil;
+    }
 }
 
 - (Task *)nextSiblingTaskAtTasks:(NSMutableArray *)tasks {
     return nil;
 }
+
+- (NSArray *)youngerSiblingsTaskAtTasks:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return nil;
+    NSArray *siblingsAndMe = [self siblingsAndMeTaskAtTasks:tasks];
+    NSInteger indexOfMe = [siblingsAndMe indexOfObject:self];
+    NIF_INFO(@"indexOfMe : %d", indexOfMe);
+    if ([siblingsAndMe count] > 1) {
+        NSIndexSet *indexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(indexOfMe + 1, [siblingsAndMe count] - indexOfMe - 1)];
+        return [siblingsAndMe objectsAtIndexes:indexSet];        
+    } else {
+        return nil;
+    }
+}
+
+
 
 // 所有子任务 递归
 - (NSArray *)allDescendantsAtTasks:(NSMutableArray *)tasks {
@@ -227,7 +276,7 @@
         [descendants addObject:son];
         NSArray *sonz_sons = [son allDescendantsAtTasks:tasks];
         if (sonz_sons && [sonz_sons count]) {
-            [descendants addObjectsFromArray:[son allDescendantsAtTasks:tasks]];            
+            [descendants addObjectsFromArray:sonz_sons];            
         } 
     }
     return descendants;    
