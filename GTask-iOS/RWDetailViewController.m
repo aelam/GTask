@@ -204,6 +204,10 @@
 
 
 - (NSIndexPath *)tableView:(UITableView *)tableView targetIndexPathForMoveFromRowAtIndexPath:(NSIndexPath *)sourceIndexPath toProposedIndexPath:(NSIndexPath *)proposedDestinationIndexPath {
+    
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:sourceIndexPath];
+    cell.textLabel.backgroundColor = [UIColor redColor];
+    
     Task *fromTask = [self.tasks objectAtIndex:sourceIndexPath.row];
     Task *toTask = [self.tasks objectAtIndex:proposedDestinationIndexPath.row];
     NSArray *fromSubtasks = [fromTask allDescendantsAtTasks:self.tasks];
@@ -219,26 +223,8 @@
                 return sourceIndexPath;
             }
         } else {
-//            [toTask generationLevelAtTasks:self.tasks]; 
             return proposedDestinationIndexPath;
         }
-        
-//        Task *fromTaskNextSibling = [fromTask nextSiblingTaskAtTasks:self.tasks];
-//        if (fromTaskNextSibling) {
-//            if([self.tasks indexOfObject:fromTaskNextSibling] >= proposedDestinationIndexPath.row){
-//                return proposedDestinationIndexPath;
-//            } else {
-//                return [NSIndexPath indexPathForRow:[self.tasks indexOfObject:fromTaskNextSibling] inSection:sourceIndexPath.section];
-//            }
-//        } else {
-//            return sourceIndexPath;
-//        }
-//        if ([fromSubtasks containsObject:toTask]) {
-//            return sourceIndexPath;
-//        } else {
-//            Task *fromTaskNextSibling = [fromTask nextSiblingTaskAtTasks:self.tasks];
-//            return [NSIndexPath indexPathForRow:[self.tasks indexOfObject:fromTaskNextSibling] inSection:sourceIndexPath.section];
-//        }
     }
 }
 
@@ -265,14 +251,14 @@
     }
     NIF_INFO(@"fromIndexPath:%@ toIndexPath : %@", fromIndexPath, toIndexPath);
     [[GTaskEngine engine]moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row forTasks:self.tasks];
-    self.tasks = [[GTaskEngine engine] localTasksForList:self.taskList];
-    [self.tableView reloadData];
+//    self.tasks = [[GTaskEngine engine] localTasksForList:self.taskList];
+//    [self.tableView reloadData];
 
-//    [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.3];
+    [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.3];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths {
-//    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
+    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 
 // Override to support conditional rearranging of the table view.

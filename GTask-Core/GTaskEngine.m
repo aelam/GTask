@@ -373,19 +373,28 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     else {                                                          // *** 下移 ***
         NIF_INFO(@"fromTask.displayOrder:%d > toTask.displayOrder: %d", fromTask.displayOrder ,toTask.displayOrder);
         
-        Task *prevToTask = [toTask prevTaskAtTasks:tasks];
+        //Task *prevToTask = [toTask prevTaskAtTasks:tasks];
+        Task *nextToTask = [toTask nextTaskAtTasks:tasks];
+
+        
         
         NSInteger toTaskLevel = [toTask generationLevelAtTasks:tasks];
-        NSInteger prevToTaskLevel = [prevToTask generationLevelAtTasks:tasks];
+        NSInteger nextToTaskLevel = [nextToTask generationLevelAtTasks:tasks];
         
-        if (prevToTask == nil) {
-            [fromTask setLocalParentId:-1 updateDB:YES];
-        } else if (toTaskLevel == prevToTaskLevel) { // =
-            [fromTask setLocalParentId:prevToTask.localParentId updateDB:YES];
-        } else if (toTaskLevel > prevToTaskLevel) {  // -_
-            [fromTask setLocalParentId:prevToTask.localTaskId updateDB:YES];
-        } else if (toTaskLevel < prevToTaskLevel) { // _-
-            [fromTask setLocalParentId:prevToTask.localParentId updateDB:YES];     
+//        if ([nextToTask isEqual:fromTask]) {
+//            
+//        }// else if (prevToTask == nil) {
+          //  [fromTask setLocalParentId:-1 updateDB:YES];
+        //}
+//        else
+        if (nextToTask == nil) {
+            [fromTask setLocalParentId:toTask.localParentId updateDB:YES];     
+        } else if (toTaskLevel == nextToTaskLevel) { // =
+            [fromTask setLocalParentId:nextToTask.localParentId updateDB:YES];
+        } else if (toTaskLevel > nextToTaskLevel) {  // _-
+            [fromTask setLocalParentId:toTask.localParentId updateDB:YES];
+        } else if (toTaskLevel < nextToTaskLevel) { // -_
+            [fromTask setLocalParentId:nextToTask.localParentId updateDB:YES];     
         } else {
             NIF_ERROR(@"HOW TO MOVE ABOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
@@ -401,8 +410,8 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             [tasks insertObject:aTask atIndex:toIndex];
         }
         
-        begin = toTask.displayOrder;
-        end = fromTask.displayOrder;
+        begin = fromTask.displayOrder;
+        end = toTask.displayOrder;
     }
     
     for (int i = begin;i <= end;i++) {
