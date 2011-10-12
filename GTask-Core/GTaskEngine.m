@@ -269,6 +269,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             task.due = [rs doubleForColumn:@"due"];
             task.serverModifyTime = [rs doubleForColumn:@"server_modify_timestamp"];
             task.displayOrder = [rs intForColumn:@"display_order"];
+            task.generationLevel = [rs intForColumn:@"generation_level"];
             
             [tasks addObject:task];
             [task release];
@@ -313,31 +314,39 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex forTasks:(NSMutableArray *)tasks {
-    
+        
     Task *fromTask = [[tasks objectAtIndex:fromIndex] retain];
     Task *toTask = [tasks objectAtIndex:toIndex];
-
+    
+    
     if ([[fromTask allDescendantsAtTasks:tasks] containsObject:toTask]) {
         return;
     }
     
-    /**********************************
-     * 1. 移动到第一行 变成第一级任务 其子任务跟随
-     * 2. 移动到两个任务之间 这个任务及其子任务变成上级的子任务 此任务与原子任务平级
-     * 2. 
-     /
-    */
-    
-//    if (toTask.localParentId != -1) {
-        [fromTask updateLocalParentId:toTask.localParentId];
-        NIF_TRACE(@"fromTask : %@ parent : %d", fromTask.title,fromTask.localParentId);
-//    }
     NSArray *subTasks = [fromTask allDescendantsAtTasks:tasks];
     
     int begin = 0;
     int end = 0;
-    if (fromTask.displayOrder > toTask.displayOrder) {
-        NIF_INFO(@"fromTask.displayOrder:%d > toTask.displayOrder: %d", fromTask.displayOrder ,toTask.displayOrder);
+    if (fromTask.displayOrder > toTask.displayOrder) {  // *** 上移 ***
+        
+        Task *prevToTask = [toTask prevTaskAtTasks:tasks];
+        
+        NSInteger toTaskLevel = [toTask generationLevelAtTasks:tasks];
+        NSInteger prevToTaskLevel = [prevToTask generationLevelAtTasks:tasks];
+
+        if (prevToTask == nil) {
+            [fromTask setLocalParentId:-1 updateDB:YES];
+        } else if (toTaskLevel == prevToTaskLevel) {
+            [fromTask setLocalParentId:prevToTask.localParentId updateDB:YES];
+        } else if (toTaskLevel > prevToTaskLevel) {
+            [fromTask setLocalParentId:prevToTask.localTaskId updateDB:YES];
+        } else if (toTaskLevel < prevToTaskLevel) {
+            [fromTask setLocalParentId:prevToTask.localParentId updateDB:YES];
+        } else {
+            NIF_ERROR(@"HOW TO MOVE ABOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+        
+        
         NSEnumerator *enumerator = [subTasks reverseObjectEnumerator];
         Task *aTask = nil;
         while (aTask = [enumerator nextObject]) {
@@ -351,8 +360,32 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         
         begin = toTask.displayOrder;
         end = fromTask.displayOrder + [subTasks count];
-    } else {
+    } else if ( fromTask.displayOrder == toTask.displayOrder) {     // *** 移 ***
+        Task *prevTask = [fromTask prevTaskAtTasks:tasks];
+        if (prevTask) {
+            [fromTask setLocalParentId:prevTask.localTaskId updateDB:YES];
+        }
+        return;
+    }
+    else {                                                          // *** 下移 ***
         NIF_INFO(@"fromTask.displayOrder:%d > toTask.displayOrder: %d", fromTask.displayOrder ,toTask.displayOrder);
+        
+        Task *prevToTask = [toTask prevTaskAtTasks:tasks];
+        
+        NSInteger toTaskLevel = [toTask generationLevelAtTasks:tasks];
+        NSInteger prevToTaskLevel = [prevToTask generationLevelAtTasks:tasks];
+        
+        if (prevToTask == nil) {
+            [fromTask setLocalParentId:-1 updateDB:YES];
+        } else if (toTaskLevel == prevToTaskLevel) { // =
+            [fromTask setLocalParentId:prevToTask.localParentId updateDB:YES];
+        } else if (toTaskLevel > prevToTaskLevel) {  // -_
+            [fromTask setLocalParentId:prevToTask.localTaskId updateDB:YES];
+        } else if (toTaskLevel < prevToTaskLevel) { // _-
+            [fromTask setLocalParentId:prevToTask.localParentId updateDB:YES];     
+        } else {
+            NIF_ERROR(@"HOW TO MOVE ABOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
 
         [tasks removeObject:fromTask];
         [tasks insertObject:fromTask atIndex:toIndex];
@@ -371,7 +404,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     
     for (int i = begin;i <= end;i++) {
         Task *task = [tasks objectAtIndex:i];
-        [task updateDisplayOrder:i];
+        [task setDisplayOrder:i updateDB:YES];
     }
 }
 
@@ -384,7 +417,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             NIF_ERROR(@"NO task above this task!");
             return NO;
         } else {
-            [task updateLocalParentId:prevSiblingTask.localTaskId];
+            [task setLocalParentId:prevSiblingTask.localTaskId updateDB:YES];
             return YES;
         }
         
@@ -398,11 +431,10 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             NSArray *youngerSiblings = [task youngerSiblingsTaskAtTasks:tasks];
             NIF_INFO(@"%@", youngerSiblings);
             for(Task *sibling in youngerSiblings) {
-                [sibling updateLocalParentId:task.localTaskId];
+                [sibling setLocalParentId:task.localTaskId updateDB:YES];
             }
             
-            [task updateLocalParentId:parent.localParentId];
-            
+            [task setLocalParentId:parent.localParentId updateDB:YES];
             return YES;
         }
         

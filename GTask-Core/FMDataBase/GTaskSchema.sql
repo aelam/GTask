@@ -42,6 +42,8 @@ CREATE TABLE tasks (
     is_cleared          INTEGER NOT NULL DEFAULT 0,
 
     server_modify_timestamp	INTEGER,
-    local_modify_timestamp	INTEGER
-    server_position         INTEGER
+    local_modify_timestamp	INTEGER,
+    server_position         INTEGER,
+    
+    generation_level        INTEGER NOT NULL DEFAULT -1
 );

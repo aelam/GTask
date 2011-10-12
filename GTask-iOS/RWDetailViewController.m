@@ -186,36 +186,10 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView indentationLevelForRowAtIndexPath:(NSIndexPath *)indexPath {
-/*
     Task *task = [self.tasks objectAtIndex:indexPath.row];
-    if (task.localParentId == -2 ||task.localParentId == -2 ) {
-        return 0;
-    } else if (indexPath.row > 0) {
-        Task *task_ = [self.tasks objectAtIndex:indexPath.row -1];
-        NSIndexPath *preIndexPath = [NSIndexPath indexPathForRow:(indexPath.row - 1) inSection:indexPath.section];
-        if (task.localParentId == task_.localParentId) {
-            return [self tableView:tableView indentationLevelForRowAtIndexPath:preIndexPath];
-        } else if(task.localParentId == task_.localTaskId) {
-            return [self tableView:tableView indentationLevelForRowAtIndexPath:preIndexPath] + 1;
-        } else {
-            return 0;
-        }
-    } else {
-        return 0;
-    }
-*/
-    Task *task = [self.tasks objectAtIndex:indexPath.row];
-    Task *parent = [task parentTaskAtTasks:self.tasks];
-    if (task.localParentId == -2 ||task.localParentId == -1 ) {
-        return 0;
-    } else if(parent && [self.tasks containsObject:parent]) {
-        NSInteger parentIndex = [self.tasks indexOfObject:parent];
-        NSIndexPath *parentIndexPath = [NSIndexPath indexPathForRow:parentIndex inSection:indexPath.section];
-        return [self tableView:tableView indentationLevelForRowAtIndexPath:parentIndexPath] + 1;
-    } else {
-        return 0;
-    }
-
+    
+    task.generationLevel = [task generationLevelAtTasks:self.tasks];
+    return task.generationLevel * 2;    
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -273,12 +247,14 @@
     UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
     if (direction == UISwipeGestureRecognizerDirectionLeft) {
         if([[GTaskEngine engine] upgradeTaskLevel:TaskUpgradeLevelUpLevel atIndex:indexPath.row forTasks:self.tasks]){
-            cell.indentationLevel--;   
+//            cell.indentationLevel --;
+//            cell.indentationLevel = [[self.tasks objectAtIndex:indexPath.row] generationLevelAtTasks:self.tasks];
             [self.tableView reloadData];
         }
     } else if(direction == UISwipeGestureRecognizerDirectionRight) {
         if([[GTaskEngine engine] upgradeTaskLevel:TaskUpgradeLevelDownLevel atIndex:indexPath.row forTasks:self.tasks]) {
-            cell.indentationLevel++;            
+//            cell.indentationLevel++;
+//            cell.indentationLevel = [[self.tasks objectAtIndex:indexPath.row] generationLevelAtTasks:self.tasks];
             [self.tableView reloadData];
         }
     }

@@ -33,13 +33,13 @@
 @synthesize link = _link;
 @synthesize displayOrder = _displayOrder;
 
-@synthesize parentTask = _parentTask;
-//@synthesize previousSiblingTask = _previousSiblingTask;
+@synthesize generationLevel = _generationLevel;
 
 - (id)init {
     if (self = [super init]) {
         _displayOrder = INITIAL_INTEGER;
         _localParentId = INITIAL_INTEGER;
+        _generationLevel = -1;
     }
     return self;
 }
@@ -60,7 +60,7 @@
             displayOrder  : %d",self.localTaskId,self.title,self.localParentId,self.displayOrder];
 #elif DESCRIPTION_LEVEL == 1
     return [NSString stringWithFormat:
-            @"id:%d title : %@ parent: %d displayOrder:%d",self.localTaskId,self.title,self.localParentId,self.displayOrder];
+            @"id:%d title : %@ parent: %d displayOrder:%d indent:%d",self.localTaskId,self.title,self.localParentId,self.displayOrder,self.generationLevel];
 #endif
 
 }
@@ -91,33 +91,66 @@
     return [task autorelease];
 }
 
-- (void)updateDisplayOrder:(NSInteger)order {
-    FMDatabase *db = [FMDatabase database];
-    if (![db open]) {
-        NIF_ERROR(@"Could not open db.");
-    } else {
-        NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET display_order = %d WHERE local_task_id = %d",order,self.localTaskId];
-        BOOL update = [db executeUpdate:sql];
-        NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
-        [db close];
-    }
-
-    self.displayOrder = order;
-}
-
-- (void)updateLocalParentId:(NSInteger)aParentId {
-    FMDatabase *db = [FMDatabase database];
-    if (![db open]) {
-        NIF_ERROR(@"Could not open db.");
-    } else {
-        NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET local_parent_id = %d WHERE local_task_id = %d",aParentId,self.localTaskId];
-        BOOL update = [db executeUpdate:sql];
-        NIF_INFO(@"UPDATE PARENT_ID SUCCESS ? : %d", update);
-        [db close];
+- (void)setDisplayOrder:(NSInteger)order updateDB:(BOOL)update {
+    if (update) {
+        FMDatabase *db = [FMDatabase database];
+        if (![db open]) {
+            NIF_ERROR(@"Could not open db.");
+        } else {
+            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET display_order = %d WHERE local_task_id = %d",order,self.localTaskId];
+            BOOL update = [db executeUpdate:sql];
+            NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
+            [db close];
+        }        
     }
     
-    self.localParentId = aParentId;
+    self.displayOrder = order;
+
 }
+
+- (void)setLocalParentId:(NSInteger)aParentId updateDB:(BOOL)update {
+    if (update) {
+        FMDatabase *db = [FMDatabase database];
+        if (![db open]) {
+            NIF_ERROR(@"Could not open db.");
+        } else {
+            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET local_parent_id = %d WHERE local_task_id = %d",aParentId,self.localTaskId];
+            BOOL update = [db executeUpdate:sql];
+            NIF_INFO(@"UPDATE PARENT_ID SUCCESS ? : %d", update);
+            [db close];
+        }
+    }    
+    self.localParentId = aParentId;
+
+}
+
+- (void)setGenerationLevel:(NSInteger)aLevel updateDB:(BOOL)update {
+    if (update) {
+        FMDatabase *db = [FMDatabase database];
+        if (![db open]) {
+            NIF_ERROR(@"Could not open db.");
+        } else {
+            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET generation_level = %d WHERE local_task_id = %d",aLevel,self.localTaskId];
+            BOOL update = [db executeUpdate:sql];                           
+            NIF_INFO(@"UPDATE GENERATION SUCCESS ? : %d", update);
+            [db close];
+        }
+    }    
+    self.generationLevel = aLevel;
+
+}
+
+- (NSInteger)generationLevelAtTasks:(NSMutableArray *)tasks {
+    if (!tasks || [tasks count] == 0) return 0;
+    Task *parent = [self parentTaskAtTasks:tasks];
+    if (parent) {
+        return 1 + [parent generationLevelAtTasks:tasks];
+    } else {
+        return 0;
+    }
+}
+
+
 
     
 - (void)dealloc {
@@ -125,7 +158,6 @@
     [_title release];
     [_notes release];
     [_link release];
-    [_parentTask release];
     [super dealloc];
 }
 

@@ -30,12 +30,13 @@
 @property (assign)  double localModifyTime;
 
 @property (assign)  NSInteger displayOrder;
+@property (assign)  NSInteger generationLevel;
 
-@property (retain) Task     *parentTask;
-//@property (retain) Task     *previousSiblingTask;
 
-- (void)updateDisplayOrder:(NSInteger)order;
-- (void)updateLocalParentId:(NSInteger)aParentId;
+- (void)setDisplayOrder:(NSInteger)displayOrder updateDB:(BOOL)update;
+- (void)setLocalParentId:(NSInteger)localParentId updateDB:(BOOL)update;
+- (void)setGenerationLevel:(NSInteger)generationLevel updateDB:(BOOL)update;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)isFirstTaskAtTasks:(NSMutableArray *)tasks;
@@ -45,6 +46,9 @@
 - (BOOL) isFirstLevelTaskAtTasks:(NSMutableArray *)tasks;
 - (Task *)parentTaskAtTasks:(NSMutableArray *)tasks;
 - (NSArray *)sonsAtTasks:(NSMutableArray *)tasks;
+
+
+- (NSInteger)generationLevelAtTasks:(NSMutableArray *)tasks;
 
 
 - (NSArray *)siblingsAndMeTaskAtTasks:(NSMutableArray *)tasks;
