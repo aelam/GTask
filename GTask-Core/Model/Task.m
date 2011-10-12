@@ -207,10 +207,11 @@
 
 - (NSArray *)sonsAtTasks:(NSMutableArray *)tasks {
     if (!tasks || [tasks count] == 0) return nil;
+    NSAssert(self.localTaskId != self.localParentId,@"%@ taskId and parentId is the same!",self.title);
+    
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"localParentId = %d",self.localTaskId];
     NSArray *subtasks = [tasks filteredArrayUsingPredicate:predicate];
     if (subtasks == nil || [subtasks count] == 0) {
-        //NIF_ERROR(@"THIS TASK SHOULD HAVE A PARENT!!");
         return nil;
     } else {
         return subtasks;
@@ -265,6 +266,22 @@
     }
 }
 
+- (NSInteger)nextSiblingOrUncleIndexAtTask:(NSMutableArray *)tasks {
+    NSInteger generationLevel = [self generationLevelAtTasks:tasks];
+    if (!tasks || [tasks count] == 0) return nil;
+    NSInteger index = [tasks indexOfObject:self];
+    if (index < [tasks count] - 1) {
+        for(int i = index+1; i < [tasks count]; i++) {
+            Task *tempTask = [tasks objectAtIndex:i];
+            if ([tempTask generationLevelAtTasks:tasks] <= generationLevel) {
+                return i;
+            }
+        }
+        return -1;
+    } else {
+        return -1;
+    }
+}
 
 
 // 同级别前一任务 同级别后一任务
@@ -281,7 +298,15 @@
 }
 
 - (Task *)nextSiblingTaskAtTasks:(NSMutableArray *)tasks {
-    return nil;
+    if (!tasks || [tasks count] == 0) return nil;
+    NSArray *siblingsAndMe = [self siblingsAndMeTaskAtTasks:tasks];
+    NSInteger indexOfMe = [siblingsAndMe indexOfObject:self];
+    NIF_INFO(@"indexOfMe : %d", indexOfMe);
+    if (indexOfMe < [tasks count] - 1) {
+        return [siblingsAndMe objectAtIndex:(indexOfMe + 1)];
+    } else {
+        return nil;
+    }
 }
 
 - (NSArray *)youngerSiblingsTaskAtTasks:(NSMutableArray *)tasks {
@@ -304,12 +329,15 @@
     NSMutableArray *descendants = [NSMutableArray array];
     
     NSArray *sons = [self sonsAtTasks:tasks];
+    if (!sons || [sons count] == 0) {
+        return nil;
+    }
     for(Task *son in sons) {
         [descendants addObject:son];
         NSArray *sonz_sons = [son allDescendantsAtTasks:tasks];
         if (sonz_sons && [sonz_sons count]) {
             [descendants addObjectsFromArray:sonz_sons];            
-        } 
+        }
     }
     return descendants;    
 }

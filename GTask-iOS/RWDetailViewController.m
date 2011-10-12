@@ -197,10 +197,51 @@
     if (!self.editViewController) {
         self.editViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGEditViewController"];
     }
-    NIF_INFO(@"%@", self.editViewController);
+
     self.editViewController.task = [self.tasks objectAtIndex:indexPath.row];
     [self.navigationController pushViewController:self.editViewController animated:YES];
 }
+
+
+- (NSIndexPath *)tableView:(UITableView *)tableView targetIndexPathForMoveFromRowAtIndexPath:(NSIndexPath *)sourceIndexPath toProposedIndexPath:(NSIndexPath *)proposedDestinationIndexPath {
+    Task *fromTask = [self.tasks objectAtIndex:sourceIndexPath.row];
+    Task *toTask = [self.tasks objectAtIndex:proposedDestinationIndexPath.row];
+    NSArray *fromSubtasks = [fromTask allDescendantsAtTasks:self.tasks];
+    
+    if (sourceIndexPath.row >=  proposedDestinationIndexPath.row) { //**上移**
+        return proposedDestinationIndexPath;
+    } else {    // **下移**
+        if ([fromSubtasks containsObject:toTask]) {
+            NSInteger targetIndex = [fromTask nextSiblingOrUncleIndexAtTask:self.tasks];
+            if (targetIndex != -1 && targetIndex != 0) {
+                return [NSIndexPath indexPathForRow:targetIndex inSection:sourceIndexPath.section];                
+            } else {
+                return sourceIndexPath;
+            }
+        } else {
+//            [toTask generationLevelAtTasks:self.tasks]; 
+            return proposedDestinationIndexPath;
+        }
+        
+//        Task *fromTaskNextSibling = [fromTask nextSiblingTaskAtTasks:self.tasks];
+//        if (fromTaskNextSibling) {
+//            if([self.tasks indexOfObject:fromTaskNextSibling] >= proposedDestinationIndexPath.row){
+//                return proposedDestinationIndexPath;
+//            } else {
+//                return [NSIndexPath indexPathForRow:[self.tasks indexOfObject:fromTaskNextSibling] inSection:sourceIndexPath.section];
+//            }
+//        } else {
+//            return sourceIndexPath;
+//        }
+//        if ([fromSubtasks containsObject:toTask]) {
+//            return sourceIndexPath;
+//        } else {
+//            Task *fromTaskNextSibling = [fromTask nextSiblingTaskAtTasks:self.tasks];
+//            return [NSIndexPath indexPathForRow:[self.tasks indexOfObject:fromTaskNextSibling] inSection:sourceIndexPath.section];
+//        }
+    }
+}
+
 
 //
 //
@@ -216,23 +257,27 @@
 //    }   
 //}
 
-
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
 {
-    
+    if ([fromIndexPath isEqual:toIndexPath]) {
+        return;
+    }
+    NIF_INFO(@"fromIndexPath:%@ toIndexPath : %@", fromIndexPath, toIndexPath);
     [[GTaskEngine engine]moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row forTasks:self.tasks];
-    [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.3];
+    self.tasks = [[GTaskEngine engine] localTasksForList:self.taskList];
+    [self.tableView reloadData];
+
+//    [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.3];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths {
-    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
+//    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 
 // Override to support conditional rearranging of the table view.
 - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    // Return NO if you do not want the item to be re-orderable.
     return YES;
 }
 

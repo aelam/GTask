@@ -58,6 +58,9 @@
 - (Task *)prevTaskAtTasks:(NSMutableArray *)tasks;
 - (Task *)nextTaskAtTasks:(NSMutableArray *)tasks;
 
+- (NSInteger)nextSiblingOrUncleIndexAtTask:(NSMutableArray *)tasks;
+
+
 // 同级别前一任务 同级别后一任务
 - (Task *)prevSiblingTaskAtTasks:(NSMutableArray *)tasks;
 - (Task *)nextSiblingTaskAtTasks:(NSMutableArray *)tasks;
