@@ -349,22 +349,21 @@
 - (void)updateEditStatuItem {
     switch (_editStatus) {
         case EditStatusNone:
-            self.statusItem.title = @"无 ";
+            self.statusItem.title = NSLocalizedString(@"None", @"None");
             [self setEditing:NO animated:YES];            
             break;
         case EditStatusDeleting:
-            self.statusItem.title = @"删除";
+            self.statusItem.title = NSLocalizedString(@"Delete", @"Delete");
             [self setEditing:NO animated:NO];            
             [self setEditing:YES animated:YES];            
             break;
         case EditStatusMoving:
-            self.statusItem.title = @"移动";
+            self.statusItem.title = NSLocalizedString(@"Move", @"Move");
             [self setEditing:YES animated:YES];            
             break;
         default:
             break;
     }
-//    [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[self.tableView indexPathsForVisibleRows] afterDelay:0.3];
 
 }
 
