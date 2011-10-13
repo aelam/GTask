@@ -387,7 +387,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         } else if (toTaskLevel < nextToTaskLevel) { // -_
             [fromTask setLocalParentId:nextToTask.localParentId updateDB:YES];     
         } else {
-            NIF_ERROR(@"HOW TO MOVE ABOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            NIF_ERROR(@"HOW TO MOVE DOWN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
 
         [tasks removeObject:fromTask];
@@ -446,6 +446,16 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         return NO;
     }
 }
+
+- (void)deleteTaskAtIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks {
+    Task *deletingTask = [tasks objectAtIndex:index];
+    NSAssert(deletingTask,@"YOU SHOULD HAVE A TASK TO DELETE");
+    NSArray *sons = [deletingTask sonsAtTasks:tasks];
+    for (Task *son in sons) {
+        son.localParentId = deletingTask.localParentId;
+    }
+}
+
 
 @end
 

@@ -11,16 +11,29 @@
 @class TaskList;
 @class GEditViewController;
 
+typedef enum {
+    EditStatusNone      =   0,
+    EditStatusMoving    =   1,
+    EditStatusDeleting  =   2,
+}EditStatus;
+
+
 @interface RWDetailViewController : UIViewController <UISplitViewControllerDelegate,UITableViewDelegate,UITableViewDataSource>
 
 @property (strong, nonatomic) id detailItem;
 
 @property (strong, nonatomic) IBOutlet UILabel *detailDescriptionLabel;
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *statusItem;
 
 @property (strong, nonatomic) NSMutableArray *tasks;
 @property (strong, nonatomic) TaskList *taskList;
 
-@property (strong, nonatomic) IBOutlet GEditViewController *editViewController;
+@property (strong, nonatomic) GEditViewController *editViewController;
+
+@property (nonatomic) EditStatus editStatus;
+
+
+- (IBAction)changeEditStatus:(id)sender;
 
 @end

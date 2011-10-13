@@ -16,6 +16,7 @@
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
 - (void)configureView;
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths;
+- (void)updateEditStatuItem;
 @end
 
 @implementation RWDetailViewController
@@ -27,6 +28,8 @@
 @synthesize tasks = _tasks;
 @synthesize taskList = _taskList;
 @synthesize editViewController = _editViewController;
+@synthesize editStatus = _editStatus;
+@synthesize statusItem = _statusItem;
 
 - (void)dealloc
 {
@@ -37,8 +40,13 @@
     [_tasks release];
     [_taskList release];
     [_editViewController release];
+    [_statusItem release];
     [super dealloc];
 }
+
+- (void)awakeFromNib {
+}
+
 
 #pragma mark - Managing the detail item
 
@@ -55,6 +63,13 @@
     if (self.masterPopoverController != nil) {
         [self.masterPopoverController dismissPopoverAnimated:YES];
     }        
+}
+
+- (void)setEditing:(BOOL)editing animated:(BOOL)animated {
+    [super setEditing:editing animated:animated];
+    [self.tableView setEditing:editing animated:animated];
+    
+    [self.navigationItem setRightBarButtonItem:editing?self.editButtonItem:nil animated:YES];
 }
 
 - (void)configureView
@@ -87,11 +102,13 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
     [self configureView];    
+
+    self.editStatus = EditStatusMoving;    
+    [self updateEditStatuItem];
+
     self.tableView.editing = YES;
     self.tableView.allowsSelectionDuringEditing = YES;
-    self.navigationItem.rightBarButtonItem = self.editButtonItem;
     
 }
 
@@ -176,13 +193,14 @@
     return YES;
 }
 
-- (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return UITableViewCellEditingStyleNone;
-}
-
-
 - (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath {
-    return NO;
+    if (self.editStatus == EditStatusMoving || self.editStatus == EditStatusNone) {
+        return NO;
+    } else if (self.editStatus == EditStatusDeleting) {
+        return YES;        
+    } else {
+        return NO;
+    }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView indentationLevelForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -228,20 +246,35 @@
     }
 }
 
+- (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (self.editStatus == EditStatusDeleting) {
+        return UITableViewCellEditingStyleDelete;
+    } else {
+        return UITableViewCellEditingStyleNone;
+    }
+}
+
+- (void)tableView:(UITableView*)tableView willBeginEditingRowAtIndexPath:(NSIndexPath *)indexPath {
+    NIF_INFO();
+}
+
+- (void)tableView:(UITableView*)tableView didEndEditingRowAtIndexPath:(NSIndexPath *)indexPath {
+    NIF_INFO();
+}
 
 //
 //
 //
 //// Override to support editing the table view.
-//- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-//{
-//    if (editingStyle == UITableViewCellEditingStyleDelete) {
-//        // Delete the row from the data source.
-//        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-//    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-//        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
-//    }   
-//}
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        // Delete the row from the data source.
+        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
+        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+    }   
+}
 
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
@@ -249,22 +282,23 @@
     if ([fromIndexPath isEqual:toIndexPath]) {
         return;
     }
-    NIF_INFO(@"fromIndexPath:%@ toIndexPath : %@", fromIndexPath, toIndexPath);
-    [[GTaskEngine engine]moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row forTasks:self.tasks];
-//    self.tasks = [[GTaskEngine engine] localTasksForList:self.taskList];
-//    [self.tableView reloadData];
 
+    [[GTaskEngine engine]moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row forTasks:self.tasks];
     [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.3];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths {
-    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
+    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
 }
 
 // Override to support conditional rearranging of the table view.
 - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return YES;
+    if (self.editStatus == EditStatusMoving) {
+        return YES;        
+    } else {
+        return NO;
+    }
 }
 
 #pragma mark -
@@ -274,18 +308,12 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSwipeCellAtIndexPath:(NSIndexPath *)indexPath direction:(UISwipeGestureRecognizerDirection) direction{
-    NIF_INFO(@"%@ -- %d",indexPath,direction);
-    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
     if (direction == UISwipeGestureRecognizerDirectionLeft) {
         if([[GTaskEngine engine] upgradeTaskLevel:TaskUpgradeLevelUpLevel atIndex:indexPath.row forTasks:self.tasks]){
-//            cell.indentationLevel --;
-//            cell.indentationLevel = [[self.tasks objectAtIndex:indexPath.row] generationLevelAtTasks:self.tasks];
             [self.tableView reloadData];
         }
     } else if(direction == UISwipeGestureRecognizerDirectionRight) {
         if([[GTaskEngine engine] upgradeTaskLevel:TaskUpgradeLevelDownLevel atIndex:indexPath.row forTasks:self.tasks]) {
-//            cell.indentationLevel++;
-//            cell.indentationLevel = [[self.tasks objectAtIndex:indexPath.row] generationLevelAtTasks:self.tasks];
             [self.tableView reloadData];
         }
     }
@@ -309,5 +337,35 @@
     self.masterPopoverController = nil;
 }
 
+
+- (IBAction)changeEditStatus:(UIBarButtonItem *)sender {
+    _editStatus ++;
+    if (_editStatus == 3) {
+        _editStatus = EditStatusNone;
+    }
+    [self updateEditStatuItem];
+}
+
+- (void)updateEditStatuItem {
+    switch (_editStatus) {
+        case EditStatusNone:
+            self.statusItem.title = @"无 ";
+            [self setEditing:NO animated:YES];            
+            break;
+        case EditStatusDeleting:
+            self.statusItem.title = @"删除";
+            [self setEditing:NO animated:NO];            
+            [self setEditing:YES animated:YES];            
+            break;
+        case EditStatusMoving:
+            self.statusItem.title = @"移动";
+            [self setEditing:YES animated:YES];            
+            break;
+        default:
+            break;
+    }
+//    [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[self.tableView indexPathsForVisibleRows] afterDelay:0.3];
+
+}
 
 @end
