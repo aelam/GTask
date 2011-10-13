@@ -373,20 +373,11 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     else {                                                          // *** 下移 ***
         NIF_INFO(@"fromTask.displayOrder:%d > toTask.displayOrder: %d", fromTask.displayOrder ,toTask.displayOrder);
         
-        //Task *prevToTask = [toTask prevTaskAtTasks:tasks];
         Task *nextToTask = [toTask nextTaskAtTasks:tasks];
-
-        
         
         NSInteger toTaskLevel = [toTask generationLevelAtTasks:tasks];
         NSInteger nextToTaskLevel = [nextToTask generationLevelAtTasks:tasks];
         
-//        if ([nextToTask isEqual:fromTask]) {
-//            
-//        }// else if (prevToTask == nil) {
-          //  [fromTask setLocalParentId:-1 updateDB:YES];
-        //}
-//        else
         if (nextToTask == nil) {
             [fromTask setLocalParentId:toTask.localParentId updateDB:YES];     
         } else if (toTaskLevel == nextToTaskLevel) { // =
