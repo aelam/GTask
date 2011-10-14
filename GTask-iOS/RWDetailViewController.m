@@ -11,6 +11,7 @@
 #import "Task.h"
 #import "GTaskEngine.h"
 #import "GTableViewCell.h"
+#import "NSObject+Runtime.h"
 
 @interface RWDetailViewController ()
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
@@ -165,11 +166,14 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString *kCellIndentifier = @"kCellIndentifier";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellIndentifier];
+
+    static char hashKey;
+    
+    GTableViewCell *cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kCellIndentifier];
     if(cell == nil) {
         cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:kCellIndentifier] autorelease];
     }
-    
+
     Task *task = [self.tasks objectAtIndex:indexPath.row];
     
     
@@ -179,7 +183,7 @@
 
     cell.textLabel.text = [NSString stringWithFormat:@"%d - %@ ",[subTasks count],task.title];
     cell.detailTextLabel.text = [NSString stringWithFormat:@"order:%d id: %d parent :%d  - %@", task.displayOrder,task.localTaskId,task.localParentId,[date description]];
-    //cell.detailTextLabel.text = task.serverTaskId;
+    
     return cell;
 }
 
@@ -288,7 +292,9 @@
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths {
-    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
+    [self.tableView beginUpdates];
+    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
+    [self.tableView endUpdates];
 }
 
 // Override to support conditional rearranging of the table view.

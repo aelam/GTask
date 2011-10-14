@@ -75,5 +75,28 @@
     return date;
 }
 
+- (NSString *)locateTimeDescription {
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm";
+    
+    NSTimeZone *gmt = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+    [dateFormatter setTimeZone:gmt];
+    NSString *timeStamp = [dateFormatter stringFromDate:[NSDate date]];
+    [dateFormatter release];
+    return timeStamp;
+}
+
+- (NSString *)locateTimeDescriptionWithFormatter:(NSString *)formatter {
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = formatter;//@"yyyy-MM-dd";
+    
+    NSTimeZone *gmt = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+    [dateFormatter setTimeZone:gmt];
+    NSString *timeStamp = [dateFormatter stringFromDate:self];
+    [dateFormatter release];
+    return timeStamp;
+        
+}
+
 
 @end

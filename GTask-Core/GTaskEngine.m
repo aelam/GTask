@@ -140,6 +140,8 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             NSString *position = [item objectForKey:@"position"];
             
             double updated = [[NSDate dateFromRFC3339:[item objectForKey:@"updated"]] timeIntervalSince1970];
+            double due = [[NSDate dateFromRFC3339:[item objectForKey:@"due"]] timeIntervalSince1970];
+            
             
             NSInteger localParentId = -1;
 
@@ -162,7 +164,17 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                 }
                 
             } else {
-                NSString *sql = [NSString stringWithFormat:@"INSERT INTO tasks (server_task_id,local_list_id,local_parent_id,notes,self_link,title,server_modify_timestamp,display_order) VALUES ('%@',%d,%d,'%@','%@','%@',%0.0f,%d)",_id,aList.localListId,localParentId,notes?notes:@"",link,title,updated,order];
+                NSString *sql = [NSString stringWithFormat:
+                                 @"INSERT INTO tasks (server_task_id,local_list_id,local_parent_id,notes,self_link,title,due,server_modify_timestamp,display_order) VALUES ('%@',%d,%d,'%@','%@','%@',%0.0f,%0.0f,%d)",
+                                 _id,
+                                 aList.localListId,
+                                 localParentId,
+                                 notes?[notes stringByReplacingOccurrencesOfString:@"'" withString:@"''"]:@"",
+                                 link,
+                                 [title stringByReplacingOccurrencesOfString:@"'" withString:@"''"],
+                                 due,
+                                 updated,
+                                 order];
                 NIF_INFO(@"save to DB sql : %@", sql);
                 //rs = [db executeUpdate:sql];
                 NSError *error = nil;
@@ -306,7 +318,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         if ([result isKindOfClass:[NSError class]]) {
             NIF_TRACE(@"--- %d", [(NSError *)result code]);
         } else if ([result isKindOfClass:[NSDictionary class]]) {
+            NIF_INFO(@"json:\n%@", result);
             BOOL rs = [self _saveTasksForTaskList:aList fromJSON:result];
+            NIF_INFO(@"UPDATE DB SUCCESS?:%d", rs);
             NSMutableArray *tasks = [self localTasksForList:aList];
             resultHander(self,tasks);
         }

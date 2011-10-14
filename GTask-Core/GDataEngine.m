@@ -234,6 +234,7 @@ static int kJsonError = 0x11;
     }else{
         urlString = [urlString stringByAppendingFormat:@"?oauth_token=%@",self.accessToken];        
     }
+    NIF_INFO(@"real_URL:%@", urlString);
     [request setURL:[NSURL URLWithString:urlString]];
     
     RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:request];

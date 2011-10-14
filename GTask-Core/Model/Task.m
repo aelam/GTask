@@ -44,7 +44,8 @@
     return self;
 }
 
-#define DESCRIPTION_LEVEL 1
+#define NAME_AND_DUE      4
+#define DESCRIPTION_LEVEL NAME_AND_DUE
 
 - (NSString *)description {
 #if DESCRIPTION_LEVEL == 3
@@ -61,12 +62,19 @@
 #elif DESCRIPTION_LEVEL == 1
     return [NSString stringWithFormat:
             @"id:%d title : %@ parent: %d displayOrder:%d indent:%d",self.localTaskId,self.title,self.localParentId,self.displayOrder,self.generationLevel];
+#elif DESCRIPTION_LEVEL == NAME_AND_DUE
+    return [NSString stringWithFormat:
+            @"localTaskId   : %d\
+            title           : %@\
+            due             : %0.0f\
+            ",self.localTaskId,self.title,self.due];
+    
 #endif
 
 }
 
-- (id)copyWithZone:(id)zone {
-    Task *task = [[Task alloc] init];
+- (id)copyWithZone:(NSZone *)zone {
+    Task *task = [[Task allocWithZone:zone] init];
     task.localListId = self.localListId;
     task.localTaskId = self.localTaskId;
     task.localListId = self.localListId;
@@ -88,7 +96,7 @@
     task.localModifyTime = self.localModifyTime;
     task.displayOrder = self.displayOrder;
 
-    return [task autorelease];
+    return task;
 }
 
 - (void)setDisplayOrder:(NSInteger)order updateDB:(BOOL)update {

@@ -24,7 +24,6 @@
         UISwipeGestureRecognizer *gestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeAction:)];
         [self addGestureRecognizer:gestureRecognizer];
         [gestureRecognizer release];
-
     }
     return self;
 }
@@ -49,7 +48,6 @@
     UIResponder *nextResponder = tableView.nextResponder;
     while ([nextResponder isKindOfClass:[UIView class]]) {
         nextResponder = nextResponder.nextResponder;
-        NIF_INFO(@"%@", nextResponder);
     }
     delegate = (UIViewController *)nextResponder;
     
@@ -67,6 +65,11 @@
 	}
 
 }
+
+- (void)willTransitionToState:(UITableViewCellStateMask)state {
+    [super willTransitionToState:state];
+}
+
 
 - (void)dealloc {
     

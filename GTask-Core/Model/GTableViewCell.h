@@ -18,6 +18,4 @@ typedef enum {
 
 @interface GTableViewCell : UITableViewCell
 
-
-
 @end

@@ -12,12 +12,8 @@
 
 @interface GEditViewController : UITableViewController
 
-@property (retain) Task *task;
+@property (copy) Task *task;
 
 @property (retain) IBOutlet UILabel *titleLabel;
-
-@property (assign) NSInteger m_integer;
-@property (assign) char m_charcter;
-@property (assign) char *m_charcter_t;
 
 @end

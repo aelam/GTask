@@ -12,4 +12,8 @@
 
 + (NSDate *)dateFromRFC3339:(NSString *)rfc3339;
 
+- (NSString *)locateTimeDescription;
+- (NSString *)locateTimeDescriptionWithFormatter:(NSString *)formatter;
+
+
 @end
