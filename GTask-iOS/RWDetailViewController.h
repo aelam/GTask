@@ -25,6 +25,7 @@ typedef enum {
 @property (strong, nonatomic) IBOutlet UILabel *detailDescriptionLabel;
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
 @property (strong, nonatomic) IBOutlet UIBarButtonItem *statusItem;
+@property (strong, nonatomic) IBOutlet UITextField *quickInputField;
 
 @property (strong, nonatomic) NSMutableArray *tasks;
 @property (strong, nonatomic) TaskList *taskList;

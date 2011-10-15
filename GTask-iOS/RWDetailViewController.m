@@ -31,6 +31,7 @@
 @synthesize editViewController = _editViewController;
 @synthesize editStatus = _editStatus;
 @synthesize statusItem = _statusItem;
+@synthesize quickInputField = _quickInputField;
 
 - (void)dealloc
 {
@@ -42,10 +43,13 @@
     [_taskList release];
     [_editViewController release];
     [_statusItem release];
+    [_quickInputField release];
     [super dealloc];
 }
 
 - (void)awakeFromNib {
+//    set a selected/unselected Image
+//    _quickInputField.leftView = 
 }
 
 
@@ -166,8 +170,6 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString *kCellIndentifier = @"kCellIndentifier";
-
-    static char hashKey;
     
     GTableViewCell *cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kCellIndentifier];
     if(cell == nil) {
@@ -176,6 +178,11 @@
 
     Task *task = [self.tasks objectAtIndex:indexPath.row];
     
+    if (task.status) {
+        cell.textLabel.textColor = [UIColor lightGrayColor];
+    } else {
+        cell.textLabel.textColor = [UIColor blackColor];
+    }
     
     NSArray *subTasks = [task allDescendantsAtTasks:self.tasks];
     

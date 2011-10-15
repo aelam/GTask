@@ -137,7 +137,17 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             NSString *link = [item objectForKey:@"selfLink"];
             NSString *title = [item objectForKey:@"title"];
             NSString *parentId = [item objectForKey:@"parent"];
-            NSString *position = [item objectForKey:@"position"];
+//            NSString *position = [item objectForKey:@"position"];
+            NSString *statusString = [item objectForKey:@"status"];
+            BOOL status = NO;
+            if ([statusString isEqualToString:@"needAction"]) {
+                status = NO;
+            } else if ([statusString isEqualToString:@"completed"]) {
+                status = YES;
+            }
+
+            NSString *completedDate = [item objectForKey:@"completed"];
+            double completedTimestamp = [[NSDate dateFromRFC3339:completedDate] timeIntervalSince1970];
             
             double updated = [[NSDate dateFromRFC3339:[item objectForKey:@"updated"]] timeIntervalSince1970];
             double due = [[NSDate dateFromRFC3339:[item objectForKey:@"due"]] timeIntervalSince1970];
@@ -165,7 +175,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                 
             } else {
                 NSString *sql = [NSString stringWithFormat:
-                                 @"INSERT INTO tasks (server_task_id,local_list_id,local_parent_id,notes,self_link,title,due,server_modify_timestamp,display_order) VALUES ('%@',%d,%d,'%@','%@','%@',%0.0f,%0.0f,%d)",
+                                 @"INSERT INTO tasks (server_task_id,local_list_id,local_parent_id,notes,self_link,title,due,server_modify_timestamp,display_order,status,completed_timestamp) VALUES ('%@',%d,%d,'%@','%@','%@',%0.0f,%0.0f,%d,%d,%0.0f)",
                                  _id,
                                  aList.localListId,
                                  localParentId,
@@ -174,7 +184,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                                  [title stringByReplacingOccurrencesOfString:@"'" withString:@"''"],
                                  due,
                                  updated,
-                                 order];
+                                 order,
+                                 status,
+                                 completedTimestamp];
                 NIF_INFO(@"save to DB sql : %@", sql);
                 //rs = [db executeUpdate:sql];
                 NSError *error = nil;

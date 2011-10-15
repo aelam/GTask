@@ -12,6 +12,7 @@
 		944270DE142F98BC0071E363 /* NSDate+RFC3339.m in Sources */ = {isa = PBXBuildFile; fileRef = 944270DD142F98BC0071E363 /* NSDate+RFC3339.m */; };
 		9447F619142C862A002B32DF /* GTaskEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9447F618142C862A002B32DF /* GTaskEngine.m */; };
 		944CBAC91448A7FD002B332B /* NSObject+Runtime.m in Sources */ = {isa = PBXBuildFile; fileRef = 944CBAC81448A7FD002B332B /* NSObject+Runtime.m */; };
+		944CBADF1449CEEC002B332B /* GTaskCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 944CBADE1449CEEC002B332B /* GTaskCell.m */; };
 		94512AC5142B174B00903FC2 /* FMDatabase+Update.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ABC142B174B00903FC2 /* FMDatabase+Update.m */; };
 		94512AC6142B174B00903FC2 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ABE142B174B00903FC2 /* FMDatabase.m */; };
 		94512AC7142B174B00903FC2 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512AC0142B174B00903FC2 /* FMDatabaseAdditions.m */; };
@@ -53,6 +54,8 @@
 		9447F618142C862A002B32DF /* GTaskEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTaskEngine.m; sourceTree = "<group>"; };
 		944CBAC71448A7FD002B332B /* NSObject+Runtime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Runtime.h"; sourceTree = "<group>"; };
 		944CBAC81448A7FD002B332B /* NSObject+Runtime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Runtime.m"; sourceTree = "<group>"; };
+		944CBADD1449CEEC002B332B /* GTaskCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTaskCell.h; sourceTree = "<group>"; };
+		944CBADE1449CEEC002B332B /* GTaskCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTaskCell.m; sourceTree = "<group>"; };
 		94512ABB142B174B00903FC2 /* FMDatabase+Update.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+Update.h"; sourceTree = "<group>"; };
 		94512ABC142B174B00903FC2 /* FMDatabase+Update.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+Update.m"; sourceTree = "<group>"; };
 		94512ABD142B174B00903FC2 /* FMDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabase.h; sourceTree = "<group>"; };
@@ -149,6 +152,8 @@
 				94512ACF142B1D1200903FC2 /* Task.m */,
 				940AFFBF144036EB009F7F4A /* GTableViewCell.h */,
 				940AFFC0144036EB009F7F4A /* GTableViewCell.m */,
+				944CBADD1449CEEC002B332B /* GTaskCell.h */,
+				944CBADE1449CEEC002B332B /* GTaskCell.m */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -339,6 +344,7 @@
 				940AFFC1144036EB009F7F4A /* GTableViewCell.m in Sources */,
 				94FA4BCF1440B07700235F9A /* GEditViewController.m in Sources */,
 				944CBAC91448A7FD002B332B /* NSObject+Runtime.m in Sources */,
+				944CBADF1449CEEC002B332B /* GTaskCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
