@@ -176,22 +176,29 @@
     if(cell == nil) {
         cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:kCellIndentifier] autorelease];
         cell.checkBox.checked = NO;
+        cell.firstLabel.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin;
+        cell.firstLabel.font = [UIFont boldSystemFontOfSize:15];
     }
-
+        
     Task *task = [self.tasks objectAtIndex:indexPath.row];
+    
+    task.generationLevel = [task generationLevelAtTasks:self.tasks];
+    cell.firstLabel.frame = CGRectMake(47 + 20 *task.generationLevel, 5, cell.frame.size.width - 60 - 20 *task.generationLevel, 20);
     
     if (task.status) {
         cell.textLabel.textColor = [UIColor lightGrayColor];
+        cell.firstLabel.textColor = [UIColor lightGrayColor];
     } else {
         cell.textLabel.textColor = [UIColor blackColor];
+        cell.firstLabel.textColor = [UIColor blackColor];
     }
     
     NSArray *subTasks = [task allDescendantsAtTasks:self.tasks];
     
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:task.serverModifyTime];
 
-    cell.textLabel.text = [NSString stringWithFormat:@"%d - %@ ",[subTasks count],task.title];
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"order:%d id: %d parent :%d  - %@", task.displayOrder,task.localTaskId,task.localParentId,[date description]];
+    cell.firstLabel.text = [NSString stringWithFormat:@"%d - %@ ",[subTasks count],task.title];
+//    cell.detailTextLabel.text = [NSString stringWithFormat:@"order:%d id: %d parent :%d  - %@", task.displayOrder,task.localTaskId,task.localParentId,[date description]];
     
     return cell;
 }

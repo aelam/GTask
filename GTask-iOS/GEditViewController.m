@@ -16,9 +16,11 @@
 
 @synthesize task = _task;
 @synthesize titleLabel = _titleLabel;
+@synthesize tempTask = _tempTask;
 
 - (void)dealloc {
     [_task release];
+    [_tempTask release];
     [_titleLabel release];
     [super dealloc];
 }
@@ -73,7 +75,7 @@
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 4;
+    return 3;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -85,46 +87,42 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString *kCellIndentifier = @"kCellIndentifier";
+    static NSString *kCellIndentifier = @"kTextFieldCellIndentifier";
+    static NSString *kTextViewCellIndentifier = @"kTextViewCellIndentifier";
     
-    static char hashKey;
     
-    UITableViewCell *cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kCellIndentifier];
+//    static char hashKey;
+    
+    GTableViewCell *cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kCellIndentifier];
     if(cell == nil) {
         cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:kCellIndentifier] autorelease];
                 
-//        UIView *associatedView = [cell associatedObjectForKey:&hashKey];
-//        if (associatedView == nil) {
-//            UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, 320, 40)];
-//            [cell setAssociatedObject:label forKey:&hashKey];
-//            [cell.contentView addSubview:label];
-//            [label release];
-//        }
-        UITextField *textField = [[UITextField alloc] initWithFrame:CGRectMake(60, 10, 260, 34)];
-        [cell setAssociatedObject:textField forKey:&hashKey];
-        [cell.contentView addSubview:textField];
-        [textField release];
-        
+
+        cell.textField.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        cell.textField.placeholder = NSLocalizedString(@"Headline", @"Headline");
+        cell.textField.font = [UIFont systemFontOfSize:26];
     }
     
+    cell.textField.frame = CGRectMake(5, 5, CGRectGetWidth(cell.bounds) - 7, CGRectGetHeight(cell.frame)-5);
     cell.textLabel.textColor = [UIColor lightGrayColor];
     cell.detailTextLabel.textAlignment = UITextAlignmentLeft;
 
 
     switch (indexPath.row) {
         case 0:
-            cell.textLabel.text = NSLocalizedString(@"title", @"title");
-            cell.detailTextLabel.text = self.task.title;        
+            //cell.textLabel.text = NSLocalizedString(@"title", @"title");
+            //cell.detailTextLabel.text = self.task.title;        
+            cell.textField.text = self.tempTask.title;
             break;
         case 1:
-            cell.textLabel.text = NSLocalizedString(@"due", @"due");
-            cell.detailTextLabel.text = [[NSDate dateWithTimeIntervalSince1970:self.task.due]locateTimeDescriptionWithFormatter:@"yyyy-MM-dd"];
+            //cell.textLabel.text = NSLocalizedString(@"due", @"due");
+            //cell.detailTextLabel.text = [[NSDate dateWithTimeIntervalSince1970:self.task.due]locateTimeDescriptionWithFormatter:@"yyyy-MM-dd"];
             break;
         case 2:
-            cell.textLabel.text = NSLocalizedString(@"title", @"title");
+            //cell.textLabel.text = NSLocalizedString(@"title", @"title");
             break;
         case 3:
-            cell.textLabel.text = NSLocalizedString(@"title", @"title");
+            //cell.textLabel.text = NSLocalizedString(@"title", @"title");
             break;
         default:
             break;
@@ -134,6 +132,18 @@
     return cell;
 }
 
+- (Task *)tempTask {
+    if (_tempTask == nil) {
+        _tempTask = [self.task copy];
+    }
+    return _tempTask;
+}
 
+- (void)setTempTask:(Task *)aTask {
+    if (_tempTask != aTask) {
+        [_tempTask release];
+        _tempTask = [aTask copy];        
+    }
+}
 
 @end

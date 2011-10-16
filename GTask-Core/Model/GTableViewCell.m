@@ -8,10 +8,12 @@
 
 #import "GTableViewCell.h"
 #import "UICheckBox.h"
+#import "UIPlaceHolderTextView.h"
 
 @implementation GTableViewCell
 
 @synthesize textField = _textField;
+@synthesize textView = _textView;
 @synthesize firstButton = _firstButton;
 @synthesize firstLabel = _firstLabel;
 @synthesize secondLabel = _secondLabel;
@@ -76,7 +78,7 @@
 
 - (UICheckBox *)checkBox {
     if (_checkBox == nil) {
-        _checkBox = [[UICheckBox alloc] initWithFrame:CGRectMake(10, 5, 27, 27)];
+        _checkBox = [[UICheckBox alloc] initWithFrame:CGRectMake(10, 5, 20, 20)];
         [self.contentView addSubview:_checkBox];
     }
     return _checkBox;
@@ -89,6 +91,15 @@
     }
     return _textField;
 }
+
+- (UIPlaceHolderTextView *)textView {
+    if (_textView == nil) {
+        _textView = [[UIPlaceHolderTextView alloc] initWithFrame:CGRectZero];
+        [self.contentView addSubview:_textView];
+    }
+    return _textView;
+}
+
 
 - (UITextField *)firstButton {
     if (_firstButton == nil) {
@@ -119,6 +130,7 @@
 
 - (void)dealloc {
     [_textField release];
+    [_textView release];
     [_firstButton release];
     [_firstLabel release];
     [_secondLabel release];
