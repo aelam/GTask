@@ -7,8 +7,16 @@
 //
 
 #import "GTableViewCell.h"
+#import "UICheckBox.h"
 
 @implementation GTableViewCell
+
+@synthesize textField = _textField;
+@synthesize firstButton = _firstButton;
+@synthesize firstLabel = _firstLabel;
+@synthesize secondLabel = _secondLabel;
+@synthesize checkBox = _checkBox;
+
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
@@ -66,13 +74,55 @@
 
 }
 
-- (void)willTransitionToState:(UITableViewCellStateMask)state {
-    [super willTransitionToState:state];
+- (UICheckBox *)checkBox {
+    if (_checkBox == nil) {
+        _checkBox = [[UICheckBox alloc] initWithFrame:CGRectMake(10, 5, 27, 27)];
+        [self.contentView addSubview:_checkBox];
+    }
+    return _checkBox;
+}
+
+- (UITextField *)textField {
+    if (_textField == nil) {
+        _textField = [[UITextField alloc] initWithFrame:CGRectZero];
+        [self.contentView addSubview:_textField];
+    }
+    return _textField;
+}
+
+- (UITextField *)firstButton {
+    if (_firstButton == nil) {
+        _firstButton = [[UIButton alloc] initWithFrame:CGRectZero];
+        [self.contentView addSubview:_firstButton];
+    }
+    return _textField;
 }
 
 
+- (UILabel *)firstLabel {
+    if (_firstLabel == nil) {
+        _firstLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+        [self.contentView addSubview:_firstLabel];
+    }
+    return _firstLabel;
+}
+
+- (UILabel *)secondLabel {
+    if (_secondLabel == nil) {
+        _secondLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+        [self.contentView addSubview:_secondLabel];
+    }
+    return _secondLabel;
+}
+
+
+
 - (void)dealloc {
-    
+    [_textField release];
+    [_firstButton release];
+    [_firstLabel release];
+    [_secondLabel release];
+    [_checkBox release];
     [super dealloc];
 }
 

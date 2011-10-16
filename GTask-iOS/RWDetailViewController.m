@@ -12,6 +12,7 @@
 #import "GTaskEngine.h"
 #import "GTableViewCell.h"
 #import "NSObject+Runtime.h"
+#import "UICheckBox.h"
 
 @interface RWDetailViewController ()
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
@@ -174,6 +175,7 @@
     GTableViewCell *cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kCellIndentifier];
     if(cell == nil) {
         cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:kCellIndentifier] autorelease];
+        cell.checkBox.checked = NO;
     }
 
     Task *task = [self.tasks objectAtIndex:indexPath.row];

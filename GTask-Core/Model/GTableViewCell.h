@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+@class UICheckBox;
+
 typedef enum {
     GTableViewCellStyleDefault,	// Simple cell with text label and optional image view (behavior of UITableViewCell in iPhoneOS 2.x)
     GTableViewCellStyleCheckBox,
@@ -17,5 +19,13 @@ typedef enum {
 
 
 @interface GTableViewCell : UITableViewCell
+
+
+@property (nonatomic,retain) UICheckBox     *checkBox;
+@property (nonatomic,retain) UITextField    *textField;
+@property (nonatomic,retain) UIButton       *firstButton;
+
+@property (nonatomic,retain) UILabel        *firstLabel;
+@property (nonatomic,retain) UILabel        *secondLabel;
 
 @end
