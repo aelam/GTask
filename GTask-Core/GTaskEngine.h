@@ -45,7 +45,7 @@ typedef enum {
 - (void)syncTasks;
 - (void)syncTasksForList:(TaskList *)aList;
 
-- (void)addTask:(Task *)aTask atIndex:(NSInteger)index forList:(TaskList *)alist;
+- (BOOL)insertTask:(Task *)aTask;
 - (void)deleteTask:(Task *)aTask atIndex:(NSInteger)index forList:(TaskList *)aList;
 - (void)modifyTask:(Task *)aTask forList:(TaskList *)aList;
 

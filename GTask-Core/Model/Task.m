@@ -24,7 +24,7 @@
 @synthesize isCompleted = _isCompleted;
 @synthesize isCleared = _isCleared;
 @synthesize isHidden = _isHidden;
-@synthesize status = _status;
+//@synthesize status = _status;
 @synthesize completedTimestamp = _completedTimestamp;
 @synthesize reminderTimestamp = _reminderTimestamp;
 @synthesize due = _due;
@@ -88,7 +88,7 @@
     task.isCompleted = self.isCompleted;
     task.isCleared = self.isCleared;
     task.isHidden = self.isHidden;
-    task.status = self.status;
+//    task.status = self.status;
     task.completedTimestamp = self.completedTimestamp;
     task.reminderTimestamp = self.reminderTimestamp;
     task.due = self.due;
@@ -129,6 +129,22 @@
         }
     }    
     self.localParentId = aParentId;
+
+}
+
+- (void)setIsCompleted:(BOOL)isCompleted updateDB:(BOOL)update {
+    if (update) {
+        FMDatabase *db = [FMDatabase database];
+        if (![db open]) {
+            NIF_ERROR(@"Could not open db.");
+        } else {
+            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET is_completed = %d WHERE local_task_id = %d",isCompleted,self.localTaskId];
+            BOOL update = [db executeUpdate:sql];
+            NIF_INFO(@"UPDATE is_complete SUCCESS ? : %d", update);
+            [db close];
+        }
+    }    
+    self.isCompleted = isCompleted;
 
 }
 

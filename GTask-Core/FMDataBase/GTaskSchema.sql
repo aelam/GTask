@@ -37,13 +37,13 @@ CREATE TABLE tasks (
     reminder_timestamp  INTEGER,
     due                 INTEGER,
     is_hidden           INTEGER,
-    status              INTEGER,
+--  status              INTEGER,
     is_deleted          INTEGER NOT NULL DEFAULT 0,
     is_cleared          INTEGER NOT NULL DEFAULT 0,
 
     server_modify_timestamp	INTEGER,
     local_modify_timestamp	INTEGER,
-    server_position         INTEGER,
+--  server_position         INTEGER,
     
     generation_level        INTEGER NOT NULL DEFAULT -1
 );

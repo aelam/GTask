@@ -9,6 +9,7 @@
 #import "RWDetailViewController.h"
 #import "GEditViewController.h"
 #import "Task.h"
+#import "TaskList.h"
 #import "GTaskEngine.h"
 #import "GTableViewCell.h"
 #import "NSObject+Runtime.h"
@@ -49,8 +50,6 @@
 }
 
 - (void)awakeFromNib {
-//    set a selected/unselected Image
-//    _quickInputField.leftView = 
 }
 
 
@@ -116,6 +115,7 @@
     self.tableView.editing = YES;
     self.tableView.allowsSelectionDuringEditing = YES;
     
+    self.quickInputField.placeholder = NSLocalizedString(@"Quick Input", @"Quick Input");
 }
 
 - (void)viewDidUnload
@@ -176,22 +176,25 @@
     if(cell == nil) {
         cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:kCellIndentifier] autorelease];
         cell.checkBox.checked = NO;
-        cell.firstLabel.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin;
         cell.firstLabel.font = [UIFont boldSystemFontOfSize:15];
     }
-        
+    
     Task *task = [self.tasks objectAtIndex:indexPath.row];
-    
+
+    [cell.checkBox handleCheckEventWithBlock:^{
+        
+        [task setIsCompleted:!task.isCompleted updateDB:YES];
+        cell.checkBox.checked = task.isCompleted;
+        cell.firstLabel.textColor = task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
+    }];
+            
     task.generationLevel = [task generationLevelAtTasks:self.tasks];
-    cell.firstLabel.frame = CGRectMake(47 + 20 *task.generationLevel, 5, cell.frame.size.width - 60 - 20 *task.generationLevel, 20);
+    cell.checkBox.frame = CGRectMake(10 + 20 *task.generationLevel, 7, 20, 20);
+    cell.firstLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    cell.firstLabel.frame = CGRectMake(44 + 20 *task.generationLevel, 5, cell.frame.size.width - 60 - 20 *task.generationLevel, 20);
     
-    if (task.status) {
-        cell.textLabel.textColor = [UIColor lightGrayColor];
-        cell.firstLabel.textColor = [UIColor lightGrayColor];
-    } else {
-        cell.textLabel.textColor = [UIColor blackColor];
-        cell.firstLabel.textColor = [UIColor blackColor];
-    }
+    cell.checkBox.checked = task.isCompleted;
+    cell.firstLabel.textColor = task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
     
     NSArray *subTasks = [task allDescendantsAtTasks:self.tasks];
     
@@ -256,7 +259,14 @@
         if ([fromSubtasks containsObject:toTask]) {
             NSInteger targetIndex = [fromTask nextSiblingOrUncleIndexAtTask:self.tasks];
             if (targetIndex != -1 && targetIndex != 0) {
-                return [NSIndexPath indexPathForRow:targetIndex inSection:sourceIndexPath.section];                
+                NSIndexPath *supportedIndexPath = [NSIndexPath indexPathForRow:targetIndex inSection:sourceIndexPath.section];
+                // fixed a bug, when cell in supportedIndexPath is nil, it would raise a exception of NSArray out of bound
+                UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:supportedIndexPath];
+                if (cell) {
+                    return supportedIndexPath;
+                } else {
+                    return sourceIndexPath;                    
+                }
             } else {
                 return sourceIndexPath;
             }
@@ -357,6 +367,42 @@
     // Called when the view is shown again in the split view, invalidating the button and popover controller.
     [self.navigationItem setLeftBarButtonItem:nil animated:YES];
     self.masterPopoverController = nil;
+}
+
+#pragma mark - 
+#pragma mark UITextFieldDelegate
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
+    if (textField.text && textField.text.length) {
+        [self addQuickTaskWithText:textField.text];
+        textField.text = nil;        
+    }
+    return YES;
+}
+
+- (void)addQuickTaskWithText:(NSString *)text {
+    
+    Task *task = [[Task alloc] init];
+    task.displayOrder = 0;
+    task.localListId = self.taskList.localListId;
+    task.isUpdated = NO;
+    task.isCompleted = NO;
+    task.localModifyTime = [[NSDate date] timeIntervalSince1970];
+    task.localParentId = -1;
+    task.title = text;
+    
+    for (int i = 0; i < [self.tasks count]; i++) {
+        Task *e = [self.tasks objectAtIndex:i];
+         [e setDisplayOrder:i+1 updateDB:YES];
+    }
+    
+    [self.tasks insertObject:task atIndex:0];
+    [[GTaskEngine engine] insertTask:task]; 
+    [task release];
+    
+    [self.tableView beginUpdates];
+    [self.tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationTop];
+    [self.tableView endUpdates];
 }
 
 

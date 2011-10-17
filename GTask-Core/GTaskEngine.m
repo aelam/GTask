@@ -139,11 +139,11 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             NSString *parentId = [item objectForKey:@"parent"];
 //            NSString *position = [item objectForKey:@"position"];
             NSString *statusString = [item objectForKey:@"status"];
-            BOOL status = NO;
+            BOOL isCompleted = NO;
             if ([statusString isEqualToString:@"needAction"]) {
-                status = NO;
+                isCompleted = NO;
             } else if ([statusString isEqualToString:@"completed"]) {
-                status = YES;
+                isCompleted = YES;
             }
 
             NSString *completedDate = [item objectForKey:@"completed"];
@@ -175,7 +175,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                 
             } else {
                 NSString *sql = [NSString stringWithFormat:
-                                 @"INSERT INTO tasks (server_task_id,local_list_id,local_parent_id,notes,self_link,title,due,server_modify_timestamp,display_order,status,completed_timestamp) VALUES ('%@',%d,%d,'%@','%@','%@',%0.0f,%0.0f,%d,%d,%0.0f)",
+                                 @"INSERT INTO tasks (server_task_id,local_list_id,local_parent_id,notes,self_link,title,due,server_modify_timestamp,display_order,is_completed,completed_timestamp) VALUES ('%@',%d,%d,'%@','%@','%@',%0.0f,%0.0f,%d,%d,%0.0f)",
                                  _id,
                                  aList.localListId,
                                  localParentId,
@@ -185,7 +185,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                                  due,
                                  updated,
                                  order,
-                                 status,
+                                 isCompleted,
                                  completedTimestamp];
                 NIF_INFO(@"save to DB sql : %@", sql);
                 //rs = [db executeUpdate:sql];
@@ -286,7 +286,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             task.isCompleted = [rs boolForColumn:@"is_completed"];
             task.isHidden = [rs boolForColumn:@"is_hidden"];
             task.isDeleted = [rs boolForColumn:@"is_deleted"];
-            task.status = [rs intForColumn:@"status"];
+//            task.status = [rs intForColumn:@"status"];
             task.isCleared = [rs boolForColumn:@"is_cleared"];
             task.completedTimestamp = [rs doubleForColumn:@"completed_timestamp"];
             task.reminderTimestamp = [rs doubleForColumn:@"reminder_timestamp"];
@@ -482,6 +482,38 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     }
 }
 
+- (BOOL)insertTask:(Task *)aTask {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NSLog(@"Could not open db.");
+		return NO;
+    } else {
+        
+        NSString *sql = [NSString stringWithFormat:
+                         @"INSERT INTO tasks (local_list_id,local_parent_id,notes,self_link,title,due,is_updated,display_order,is_completed,completed_timestamp,local_modify_timestamp) VALUES (%d,%d,'%@','%@','%@','%@',%d,%d,%d,%0.0f,%0.0f)",
+                         aTask.localListId,
+                         aTask.localParentId,
+                         aTask.notes?[aTask.notes stringByReplacingOccurrencesOfString:@"'" withString:@"''"]:nil,
+                         aTask.link,
+                         [aTask.title stringByReplacingOccurrencesOfString:@"'" withString:@"''"],
+                         aTask.due,
+                         aTask.isUpdated,
+                         aTask.displayOrder,
+                         aTask.isCompleted,
+                         aTask.completedTimestamp,
+                         aTask.localModifyTime];
+        NIF_INFO(@"save to DB sql : %@", sql);
+        NSError *error = nil;
+        BOOL rs = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
+        if (error) {
+            NIF_INFO(@"%@", error);
+        }
+        aTask.localTaskId = [db lastInsertRowId];
+    }
+    [db close];
+
+    return YES;
+}
 
 @end
 

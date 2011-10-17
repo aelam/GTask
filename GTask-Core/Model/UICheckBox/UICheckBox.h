@@ -7,11 +7,15 @@
 //
 
 
+typedef void (^ActionBlock)();
 
 @interface UICheckBox : UIButton {
     BOOL checked;
+    ActionBlock _actionBlock;
 }
 
 @property (nonatomic, assign) BOOL checked;
+
+-(void) handleCheckEventWithBlock:(ActionBlock) action;
 
 @end

@@ -18,7 +18,7 @@ typedef enum {
 }EditStatus;
 
 
-@interface RWDetailViewController : UIViewController <UISplitViewControllerDelegate,UITableViewDelegate,UITableViewDataSource>
+@interface RWDetailViewController : UIViewController <UISplitViewControllerDelegate,UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate>
 
 @property (strong, nonatomic) id detailItem;
 
@@ -36,5 +36,7 @@ typedef enum {
 
 
 - (IBAction)changeEditStatus:(id)sender;
+
+- (void)addQuickTaskWithText:(NSString *)text;
 
 @end

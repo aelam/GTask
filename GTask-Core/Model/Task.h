@@ -22,7 +22,7 @@
 @property (assign)  BOOL     isCompleted;
 @property (assign)  BOOL     isCleared;
 @property (assign)  BOOL     isHidden;
-@property (assign)  NSInteger status;
+//@property (assign)  NSInteger status;
 @property (assign)  double  completedTimestamp;
 @property (assign)  double  reminderTimestamp;
 @property (assign)  double  due;
@@ -36,6 +36,7 @@
 - (void)setDisplayOrder:(NSInteger)displayOrder updateDB:(BOOL)update;
 - (void)setLocalParentId:(NSInteger)localParentId updateDB:(BOOL)update;
 - (void)setGenerationLevel:(NSInteger)generationLevel updateDB:(BOOL)update;
+- (void)setIsCompleted:(BOOL)isCompleted updateDB:(BOOL)update;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

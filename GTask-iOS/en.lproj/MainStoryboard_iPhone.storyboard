@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="1.0" toolsVersion="1938" systemVersion="11B26" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" initialViewController="3">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="1.0" toolsVersion="1938" systemVersion="11C74" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" initialViewController="3">
     <dependencies>
         <development defaultVersion="4200" identifier="xcode"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="933"/>
@@ -50,12 +50,26 @@
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="416"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <textField key="tableHeaderView" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="在此快速输入" minimumFontSize="17" id="QNf-BN-GgL">
-                                    <rect key="frame" x="0.0" y="0.0" width="320" height="31"/>
+                                <view key="tableHeaderView" contentMode="scaleToFill" id="1Kk-8k-YmF">
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                    <textInputTraits key="textInputTraits"/>
-                                </textField>
+                                    <subviews>
+                                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" id="iSL-4r-w4t">
+                                            <rect key="frame" x="42" y="7" width="269" height="31"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                            <textInputTraits key="textInputTraits" returnKeyType="done"/>
+                                            <connections>
+                                                <outlet property="delegate" destination="21" id="sOv-Jg-prd"/>
+                                            </connections>
+                                        </textField>
+                                        <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" image="checkbox_not_selected@2x.png" id="jhX-l4-VK7">
+                                            <rect key="frame" x="10" y="10" width="20" height="20"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </imageView>
+                                    </subviews>
+                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                </view>
                                 <connections>
                                     <outlet property="dataSource" destination="21" id="zhq-3t-Hhu"/>
                                     <outlet property="delegate" destination="21" id="JAf-UV-WWb"/>
@@ -74,9 +88,9 @@
                     <navigationItem key="navigationItem" title="Tasks" id="26"/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="quickInputField" destination="iSL-4r-w4t" id="X1C-wN-xtv"/>
                         <outlet property="statusItem" destination="p47-gR-HFQ" id="WHg-zX-3la"/>
                         <outlet property="tableView" destination="VRB-Up-e2e" id="sgU-YI-xFS"/>
-                        <segue destination="kLw-db-bcv" kind="custom" id="blf-1g-dMR"/>
                     </connections>
                 </viewController>
             </objects>
@@ -101,6 +115,9 @@
             <point key="canvasLocation" x="1332" y="64"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="checkbox_not_selected@2x.png" width="53" height="53"/>
+    </resources>
     <classes>
         <class className="GEditViewController" superclassName="UITableViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/GEditViewController.h"/>

@@ -28,6 +28,10 @@
 
 -(IBAction)checkBoxClicked{    
     self.checked = !self.checked;
+    
+    if (_actionBlock) {
+        _actionBlock();
+    }
 }
 
 - (void)setChecked:(BOOL)check {
@@ -38,6 +42,20 @@
         [self setImage:[UIImage imageNamed:@"checkbox_selected.png"] forState:UIControlStateNormal];
     }
 
+}
+
+-(void) handleCheckEventWithBlock:(ActionBlock) action {
+    if (_actionBlock != action) {
+        Block_release(_actionBlock);
+        _actionBlock = Block_copy(action);        
+    }
+    [self addTarget:self action:@selector(checkBoxClicked) forControlEvents:UIControlEventTouchUpInside];
+    
+}
+
+- (void)dealloc {
+    Block_release(_actionBlock);
+    [super dealloc];
 }
 
 @end
