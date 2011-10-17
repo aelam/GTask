@@ -124,6 +124,7 @@
     self.tableView.allowsSelectionDuringEditing = YES;
     
     self.quickInputField.placeholder = NSLocalizedString(@"Quick Input", @"Quick Input");
+    self.quickInputField.clearButtonMode = UITextFieldViewModeWhileEditing;
 }
 
 - (void)viewDidUnload
@@ -139,9 +140,9 @@
     if (tasks) {
         [self.tasks removeAllObjects];
         [self.tasks addObjectsFromArray:tasks];
+        [self.tableView reloadData];
     }
-    [self.tableView reloadData];
-    if (!self.tasks) {
+    else {
         [[GTaskEngine engine] fetchServerTasksForList:self.taskList resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
             [self.tasks removeAllObjects];            
             [self.tasks addObjectsFromArray:result];

@@ -10,10 +10,14 @@
 
 @class Task;
 
-@interface GEditViewController : UITableViewController
+@interface GEditViewController : UITableViewController <UITextFieldDelegate,UITextViewDelegate> {
+//    float textViewHeight;
+}
 
 @property (retain) Task *task;
 @property (copy)   Task *tempTask;
+@property (retain)   UITextView *textView;
+@property (assign)   float textViewHeight;
 
 @property (retain) IBOutlet UILabel *titleLabel;
 
