@@ -99,6 +99,30 @@
     return task;
 }
 
+- (BOOL)isSameContent:(Task *)anotherTask {
+    return (anotherTask.localListId == self.localListId &&
+            anotherTask.localTaskId == self.localTaskId &&
+            anotherTask.localListId == self.localListId &&
+            anotherTask.localParentId == self.localParentId &&
+            anotherTask.serverTaskId == self.serverTaskId &&
+            anotherTask.title == self.title &&
+            anotherTask.notes == self.notes &&
+            anotherTask.link == self.link &&
+            anotherTask.isUpdated == self.isUpdated &&
+            anotherTask.isDeleted == self.isDeleted &&
+            anotherTask.isCompleted == self.isCompleted &&
+            anotherTask.isCleared == self.isCleared &&
+            anotherTask.isHidden == self.isHidden &&
+            anotherTask.completedTimestamp == self.completedTimestamp &&
+            anotherTask.reminderTimestamp == self.reminderTimestamp &&
+            anotherTask.due == self.due &&
+            anotherTask.serverModifyTime == self.serverModifyTime &&
+            anotherTask.localModifyTime == self.localModifyTime &&
+            anotherTask.displayOrder == self.displayOrder);
+
+    return YES;
+}
+
 - (void)setDisplayOrder:(NSInteger)order updateDB:(BOOL)update {
     if (update) {
         FMDatabase *db = [FMDatabase database];
@@ -107,7 +131,7 @@
         } else {
             NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET display_order = %d WHERE local_task_id = %d",order,self.localTaskId];
             BOOL update = [db executeUpdate:sql];
-            NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
+            //NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
             [db close];
         }        
     }

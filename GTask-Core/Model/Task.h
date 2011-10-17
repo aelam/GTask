@@ -33,6 +33,8 @@
 @property (assign)  NSInteger generationLevel;
 
 
+- (BOOL)isSameContent:(Task *)anotherTask;
+
 - (void)setDisplayOrder:(NSInteger)displayOrder updateDB:(BOOL)update;
 - (void)setLocalParentId:(NSInteger)localParentId updateDB:(BOOL)update;
 - (void)setGenerationLevel:(NSInteger)generationLevel updateDB:(BOOL)update;

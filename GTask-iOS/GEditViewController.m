@@ -35,9 +35,9 @@
 
 #pragma mark - View lifecycle
 
-- (void)viewWillAppear:(BOOL)animated {
+- (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    
+        
     self.titleLabel.text = self.task.title;
     NIF_INFO(@"%@", self.task);
     [self.tableView reloadData];
@@ -100,10 +100,11 @@
 
         cell.textField.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         cell.textField.placeholder = NSLocalizedString(@"Headline", @"Headline");
-        cell.textField.font = [UIFont systemFontOfSize:26];
+        cell.textField.font = [UIFont systemFontOfSize:17];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
     
-    cell.textField.frame = CGRectMake(5, 5, CGRectGetWidth(cell.bounds) - 7, CGRectGetHeight(cell.frame)-5);
+    cell.textField.frame = CGRectMake(5, 11, CGRectGetWidth(cell.bounds) - 7, CGRectGetHeight(cell.frame)-5);
     cell.textLabel.textColor = [UIColor lightGrayColor];
     cell.detailTextLabel.textAlignment = UITextAlignmentLeft;
 

@@ -102,6 +102,14 @@
     // Release any cached data, images, etc that aren't in use.
 }
 
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    if (self = [super initWithCoder:aDecoder]) {
+        _tasks = [[NSMutableArray alloc] init];
+    }
+    return self;
+}
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad
@@ -127,11 +135,16 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    self.tasks = [[GTaskEngine engine] localTasksForList:self.taskList];
+    NSArray *tasks = [[GTaskEngine engine] localTasksForList:self.taskList];
+    if (tasks) {
+        [self.tasks removeAllObjects];
+        [self.tasks addObjectsFromArray:tasks];
+    }
     [self.tableView reloadData];
     if (!self.tasks) {
         [[GTaskEngine engine] fetchServerTasksForList:self.taskList resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
-            self.tasks = result;
+            [self.tasks removeAllObjects];            
+            [self.tasks addObjectsFromArray:result];
             [self.tableView reloadData];
         }];
     }
@@ -240,6 +253,7 @@
     }
 
     self.editViewController.task = [self.tasks objectAtIndex:indexPath.row];
+    self.editViewController.tempTask = self.editViewController.task;
     [self.navigationController pushViewController:self.editViewController animated:YES];
 }
 
@@ -299,8 +313,34 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source.
-        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+
+        [self.tableView beginUpdates];
+
+        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+
+        Task *deletingTask = [[self.tasks objectAtIndex:indexPath.row] retain];
+        [self.tasks removeObjectAtIndex:indexPath.row];
+        [[GTaskEngine engine] deleteTask:deletingTask]; 
+        
+        [self.tableView endUpdates];
+
+        Task *parent = [deletingTask parentTaskAtTasks:self.tasks];
+        NSArray *sons = [deletingTask sonsAtTasks:self.tasks];
+        for(Task *son in sons) {
+            if (parent) {
+                [son setLocalParentId:parent.localTaskId updateDB:YES];
+            } else {
+                [son setLocalParentId:-1 updateDB:YES];
+            }
+        }
+        
+        for (int i = indexPath.row; i < [self.tasks count]; i++) {
+            Task *e = [self.tasks objectAtIndex:i];
+            [e setDisplayOrder:i updateDB:YES];
+        }
+        [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.5];
+        [deletingTask release];
+
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
     }   
@@ -319,7 +359,7 @@
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths {
     [self.tableView beginUpdates];
-    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
+    [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
     [self.tableView endUpdates];
 }
 
