@@ -59,6 +59,24 @@
     }
 }
 
+- (void)setText:(NSString *)text {
+    [super setText:text];
+    if([[self placeholder] length] == 0)
+    {
+        return;
+    }
+    
+    if([[self text] length] == 0)
+    {
+        [[self viewWithTag:999] setAlpha:1];
+    }
+    else
+    {
+        [[self viewWithTag:999] setAlpha:0];
+    }
+
+}
+
 - (void)drawRect:(CGRect)rect
 {
     if( [[self placeholder] length] > 0 )

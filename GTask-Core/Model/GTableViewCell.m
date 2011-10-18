@@ -127,6 +127,11 @@
 }
 
 
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    
+}
+
 
 - (void)dealloc {
     [_textField release];

@@ -104,10 +104,10 @@
             anotherTask.localTaskId == self.localTaskId &&
             anotherTask.localListId == self.localListId &&
             anotherTask.localParentId == self.localParentId &&
-            anotherTask.serverTaskId == self.serverTaskId &&
-            anotherTask.title == self.title &&
-            anotherTask.notes == self.notes &&
-            anotherTask.link == self.link &&
+            [anotherTask.serverTaskId isEqualToString:self.serverTaskId] &&
+            [anotherTask.title isEqualToString:self.title]&&
+            [anotherTask.notes isEqualToString:self.notes]&&
+            [anotherTask.link isEqualToString:self.link]&&
             anotherTask.isUpdated == self.isUpdated &&
             anotherTask.isDeleted == self.isDeleted &&
             anotherTask.isCompleted == self.isCompleted &&

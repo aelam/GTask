@@ -1,4 +1,4 @@
-//
+ //
 //  GEditViewController.m
 //  GTask-iOS
 //
@@ -12,6 +12,17 @@
 #import "NSObject+Runtime.h"
 #import "UIPlaceHolderTextView.h"
 #import "NSDate+RFC3339.h"
+#import "UICheckBox.h"
+
+@interface GEditViewController (Plus)
+
+- (void)addCancelAndDoneItems;
+- (void)removeItems;
+
+@end
+
+#define TASK_TITLE_TEXT_FIELD_TAG   10101
+
 
 @implementation GEditViewController
 
@@ -20,12 +31,14 @@
 @synthesize tempTask = _tempTask;
 @synthesize textView = _textView;
 @synthesize textViewHeight = _textViewHeight;
+@synthesize titleField = _titleField;
 
 - (void)dealloc {
     [_task release];
     [_tempTask release];
     [_titleLabel release];
     [_textView release];
+    [_titleField release];
     [super dealloc];
 }
 
@@ -42,16 +55,16 @@
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
         
-    self.titleLabel.text = self.task.title;
+    self.titleLabel.text = self.tempTask.title;
     NIF_INFO(@"%@", self.task);
+
     [self.tableView reloadData];
+    
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-//    self.navigationItem.rightBarButtonItem = self.editButtonItem;
-
 }
 
 - (void)viewDidUnload
@@ -71,6 +84,11 @@
     }
 }
 
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation duration:(NSTimeInterval)duration {
+
+}
+
+
 - (void)setEditing:(BOOL)editing animated:(BOOL)animated {
     [super setEditing:editing animated:animated];
     [self.tableView setEditing:editing animated:animated];
@@ -78,17 +96,27 @@
     
 }
 
-
+#pragma mark -
+#pragma mark UITableDelegate and UITableViewDataSource
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return 4;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.row < 3) {
-        return 44;
+        return 40;
     } else {
-//        return CGRectGetHeight(self.tableView.frame) - 3 * 44;
-        return [self textViewHeight];
+        NSInteger height = CGRectGetHeight(self.tableView.frame) - 3 * 40;
+        NSString *content = self.tempTask.notes;    
+        if (content) {
+            CGSize contentSize = [content sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(CGRectGetWidth(self.tableView.frame), 10000)];
+            if (contentSize.height  + 40 > height) {
+                return contentSize.height + 40;
+            } else {
+                return height;
+            }
+        }
+        return height;
     }
 }
 
@@ -106,14 +134,29 @@
             
             
             cell.textField.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            cell.textField.placeholder = NSLocalizedString(@"Headline", @"Headline");
+            cell.textField.placeholder = NSLocalizedString(@"Add title", @"Add title");
             cell.textField.font = [UIFont boldSystemFontOfSize:17];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.textField.delegate = self;
+            
+            cell.checkBox.checked = NO;
+            cell.checkBox.frame = CGRectMake(8, 12, 20, 20);
+            
         }
         
-        cell.textField.frame = CGRectMake(5, 11, CGRectGetWidth(cell.bounds) - 7, CGRectGetHeight(cell.frame)-5);
-        cell.textLabel.textColor = [UIColor lightGrayColor];
-        cell.detailTextLabel.textAlignment = UITextAlignmentLeft;
+        [cell.checkBox handleCheckEventWithBlock:^{
+            self.tempTask.isCompleted = !self.tempTask.isCompleted;
+            
+            cell.checkBox.checked = self.tempTask.isCompleted;
+            cell.textField.textColor = self.tempTask.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
+        }];
+
+        cell.checkBox.checked = self.tempTask.isCompleted;
+        cell.textField.textColor = self.tempTask.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
+        
+        cell.textField.frame = CGRectMake(35, 12, cell.frame.size.width - 60 - 20, 25);
+        cell.textField.tag = TASK_TITLE_TEXT_FIELD_TAG;
+        self.titleField = cell.textField;
         
         cell.textField.text = self.tempTask.title;
                 
@@ -123,9 +166,10 @@
             cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:kListChooseCellIndentifier] autorelease];
             
             cell.textField.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            cell.textField.placeholder = NSLocalizedString(@"Headline", @"Headline");
+            cell.textField.placeholder = NSLocalizedString(@"Add title", @"Add title");
             cell.textField.font = [UIFont boldSystemFontOfSize:17];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.textField.delegate = self;
         }
         
         cell.textField.frame = CGRectMake(5, 11, CGRectGetWidth(cell.bounds) - 7, CGRectGetHeight(cell.frame)-5);
@@ -141,7 +185,8 @@
             cell.textField.placeholder = NSLocalizedString(@"Headline", @"Headline");
             cell.textField.font = [UIFont boldSystemFontOfSize:17];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
-}
+            cell.textField.delegate = self;
+        }
         
         cell.textField.frame = CGRectMake(5, 11, CGRectGetWidth(cell.bounds) - 7, CGRectGetHeight(cell.frame)-5);
         cell.textField.text = self.tempTask.title;
@@ -154,67 +199,101 @@
             cell.textView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
             
             cell.textView.font = [UIFont systemFontOfSize:17];
-            cell.textView.delegate = self;
             cell.textView.scrollEnabled = NO;
         }
+        cell.textView.delegate = self;
         cell.textView.frame = CGRectMake(0, 0, CGRectGetWidth(cell.bounds), CGRectGetHeight(cell.frame));
         cell.textView.placeholder = NSLocalizedString(@"Click here to edit", @"Click here to edit");
-        cell.textView.backgroundColor = [UIColor greenColor];
+//        cell.textView.backgroundColor = [UIColor greenColor];
 
         cell.textView.text = self.tempTask.notes;
         self.textView = cell.textView;
         
     }
-    
-    
     return cell;
+}
+
+#pragma mark -
+#pragma mark UITextFieldDelegate
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
+    NIF_INFO(@"self.navigationController.navigationBarHidden : %d", self.navigationController.navigationBarHidden);
+    BOOL isHidden = self.navigationController.navigationBarHidden;
+    [self.navigationController setNavigationBarHidden:YES animated:!isHidden];        
+    [self addCancelAndDoneItems];
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+//    [self.navigationController setNavigationBarHidden:NO animated:NO];
+    [self removeItems];
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    if (textField.tag == TASK_TITLE_TEXT_FIELD_TAG) {
+        self.tempTask.title = textField.text;        
+    }
+    return YES;
+}
+
+#pragma mark -
+#pragma mark UITextViewDelegate
+- (void)textViewDidBeginEditing:(UIPlaceHolderTextView *)textView {
+    [self.navigationController setNavigationBarHidden:YES animated:!self.navigationController.navigationBarHidden];        
+    [self addCancelAndDoneItems];
+    [self.tableView beginUpdates];
+    [self.tableView endUpdates];
+    [UIView beginAnimations:nil context:NULL];
+    self.textView.bounds = self.textView.superview.bounds;
+    [UIView commitAnimations];
+}
+
+- (void)textViewDidEndEditing:(UIPlaceHolderTextView *)textView{
+    [self removeItems];
+    self.textView.bounds = self.textView.superview.bounds;
+    [self.tableView beginUpdates];
+    [self.tableView endUpdates];
+
 }
 
 - (void)textViewDidChange:(UITextView *)textView {
     self.tempTask.notes = textView.text;
-    UITableViewCell *cell = (UITableViewCell *)[self.textView superview];
-    [cell layoutSubviews];
+    self.textView.bounds = self.textView.superview.bounds;
+    [self.tableView beginUpdates];
+    [self.tableView endUpdates];
+
+}
+
+
+- (void)addCancelAndDoneItems {
+    UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"Cancel") style:UIBarButtonItemStylePlain target:self action:@selector(cancelAction:)];
+    [self.navigationItem setLeftBarButtonItem:cancelItem animated:NO];
+    [cancelItem release];
     
-    [self textViewHeight];
+    UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(doneAction:)];
+    [self.navigationItem setRightBarButtonItem:doneItem animated:YES];
+    [doneItem release];
+}
+
+- (void)removeItems {
+    [self.navigationItem setLeftBarButtonItem:nil animated:NO];
+    [self.navigationItem setRightBarButtonItem:nil animated:YES];
 }
 
 
-- (float) textViewHeight {
-    NSString *content = self.tempTask.notes;    
-    if (content) {
-        CGSize contentSize = [content sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(CGRectGetWidth(self.tableView.frame), 10000)];
-        UITableViewCell *cell = (UITableViewCell *)[self.textView superview];
-        NIF_INFO(@"%@", cell);
-        if (contentSize.height > CGRectGetHeight(cell.frame)) {
-            cell.frame = CGRectMake(0, 0, CGRectGetWidth(cell.bounds), CGRectGetHeight(cell.frame));            
-            _textViewHeight = contentSize.height;
-        } else {
-            _textViewHeight = CGRectGetHeight(self.tableView.frame) - 44 * 3;
-        }
-    } else {
-        _textViewHeight = CGRectGetHeight(self.tableView.frame) - 44 * 3;
-    }
-    return _textViewHeight;
+#pragma mark -
+#pragma mark IBAction
+- (void)cancelAction:(id)sender {
+    [self.titleField resignFirstResponder];
+    [self.textView resignFirstResponder];    
 }
 
-- (void)setTextViewHeight:(float)textViewHeight {
-    NSString *content = self.tempTask.notes;    
-    if (content) {
-        CGSize contentSize = [content sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(CGRectGetWidth(self.tableView.frame), 10000)];
-        UITableViewCell *cell = (UITableViewCell *)[self.textView superview];
-        NIF_INFO(@"%@", cell);
-        if (contentSize.height > CGRectGetHeight(cell.frame)) {
-            cell.frame = CGRectMake(0, 0, CGRectGetWidth(cell.bounds), CGRectGetHeight(cell.frame));            
-            _textViewHeight = contentSize.height;
-        } else {
-            _textViewHeight = CGRectGetHeight(self.tableView.frame) - 44 * 3;
-        }
-    } else {
-        _textViewHeight = CGRectGetHeight(self.tableView.frame) - 44 * 3;
-    }    
+- (void)doneAction:(id)sender {
+    [self.titleField resignFirstResponder];
+    [self.textView resignFirstResponder];
 }
 
 
+#pragma mark -
+#pragma mark Setter And Getter
 - (Task *)tempTask {
     if (_tempTask == nil) {
         _tempTask = [self.task copy];
