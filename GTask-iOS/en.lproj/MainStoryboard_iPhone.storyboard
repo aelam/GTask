@@ -104,28 +104,59 @@
             </objects>
             <point key="canvasLocation" x="890" y="72"/>
         </scene>
-        <scene sceneID="JL3-Rm-CBm">
+        <scene sceneID="ShM-S4-paL">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="gd5-33-1iJ" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <tableViewController storyboardIdentifier="kGEditViewController" id="kLw-db-bcv" customClass="GEditViewController" sceneMemberID="viewController">
-                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="gr8-Tn-qqH">
+                <placeholder placeholderIdentifier="IBFirstResponder" id="FXn-5Q-B7u" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <viewController storyboardIdentifier="kGEditViewController" id="L5d-4U-cLQ" customClass="GEditViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="YOR-B7-7Uf">
                         <rect key="frame" x="0.0" y="20" width="320" height="460"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <sections/>
-                        <connections>
-                            <outlet property="dataSource" destination="kLw-db-bcv" id="TJv-P5-Vn0"/>
-                            <outlet property="delegate" destination="kLw-db-bcv" id="1lX-ap-eUb"/>
-                        </connections>
-                    </tableView>
-                </tableViewController>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="Bw0-x3-Z2w">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="460"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="L5d-4U-cLQ" id="KJy-LW-tdJ"/>
+                                    <outlet property="delegate" destination="L5d-4U-cLQ" id="K0D-JD-7fW"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <connections>
+                        <outlet property="tableView" destination="Bw0-x3-Z2w" id="Vbu-mm-xkT"/>
+                    </connections>
+                </viewController>
             </objects>
-            <point key="canvasLocation" x="1332" y="64"/>
+            <point key="canvasLocation" x="1294" y="69"/>
         </scene>
     </scenes>
     <resources>
         <image name="checkbox_not_selected@2x.png" width="53" height="53"/>
     </resources>
+    <classes>
+        <class className="GEditViewController" superclassName="UIViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/GEditViewController.h"/>
+            <relationships>
+                <relationship kind="outlet" name="tableView" candidateClass="UITableView"/>
+                <relationship kind="outlet" name="titleLabel" candidateClass="UILabel"/>
+            </relationships>
+        </class>
+        <class className="RWDetailViewController" superclassName="UIViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/RWDetailViewController.h"/>
+            <relationships>
+                <relationship kind="action" name="changeEditStatus:"/>
+                <relationship kind="outlet" name="detailDescriptionLabel" candidateClass="UILabel"/>
+                <relationship kind="outlet" name="quickInputField" candidateClass="UITextField"/>
+                <relationship kind="outlet" name="statusItem" candidateClass="UIBarButtonItem"/>
+                <relationship kind="outlet" name="tableView" candidateClass="UITableView"/>
+            </relationships>
+        </class>
+        <class className="RWMasterViewController" superclassName="UITableViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/RWMasterViewController.h"/>
+        </class>
+    </classes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
         <simulatedStatusBarMetrics key="statusBar"/>
         <simulatedOrientationMetrics key="orientation"/>

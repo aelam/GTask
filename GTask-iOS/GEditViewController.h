@@ -11,16 +11,18 @@
 @class Task;
 @class UIPlaceHolderTextView;
 
-@interface GEditViewController : UITableViewController <UITextFieldDelegate,UITextViewDelegate> {
-//    float textViewHeight;
+@interface GEditViewController : UIViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource> {
+
 }
 
 @property (retain) Task *task;
 @property (copy)   Task *tempTask;
 @property (retain) UITextField *titleField;
 @property (retain) UIPlaceHolderTextView *textView;
-@property (assign)   float textViewHeight;
+@property (assign) float textViewHeight;
 
 @property (retain) IBOutlet UILabel *titleLabel;
+@property (retain) IBOutlet UITableView *tableView;
+
 
 @end

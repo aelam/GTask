@@ -18,6 +18,7 @@
 
 - (void)addCancelAndDoneItems;
 - (void)removeItems;
+- (void)hideKeyboard:(id)sender;
 
 @end
 
@@ -32,8 +33,11 @@
 @synthesize textView = _textView;
 @synthesize textViewHeight = _textViewHeight;
 @synthesize titleField = _titleField;
+@synthesize tableView = _tableView;
 
 - (void)dealloc {
+    
+    [[NSNotificationCenter defaultCenter]removeObserver:self];
     [_task release];
     [_tempTask release];
     [_titleLabel release];
@@ -65,6 +69,11 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardWillHideNotification object:nil];
+    
 }
 
 - (void)viewDidUnload
@@ -108,7 +117,7 @@
     } else {
         NSInteger height = CGRectGetHeight(self.tableView.frame) - 3 * 40;
         NSString *content = self.tempTask.notes;    
-        if (content) {
+        if (content && content.length) {
             CGSize contentSize = [content sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(CGRectGetWidth(self.tableView.frame), 10000)];
             if (contentSize.height  + 40 > height) {
                 return contentSize.height + 40;
@@ -116,7 +125,7 @@
                 return height;
             }
         }
-        return height;
+        return height > 130?height:130;
     }
 }
 
@@ -282,13 +291,71 @@
 #pragma mark -
 #pragma mark IBAction
 - (void)cancelAction:(id)sender {
-    [self.titleField resignFirstResponder];
-    [self.textView resignFirstResponder];    
+//    [self.titleField resignFirstResponder];
+//    [self.textView resignFirstResponder];    
+    [self hideKeyboard:sender];
 }
 
 - (void)doneAction:(id)sender {
+//    [self.titleField resignFirstResponder];
+//    [self.textView resignFirstResponder];
+    [self hideKeyboard:sender];
+}
+
+- (void)hideKeyboard:(id)sender {
     [self.titleField resignFirstResponder];
-    [self.textView resignFirstResponder];
+    [self.textView resignFirstResponder];    
+    [self.navigationController setNavigationBarHidden:NO animated:YES];        
+}
+
+- (void)keyboardDidShow:(NSNotification *)note
+{
+    NSDictionary *info = [note userInfo];
+//    NSValue *keyBounds = [info objectForKey:UIKeyboardBoundsUserInfoKey];
+    NSValue *keyBounds1 = [info objectForKey:UIKeyboardFrameBeginUserInfoKey];
+    NSValue *keyBounds = [info objectForKey:UIKeyboardFrameEndUserInfoKey];
+        
+    NIF_INFO(@"%@", keyBounds);
+    NIF_INFO(@"%@", keyBounds1);
+//    NIF_INFO(@"%@", keyBounds2);
+    
+    CGRect bndKey;
+    [keyBounds getValue:&bndKey];
+        
+    
+    NSArray *windows = [[UIApplication sharedApplication] windows];
+    for(UIView *tempWindow in windows) {
+        for(int i = 0; i < [tempWindow.subviews count]; i++)
+        {
+            //Get a reference of the current view 
+            UIView *keyboard = [tempWindow.subviews objectAtIndex:i];
+            NIF_INFO(@"%@", [keyboard description]);
+            
+            if([[keyboard description] hasPrefix:@"<UIPeripheralHostView"] == YES)
+            {
+//                [UIView beginAnimations:nil context:nil];
+                UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, -40, keyboard.frame.size.width, 40)];
+                UIBarButtonItem *barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Hide" style:UIBarButtonItemStyleBordered target:self action:@selector(hideKeyboard:)];
+                NSArray *items = [[NSArray alloc] initWithObjects:barButtonItem, nil];
+                [toolbar setItems:items];
+                [items release];
+
+                [keyboard addSubview:toolbar];
+                bndKey = keyboard.frame;
+            }
+        }
+    }
+    
+    [UIView animateWithDuration:0.2 animations:^{
+        CGRect oldFrame = self.tableView.frame;
+        self.tableView.frame = CGRectMake(CGRectGetMinX(oldFrame), CGRectGetMinY(oldFrame),bndKey.size.width, CGRectGetHeight(oldFrame) - MIN(CGRectGetHeight(bndKey), CGRectGetWidth(bndKey))); 
+    }];
+}
+
+- (void)keyboardDidHide:(NSNotification *)note {
+    self.tableView.frame = self.view.frame;
+    [self.tableView beginUpdates];
+    [self.tableView endUpdates];
 }
 
 
