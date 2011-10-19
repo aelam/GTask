@@ -13,6 +13,7 @@
 
 @interface GEditViewController : UIViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource> {
 
+    BOOL isKeyboardHidden;
 }
 
 @property (retain) Task *task;
@@ -24,5 +25,7 @@
 @property (retain) IBOutlet UILabel *titleLabel;
 @property (retain) IBOutlet UITableView *tableView;
 
+@property (assign) UIButton *undoButton;
+@property (assign) UIButton *redoButton;
 
 @end

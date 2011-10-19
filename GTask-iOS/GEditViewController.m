@@ -19,6 +19,8 @@
 - (void)addCancelAndDoneItems;
 - (void)removeItems;
 - (void)hideKeyboard:(id)sender;
+- (void)appendToolbarAboveKeyboard:(UIView *)keyboard;
+- (void)updateUndoButtons;
 
 @end
 
@@ -34,10 +36,11 @@
 @synthesize textViewHeight = _textViewHeight;
 @synthesize titleField = _titleField;
 @synthesize tableView = _tableView;
+@synthesize undoButton = _undoButton;
+@synthesize redoButton = _redoButton;
 
 - (void)dealloc {
     
-    [[NSNotificationCenter defaultCenter]removeObserver:self];
     [_task release];
     [_tempTask release];
     [_titleLabel release];
@@ -64,15 +67,22 @@
 
     [self.tableView reloadData];
     
+    isKeyboardHidden = YES;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardWillHideNotification object:nil];    
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [[NSNotificationCenter defaultCenter]removeObserver:self];
+    [self hideKeyboard:nil];
 }
 
 - (void)viewDidLoad
 {
-    [super viewDidLoad];
-    
-    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardWillHideNotification object:nil];
+    [super viewDidLoad];    
+//    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
 }
 
@@ -146,6 +156,7 @@
             cell.textField.placeholder = NSLocalizedString(@"Add title", @"Add title");
             cell.textField.font = [UIFont boldSystemFontOfSize:17];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.textField.returnKeyType = UIReturnKeyDone;
             cell.textField.delegate = self;
             
             cell.checkBox.checked = NO;
@@ -173,32 +184,19 @@
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kListChooseCellIndentifier];
         if(cell == nil) {
             cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:kListChooseCellIndentifier] autorelease];
-            
-            cell.textField.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            cell.textField.placeholder = NSLocalizedString(@"Add title", @"Add title");
-            cell.textField.font = [UIFont boldSystemFontOfSize:17];
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
-            cell.textField.delegate = self;
+            cell.textLabel.text = NSLocalizedString(@"Date", @"Date");
+            cell.textLabel.font = [UIFont systemFontOfSize:14];
+            cell.textLabel.textColor = [UIColor lightGrayColor];
         }
-        
-        cell.textField.frame = CGRectMake(5, 11, CGRectGetWidth(cell.bounds) - 7, CGRectGetHeight(cell.frame)-5);
-
-        cell.textField.text = self.tempTask.title;
 
     } else if (indexPath.row == 2) {
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kDateChooseCellIndentifier];
         if(cell == nil) {
             cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:kDateChooseCellIndentifier] autorelease];
-            
-            cell.textField.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            cell.textField.placeholder = NSLocalizedString(@"Headline", @"Headline");
-            cell.textField.font = [UIFont boldSystemFontOfSize:17];
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
-            cell.textField.delegate = self;
+            cell.textLabel.text = NSLocalizedString(@"List", @"List");
+            cell.textLabel.font = [UIFont systemFontOfSize:14];
+            cell.textLabel.textColor = [UIColor lightGrayColor];
         }
-        
-        cell.textField.frame = CGRectMake(5, 11, CGRectGetWidth(cell.bounds) - 7, CGRectGetHeight(cell.frame)-5);
-        cell.textField.text = self.tempTask.title;
 
     } else if (indexPath.row == 3) {
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kTextViewCellIndentifier];
@@ -225,14 +223,12 @@
 #pragma mark -
 #pragma mark UITextFieldDelegate
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
-    NIF_INFO(@"self.navigationController.navigationBarHidden : %d", self.navigationController.navigationBarHidden);
     BOOL isHidden = self.navigationController.navigationBarHidden;
     [self.navigationController setNavigationBarHidden:YES animated:!isHidden];        
     [self addCancelAndDoneItems];
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
-//    [self.navigationController setNavigationBarHidden:NO animated:NO];
     [self removeItems];
 }
 
@@ -243,6 +239,10 @@
     return YES;
 }
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [self hideKeyboard:textField];
+    return YES;
+}
 #pragma mark -
 #pragma mark UITextViewDelegate
 - (void)textViewDidBeginEditing:(UIPlaceHolderTextView *)textView {
@@ -264,13 +264,33 @@
 }
 
 - (void)textViewDidChange:(UITextView *)textView {
+    
     self.tempTask.notes = textView.text;
     self.textView.bounds = self.textView.superview.bounds;
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
-
+    
+    [self updateUndoButtons];
 }
 
+-(void)undoText:(NSString *)textToRestore
+{   
+    NSString *textBackup = [self.textView.text copy];
+    
+    self.textView.text = textToRestore;
+    self.tempTask.notes = textToRestore;
+    if ([self.textView.undoManager isUndoing])
+    {
+        // Prepare the redo.
+        [[self.textView.undoManager prepareWithInvocationTarget:self] undoText:@""];     
+    }
+    else if ([self.textView.undoManager isRedoing])
+    {
+        [[self.textView.undoManager prepareWithInvocationTarget:self] undoText:textBackup];
+    }
+    
+    [textBackup release];
+}
 
 - (void)addCancelAndDoneItems {
     UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"Cancel") style:UIBarButtonItemStylePlain target:self action:@selector(cancelAction:)];
@@ -291,33 +311,37 @@
 #pragma mark -
 #pragma mark IBAction
 - (void)cancelAction:(id)sender {
-//    [self.titleField resignFirstResponder];
-//    [self.textView resignFirstResponder];    
     [self hideKeyboard:sender];
 }
 
 - (void)doneAction:(id)sender {
-//    [self.titleField resignFirstResponder];
-//    [self.textView resignFirstResponder];
     [self hideKeyboard:sender];
 }
 
 - (void)hideKeyboard:(id)sender {
+    isKeyboardHidden = YES;
+    
     [self.titleField resignFirstResponder];
     [self.textView resignFirstResponder];    
     [self.navigationController setNavigationBarHidden:NO animated:YES];        
 }
 
+- (void)undoAction:(UIButton *)sender {
+    [self.textView.undoManager undo];
+    [self updateUndoButtons];
+}
+
+- (void)redoAction:(UIButton *)sender {
+    [self.textView.undoManager redo];
+    [self updateUndoButtons];
+}
+
+#pragma mark -
+#pragma mark keyboard Notification
 - (void)keyboardDidShow:(NSNotification *)note
 {
-    NSDictionary *info = [note userInfo];
-//    NSValue *keyBounds = [info objectForKey:UIKeyboardBoundsUserInfoKey];
-    NSValue *keyBounds1 = [info objectForKey:UIKeyboardFrameBeginUserInfoKey];
-    NSValue *keyBounds = [info objectForKey:UIKeyboardFrameEndUserInfoKey];
-        
-    NIF_INFO(@"%@", keyBounds);
-    NIF_INFO(@"%@", keyBounds1);
-//    NIF_INFO(@"%@", keyBounds2);
+    NSDictionary *info = [note userInfo];    
+    NSValue *keyBounds = [info objectForKey:UIKeyboardFrameBeginUserInfoKey];
     
     CGRect bndKey;
     [keyBounds getValue:&bndKey];
@@ -329,35 +353,73 @@
         {
             //Get a reference of the current view 
             UIView *keyboard = [tempWindow.subviews objectAtIndex:i];
-            NIF_INFO(@"%@", [keyboard description]);
             
             if([[keyboard description] hasPrefix:@"<UIPeripheralHostView"] == YES)
             {
-//                [UIView beginAnimations:nil context:nil];
-                UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, -40, keyboard.frame.size.width, 40)];
-                UIBarButtonItem *barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Hide" style:UIBarButtonItemStyleBordered target:self action:@selector(hideKeyboard:)];
-                NSArray *items = [[NSArray alloc] initWithObjects:barButtonItem, nil];
-                [toolbar setItems:items];
-                [items release];
+                [self appendToolbarAboveKeyboard:keyboard];
 
-                [keyboard addSubview:toolbar];
                 bndKey = keyboard.frame;
+                
+                [UIView animateWithDuration:0.2 animations:^{
+                    CGRect oldFrame = self.tableView.frame;
+                    self.tableView.frame = CGRectMake(CGRectGetMinX(oldFrame), CGRectGetMinY(oldFrame),bndKey.size.width, CGRectGetMinY(bndKey)-60); 
+                }];
+
             }
         }
-    }
-    
-    [UIView animateWithDuration:0.2 animations:^{
-        CGRect oldFrame = self.tableView.frame;
-        self.tableView.frame = CGRectMake(CGRectGetMinX(oldFrame), CGRectGetMinY(oldFrame),bndKey.size.width, CGRectGetHeight(oldFrame) - MIN(CGRectGetHeight(bndKey), CGRectGetWidth(bndKey))); 
-    }];
+    }    
 }
 
 - (void)keyboardDidHide:(NSNotification *)note {
+    isKeyboardHidden = YES;
     self.tableView.frame = self.view.frame;
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
 }
 
+
+#pragma mark - 
+#pragma mark ToolBar above keyboard
+- (void)appendToolbarAboveKeyboard:(UIView *)keyboard {
+    UIView *toolbar = [[UIView alloc] initWithFrame:CGRectMake(0, -40, keyboard.frame.size.width, 40)];
+    toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth |UIViewAutoresizingFlexibleBottomMargin;
+    toolbar.backgroundColor = RGB_COLOR(223,223,227);
+    
+    // Undo Button
+    _undoButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    _undoButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    _undoButton.frame = CGRectMake(5, 5, 50, 30);
+    [_undoButton setTitle:@"undo" forState:UIControlStateNormal];
+    [_undoButton addTarget:self action:@selector(undoAction:) forControlEvents:UIControlEventTouchUpInside];
+    [toolbar addSubview:_undoButton];
+    
+    // Redo Button
+    _redoButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    _redoButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    _redoButton.frame = CGRectMake(60, 5, 60, 30);
+    [_redoButton setTitle:@"redo" forState:UIControlStateNormal];
+    [_redoButton addTarget:self action:@selector(redoAction:) forControlEvents:UIControlEventTouchUpInside];
+    [toolbar addSubview:_redoButton];
+
+    [self updateUndoButtons];
+    
+    // Hide Keyboard Button
+    UIButton *hideKeyboardButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    hideKeyboardButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+    hideKeyboardButton.frame = CGRectMake(CGRectGetWidth(toolbar.frame) - 110, 5, 100, 30);
+    [hideKeyboardButton setTitle:@"Hide|" forState:UIControlStateNormal];
+    [hideKeyboardButton addTarget:self action:@selector(hideKeyboard:) forControlEvents:UIControlEventTouchUpInside];
+    [toolbar addSubview:hideKeyboardButton];
+    
+    [keyboard addSubview:toolbar];
+    [toolbar release];
+
+}
+
+- (void)updateUndoButtons {
+    _undoButton.enabled =[self.textView.undoManager canUndo];
+    _redoButton.enabled = [self.textView.undoManager canRedo];
+}
 
 #pragma mark -
 #pragma mark Setter And Getter
