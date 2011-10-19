@@ -8,16 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		940AFFBD144000C5009F7F4A /* update_schema.sh in Resources */ = {isa = PBXBuildFile; fileRef = 940AFFBC144000C5009F7F4A /* update_schema.sh */; };
-		940AFFC1144036EB009F7F4A /* GTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 940AFFC0144036EB009F7F4A /* GTableViewCell.m */; };
-		9434DA51144ADC7200F396DE /* checkbox_not_selected.png in Resources */ = {isa = PBXBuildFile; fileRef = 9434DA4B144ADC7200F396DE /* checkbox_not_selected.png */; };
-		9434DA52144ADC7200F396DE /* checkbox_not_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9434DA4C144ADC7200F396DE /* checkbox_not_selected@2x.png */; };
-		9434DA53144ADC7200F396DE /* checkbox_selected.png in Resources */ = {isa = PBXBuildFile; fileRef = 9434DA4D144ADC7200F396DE /* checkbox_selected.png */; };
-		9434DA54144ADC7200F396DE /* checkbox_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9434DA4E144ADC7200F396DE /* checkbox_selected@2x.png */; };
-		9434DA55144ADC7200F396DE /* UICheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 9434DA50144ADC7200F396DE /* UICheckBox.m */; };
 		944270DE142F98BC0071E363 /* NSDate+RFC3339.m in Sources */ = {isa = PBXBuildFile; fileRef = 944270DD142F98BC0071E363 /* NSDate+RFC3339.m */; };
 		9447F619142C862A002B32DF /* GTaskEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9447F618142C862A002B32DF /* GTaskEngine.m */; };
 		944CBAC91448A7FD002B332B /* NSObject+Runtime.m in Sources */ = {isa = PBXBuildFile; fileRef = 944CBAC81448A7FD002B332B /* NSObject+Runtime.m */; };
-		944CBADF1449CEEC002B332B /* GTaskCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 944CBADE1449CEEC002B332B /* GTaskCell.m */; };
 		94512AC5142B174B00903FC2 /* FMDatabase+Update.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ABC142B174B00903FC2 /* FMDatabase+Update.m */; };
 		94512AC6142B174B00903FC2 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ABE142B174B00903FC2 /* FMDatabase.m */; };
 		94512AC7142B174B00903FC2 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512AC0142B174B00903FC2 /* FMDatabaseAdditions.m */; };
@@ -27,7 +20,19 @@
 		94512ACC142B1BA300903FC2 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 94512ACB142B1BA300903FC2 /* libsqlite3.dylib */; };
 		94512AD0142B1D1200903FC2 /* Task.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512ACF142B1D1200903FC2 /* Task.m */; };
 		94512AD3142B1D3600903FC2 /* TaskList.m in Sources */ = {isa = PBXBuildFile; fileRef = 94512AD2142B1D3600903FC2 /* TaskList.m */; };
-		945A787B144B39B7001BED54 /* UIPlaceHolderTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 945A787A144B39B6001BED54 /* UIPlaceHolderTextView.m */; };
+		94664313144EBE7C00E41345 /* GTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 94664307144EBE7C00E41345 /* GTableViewCell.m */; };
+		94664314144EBE7C00E41345 /* GTaskCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 94664309144EBE7C00E41345 /* GTaskCell.m */; };
+		94664315144EBE7C00E41345 /* checkbox_not_selected.png in Resources */ = {isa = PBXBuildFile; fileRef = 9466430B144EBE7C00E41345 /* checkbox_not_selected.png */; };
+		94664316144EBE7C00E41345 /* checkbox_not_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9466430C144EBE7C00E41345 /* checkbox_not_selected@2x.png */; };
+		94664317144EBE7C00E41345 /* checkbox_selected.png in Resources */ = {isa = PBXBuildFile; fileRef = 9466430D144EBE7C00E41345 /* checkbox_selected.png */; };
+		94664318144EBE7C00E41345 /* checkbox_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9466430E144EBE7C00E41345 /* checkbox_selected@2x.png */; };
+		94664319144EBE7C00E41345 /* UICheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 94664310144EBE7C00E41345 /* UICheckBox.m */; };
+		9466431A144EBE7C00E41345 /* UIPlaceHolderTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 94664312144EBE7C00E41345 /* UIPlaceHolderTextView.m */; };
+		9466431D144EC38300E41345 /* DDDatePickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9466431C144EC38300E41345 /* DDDatePickerView.m */; };
+		94664321144EC40E00E41345 /* UIWebView+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 94664320144EC40E00E41345 /* UIWebView+Blocks.m */; };
+		94664328144EC4AE00E41345 /* UIImage+Categories.m in Sources */ = {isa = PBXBuildFile; fileRef = 94664327144EC4AE00E41345 /* UIImage+Categories.m */; };
+		9466432C144EC65900E41345 /* button.png in Resources */ = {isa = PBXBuildFile; fileRef = 9466432A144EC65900E41345 /* button.png */; };
+		9466432D144EC65900E41345 /* button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9466432B144EC65900E41345 /* button@2x.png */; };
 		946C7F0914298A79004E97A9 /* NSMutableURLRequest+Shorten.m in Sources */ = {isa = PBXBuildFile; fileRef = 946C7F0814298A79004E97A9 /* NSMutableURLRequest+Shorten.m */; };
 		946C7F1E14298F8C004E97A9 /* RSimpleConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 946C7F1D14298F8B004E97A9 /* RSimpleConnection.m */; };
 		94C21FC814286C85007B3483 /* YAJL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94C21FC714286C85007B3483 /* YAJL.framework */; };
@@ -46,28 +51,17 @@
 		94DC633A14273FBD00151B26 /* GDataLoginDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC633814273FBD00151B26 /* GDataLoginDialog.m */; };
 		94DC633D1427404500151B26 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94DC633C1427404500151B26 /* QuartzCore.framework */; };
 		94DC6341142741BA00151B26 /* NSString+Categories.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC6340142741BA00151B26 /* NSString+Categories.m */; };
-		94DC63451427466800151B26 /* UIWebView+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 94DC63441427466800151B26 /* UIWebView+Blocks.m */; };
 		94FA4BCF1440B07700235F9A /* GEditViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 94FA4BCD1440B07700235F9A /* GEditViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		940AFFBC144000C5009F7F4A /* update_schema.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = update_schema.sh; sourceTree = "<group>"; };
-		940AFFBF144036EB009F7F4A /* GTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTableViewCell.h; sourceTree = "<group>"; };
-		940AFFC0144036EB009F7F4A /* GTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTableViewCell.m; sourceTree = "<group>"; };
-		9434DA4B144ADC7200F396DE /* checkbox_not_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox_not_selected.png; sourceTree = "<group>"; };
-		9434DA4C144ADC7200F396DE /* checkbox_not_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkbox_not_selected@2x.png"; sourceTree = "<group>"; };
-		9434DA4D144ADC7200F396DE /* checkbox_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox_selected.png; sourceTree = "<group>"; };
-		9434DA4E144ADC7200F396DE /* checkbox_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkbox_selected@2x.png"; sourceTree = "<group>"; };
-		9434DA4F144ADC7200F396DE /* UICheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UICheckBox.h; sourceTree = "<group>"; };
-		9434DA50144ADC7200F396DE /* UICheckBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UICheckBox.m; sourceTree = "<group>"; };
 		944270DC142F98BB0071E363 /* NSDate+RFC3339.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+RFC3339.h"; sourceTree = "<group>"; };
 		944270DD142F98BC0071E363 /* NSDate+RFC3339.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+RFC3339.m"; sourceTree = "<group>"; };
 		9447F617142C862A002B32DF /* GTaskEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTaskEngine.h; sourceTree = "<group>"; };
 		9447F618142C862A002B32DF /* GTaskEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTaskEngine.m; sourceTree = "<group>"; };
 		944CBAC71448A7FD002B332B /* NSObject+Runtime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Runtime.h"; sourceTree = "<group>"; };
 		944CBAC81448A7FD002B332B /* NSObject+Runtime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Runtime.m"; sourceTree = "<group>"; };
-		944CBADD1449CEEC002B332B /* GTaskCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTaskCell.h; sourceTree = "<group>"; };
-		944CBADE1449CEEC002B332B /* GTaskCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTaskCell.m; sourceTree = "<group>"; };
 		94512ABB142B174B00903FC2 /* FMDatabase+Update.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+Update.h"; sourceTree = "<group>"; };
 		94512ABC142B174B00903FC2 /* FMDatabase+Update.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+Update.m"; sourceTree = "<group>"; };
 		94512ABD142B174B00903FC2 /* FMDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabase.h; sourceTree = "<group>"; };
@@ -83,8 +77,26 @@
 		94512ACF142B1D1200903FC2 /* Task.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Task.m; sourceTree = "<group>"; };
 		94512AD1142B1D3600903FC2 /* TaskList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaskList.h; sourceTree = "<group>"; };
 		94512AD2142B1D3600903FC2 /* TaskList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TaskList.m; sourceTree = "<group>"; };
-		945A7879144B39B6001BED54 /* UIPlaceHolderTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIPlaceHolderTextView.h; sourceTree = "<group>"; };
-		945A787A144B39B6001BED54 /* UIPlaceHolderTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIPlaceHolderTextView.m; sourceTree = "<group>"; };
+		94664306144EBE7C00E41345 /* GTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTableViewCell.h; sourceTree = "<group>"; };
+		94664307144EBE7C00E41345 /* GTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTableViewCell.m; sourceTree = "<group>"; };
+		94664308144EBE7C00E41345 /* GTaskCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTaskCell.h; sourceTree = "<group>"; };
+		94664309144EBE7C00E41345 /* GTaskCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTaskCell.m; sourceTree = "<group>"; };
+		9466430B144EBE7C00E41345 /* checkbox_not_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox_not_selected.png; sourceTree = "<group>"; };
+		9466430C144EBE7C00E41345 /* checkbox_not_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkbox_not_selected@2x.png"; sourceTree = "<group>"; };
+		9466430D144EBE7C00E41345 /* checkbox_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox_selected.png; sourceTree = "<group>"; };
+		9466430E144EBE7C00E41345 /* checkbox_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkbox_selected@2x.png"; sourceTree = "<group>"; };
+		9466430F144EBE7C00E41345 /* UICheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UICheckBox.h; sourceTree = "<group>"; };
+		94664310144EBE7C00E41345 /* UICheckBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UICheckBox.m; sourceTree = "<group>"; };
+		94664311144EBE7C00E41345 /* UIPlaceHolderTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIPlaceHolderTextView.h; sourceTree = "<group>"; };
+		94664312144EBE7C00E41345 /* UIPlaceHolderTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIPlaceHolderTextView.m; sourceTree = "<group>"; };
+		9466431B144EC38300E41345 /* DDDatePickerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDDatePickerView.h; sourceTree = "<group>"; };
+		9466431C144EC38300E41345 /* DDDatePickerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDDatePickerView.m; sourceTree = "<group>"; };
+		9466431F144EC40E00E41345 /* UIWebView+Blocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+Blocks.h"; sourceTree = "<group>"; };
+		94664320144EC40E00E41345 /* UIWebView+Blocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+Blocks.m"; sourceTree = "<group>"; };
+		94664326144EC4AD00E41345 /* UIImage+Categories.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Categories.h"; sourceTree = "<group>"; };
+		94664327144EC4AE00E41345 /* UIImage+Categories.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Categories.m"; sourceTree = "<group>"; };
+		9466432A144EC65900E41345 /* button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = button.png; sourceTree = "<group>"; };
+		9466432B144EC65900E41345 /* button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button@2x.png"; sourceTree = "<group>"; };
 		946C7F0714298A79004E97A9 /* NSMutableURLRequest+Shorten.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+Shorten.h"; sourceTree = "<group>"; };
 		946C7F0814298A79004E97A9 /* NSMutableURLRequest+Shorten.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableURLRequest+Shorten.m"; sourceTree = "<group>"; };
 		946C7F1C14298F8B004E97A9 /* RSimpleConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSimpleConnection.h; path = "GTask-Core/RSimpleConnection.h"; sourceTree = SOURCE_ROOT; };
@@ -116,8 +128,6 @@
 		94DC633F142741BA00151B26 /* NSString+Categories.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Categories.h"; sourceTree = "<group>"; };
 		94DC6340142741BA00151B26 /* NSString+Categories.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Categories.m"; sourceTree = "<group>"; };
 		94DC63421427429700151B26 /* NIFLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NIFLog.h; sourceTree = "<group>"; };
-		94DC63431427466800151B26 /* UIWebView+Blocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+Blocks.h"; sourceTree = "<group>"; };
-		94DC63441427466800151B26 /* UIWebView+Blocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+Blocks.m"; sourceTree = "<group>"; };
 		94FA4BCC1440B07700235F9A /* GEditViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GEditViewController.h; sourceTree = "<group>"; };
 		94FA4BCD1440B07700235F9A /* GEditViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GEditViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -139,19 +149,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		9434DA4A144ADC7200F396DE /* UICheckBox */ = {
-			isa = PBXGroup;
-			children = (
-				9434DA4B144ADC7200F396DE /* checkbox_not_selected.png */,
-				9434DA4C144ADC7200F396DE /* checkbox_not_selected@2x.png */,
-				9434DA4D144ADC7200F396DE /* checkbox_selected.png */,
-				9434DA4E144ADC7200F396DE /* checkbox_selected@2x.png */,
-				9434DA4F144ADC7200F396DE /* UICheckBox.h */,
-				9434DA50144ADC7200F396DE /* UICheckBox.m */,
-			);
-			path = UICheckBox;
-			sourceTree = "<group>";
-		};
 		94512ABA142B174B00903FC2 /* FMDataBase */ = {
 			isa = PBXGroup;
 			children = (
@@ -173,20 +170,63 @@
 		94512ACD142B1CF800903FC2 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				9434DA4A144ADC7200F396DE /* UICheckBox */,
 				94512AD1142B1D3600903FC2 /* TaskList.h */,
 				94512AD2142B1D3600903FC2 /* TaskList.m */,
 				94512ACE142B1D1200903FC2 /* Task.h */,
 				94512ACF142B1D1200903FC2 /* Task.m */,
-				940AFFBF144036EB009F7F4A /* GTableViewCell.h */,
-				940AFFC0144036EB009F7F4A /* GTableViewCell.m */,
-				944CBADD1449CEEC002B332B /* GTaskCell.h */,
-				944CBADE1449CEEC002B332B /* GTaskCell.m */,
-				945A7879144B39B6001BED54 /* UIPlaceHolderTextView.h */,
-				945A787A144B39B6001BED54 /* UIPlaceHolderTextView.m */,
 			);
 			path = Model;
 			sourceTree = "<group>";
+		};
+		94664305144EBE7C00E41345 /* iOS-Model */ = {
+			isa = PBXGroup;
+			children = (
+				94664306144EBE7C00E41345 /* GTableViewCell.h */,
+				94664307144EBE7C00E41345 /* GTableViewCell.m */,
+				94664308144EBE7C00E41345 /* GTaskCell.h */,
+				94664309144EBE7C00E41345 /* GTaskCell.m */,
+				9466430A144EBE7C00E41345 /* UICheckBox */,
+				94664311144EBE7C00E41345 /* UIPlaceHolderTextView.h */,
+				94664312144EBE7C00E41345 /* UIPlaceHolderTextView.m */,
+				9466431B144EC38300E41345 /* DDDatePickerView.h */,
+				9466431C144EC38300E41345 /* DDDatePickerView.m */,
+			);
+			path = "iOS-Model";
+			sourceTree = "<group>";
+		};
+		9466430A144EBE7C00E41345 /* UICheckBox */ = {
+			isa = PBXGroup;
+			children = (
+				9466430B144EBE7C00E41345 /* checkbox_not_selected.png */,
+				9466430C144EBE7C00E41345 /* checkbox_not_selected@2x.png */,
+				9466430D144EBE7C00E41345 /* checkbox_selected.png */,
+				9466430E144EBE7C00E41345 /* checkbox_selected@2x.png */,
+				9466430F144EBE7C00E41345 /* UICheckBox.h */,
+				94664310144EBE7C00E41345 /* UICheckBox.m */,
+			);
+			path = UICheckBox;
+			sourceTree = "<group>";
+		};
+		9466431E144EC3CF00E41345 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				9466431F144EC40E00E41345 /* UIWebView+Blocks.h */,
+				94664320144EC40E00E41345 /* UIWebView+Blocks.m */,
+				94664326144EC4AD00E41345 /* UIImage+Categories.h */,
+				94664327144EC4AE00E41345 /* UIImage+Categories.m */,
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
+		94664329144EC5FA00E41345 /* iOS-Graphics */ = {
+			isa = PBXGroup;
+			children = (
+				9466432A144EC65900E41345 /* button.png */,
+				9466432B144EC65900E41345 /* button@2x.png */,
+			);
+			name = "iOS-Graphics";
+			path = "Resource/iOS-Graphics";
+			sourceTree = SOURCE_ROOT;
 		};
 		94DC62CA14273A5A00151B26 = {
 			isa = PBXGroup;
@@ -222,6 +262,9 @@
 		94DC62DF14273A5A00151B26 /* GTask-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				94664329144EC5FA00E41345 /* iOS-Graphics */,
+				9466431E144EC3CF00E41345 /* Categories */,
+				94664305144EBE7C00E41345 /* iOS-Model */,
 				94DC62E814273A5A00151B26 /* RWAppDelegate.h */,
 				94DC62E914273A5A00151B26 /* RWAppDelegate.m */,
 				94DC62EB14273A5A00151B26 /* MainStoryboard_iPhone.storyboard */,
@@ -276,8 +319,6 @@
 				944CBAC81448A7FD002B332B /* NSObject+Runtime.m */,
 				94DC633F142741BA00151B26 /* NSString+Categories.h */,
 				94DC6340142741BA00151B26 /* NSString+Categories.m */,
-				94DC63431427466800151B26 /* UIWebView+Blocks.h */,
-				94DC63441427466800151B26 /* UIWebView+Blocks.m */,
 				946C7F0714298A79004E97A9 /* NSMutableURLRequest+Shorten.h */,
 				946C7F0814298A79004E97A9 /* NSMutableURLRequest+Shorten.m */,
 				944270DC142F98BB0071E363 /* NSDate+RFC3339.h */,
@@ -344,10 +385,12 @@
 				94512AC9142B174B00903FC2 /* GTask.sqlite in Resources */,
 				94512ACA142B174B00903FC2 /* GTaskSchema.sql in Resources */,
 				940AFFBD144000C5009F7F4A /* update_schema.sh in Resources */,
-				9434DA51144ADC7200F396DE /* checkbox_not_selected.png in Resources */,
-				9434DA52144ADC7200F396DE /* checkbox_not_selected@2x.png in Resources */,
-				9434DA53144ADC7200F396DE /* checkbox_selected.png in Resources */,
-				9434DA54144ADC7200F396DE /* checkbox_selected@2x.png in Resources */,
+				94664315144EBE7C00E41345 /* checkbox_not_selected.png in Resources */,
+				94664316144EBE7C00E41345 /* checkbox_not_selected@2x.png in Resources */,
+				94664317144EBE7C00E41345 /* checkbox_selected.png in Resources */,
+				94664318144EBE7C00E41345 /* checkbox_selected@2x.png in Resources */,
+				9466432C144EC65900E41345 /* button.png in Resources */,
+				9466432D144EC65900E41345 /* button@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -365,7 +408,6 @@
 				94DC633914273FBD00151B26 /* GDataEngine.m in Sources */,
 				94DC633A14273FBD00151B26 /* GDataLoginDialog.m in Sources */,
 				94DC6341142741BA00151B26 /* NSString+Categories.m in Sources */,
-				94DC63451427466800151B26 /* UIWebView+Blocks.m in Sources */,
 				946C7F0914298A79004E97A9 /* NSMutableURLRequest+Shorten.m in Sources */,
 				946C7F1E14298F8C004E97A9 /* RSimpleConnection.m in Sources */,
 				94512AC5142B174B00903FC2 /* FMDatabase+Update.m in Sources */,
@@ -376,12 +418,15 @@
 				94512AD3142B1D3600903FC2 /* TaskList.m in Sources */,
 				9447F619142C862A002B32DF /* GTaskEngine.m in Sources */,
 				944270DE142F98BC0071E363 /* NSDate+RFC3339.m in Sources */,
-				940AFFC1144036EB009F7F4A /* GTableViewCell.m in Sources */,
 				94FA4BCF1440B07700235F9A /* GEditViewController.m in Sources */,
 				944CBAC91448A7FD002B332B /* NSObject+Runtime.m in Sources */,
-				944CBADF1449CEEC002B332B /* GTaskCell.m in Sources */,
-				9434DA55144ADC7200F396DE /* UICheckBox.m in Sources */,
-				945A787B144B39B7001BED54 /* UIPlaceHolderTextView.m in Sources */,
+				94664313144EBE7C00E41345 /* GTableViewCell.m in Sources */,
+				94664314144EBE7C00E41345 /* GTaskCell.m in Sources */,
+				94664319144EBE7C00E41345 /* UICheckBox.m in Sources */,
+				9466431A144EBE7C00E41345 /* UIPlaceHolderTextView.m in Sources */,
+				9466431D144EC38300E41345 /* DDDatePickerView.m in Sources */,
+				94664321144EC40E00E41345 /* UIWebView+Blocks.m in Sources */,
+				94664328144EC4AE00E41345 /* UIImage+Categories.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

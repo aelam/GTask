@@ -10,10 +10,13 @@
 
 @class Task;
 @class UIPlaceHolderTextView;
+//@class DDDatePickerView;
+@protocol DDDatePickerViewDelegate;
 
-@interface GEditViewController : UIViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource> {
+@interface GEditViewController : UIViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource,DDDatePickerViewDelegate> {
 
     BOOL isKeyboardHidden;
+    BOOL isPickerShown;
 }
 
 @property (retain) Task *task;
@@ -27,5 +30,7 @@
 
 @property (assign) UIButton *undoButton;
 @property (assign) UIButton *redoButton;
+
+@property (retain) UIDatePicker *datePicker;
 
 @end

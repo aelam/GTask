@@ -13,6 +13,7 @@
 #import "UIPlaceHolderTextView.h"
 #import "NSDate+RFC3339.h"
 #import "UICheckBox.h"
+#import "DDDatePickerView.h"
 
 @interface GEditViewController (Plus)
 
@@ -38,6 +39,7 @@
 @synthesize tableView = _tableView;
 @synthesize undoButton = _undoButton;
 @synthesize redoButton = _redoButton;
+@synthesize datePicker = _datePicker;
 
 - (void)dealloc {
     
@@ -68,6 +70,7 @@
     [self.tableView reloadData];
     
     isKeyboardHidden = YES;
+    isPickerShown = NO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardWillHideNotification object:nil];    
@@ -220,6 +223,14 @@
     return cell;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    if (indexPath.row == 1 && !isPickerShown) {
+        [self showDatePicker];
+    }
+}
+
 #pragma mark -
 #pragma mark UITextFieldDelegate
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
@@ -243,6 +254,8 @@
     [self hideKeyboard:textField];
     return YES;
 }
+
+
 #pragma mark -
 #pragma mark UITextViewDelegate
 - (void)textViewDidBeginEditing:(UIPlaceHolderTextView *)textView {
@@ -273,25 +286,6 @@
     [self updateUndoButtons];
 }
 
--(void)undoText:(NSString *)textToRestore
-{   
-    NSString *textBackup = [self.textView.text copy];
-    
-    self.textView.text = textToRestore;
-    self.tempTask.notes = textToRestore;
-    if ([self.textView.undoManager isUndoing])
-    {
-        // Prepare the redo.
-        [[self.textView.undoManager prepareWithInvocationTarget:self] undoText:@""];     
-    }
-    else if ([self.textView.undoManager isRedoing])
-    {
-        [[self.textView.undoManager prepareWithInvocationTarget:self] undoText:textBackup];
-    }
-    
-    [textBackup release];
-}
-
 - (void)addCancelAndDoneItems {
     UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"Cancel") style:UIBarButtonItemStylePlain target:self action:@selector(cancelAction:)];
     [self.navigationItem setLeftBarButtonItem:cancelItem animated:NO];
@@ -306,6 +300,17 @@
     [self.navigationItem setLeftBarButtonItem:nil animated:NO];
     [self.navigationItem setRightBarButtonItem:nil animated:YES];
 }
+
+#pragma mark - 
+#pragma mark - DDDatePickerDelegate
+- (void)datePickerViewCancel:(DDDatePickerView *)datePickerView {
+    
+}
+
+- (void)datePickerView:(DDDatePickerView *)datePickerView didConfirmWithDate:(NSDate *)date {
+    
+}
+
 
 
 #pragma mark -
@@ -420,6 +425,45 @@
     _undoButton.enabled =[self.textView.undoManager canUndo];
     _redoButton.enabled = [self.textView.undoManager canRedo];
 }
+
+- (UIDatePicker *)datePicker {
+    if (_datePicker == nil) {
+        _datePicker = [[UIDatePicker alloc] init];
+        
+        _datePicker.datePickerMode = UIDatePickerModeDate;
+        _datePicker.timeZone = [NSTimeZone localTimeZone];
+        _datePicker.minimumDate = [NSDate date];
+        _datePicker.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth;
+        [self.view addSubview:_datePicker];
+    }
+    return _datePicker;
+}
+
+- (void)showDatePicker {
+    CGRect oldFrame = self.tableView.frame;
+    self.tableView.frame = CGRectMake(CGRectGetMinX(oldFrame), CGRectGetMinY(oldFrame),self.view.frame.size.width, self.view.frame.size.height - 216);
+    self.navigationController.toolbarHidden = YES;
+//    self.tableView.frame = CGRectMake(0,0,320, 216);
+    [self.tableView beginUpdates];
+    [self.tableView endUpdates];
+    
+    NIF_INFO(@"%@",NSStringFromCGRect(self.tableView.frame));
+    self.datePicker.frame = CGRectMake(CGRectGetMinX(oldFrame), self.view.frame.size.height - 216, self.view.frame.size.width, 216);
+    NIF_INFO(@"%@", NSStringFromCGRect(self.datePicker.frame));
+//    [self.view layoutSubviews];
+    
+    isPickerShown = YES;
+}
+
+- (void)hideDatePicker {
+    self.navigationController.toolbarHidden = NO;
+    isPickerShown = NO;
+    self.tableView.frame = self.view.frame;
+    [self.tableView beginUpdates];
+    [self.tableView endUpdates];
+
+}
+
 
 #pragma mark -
 #pragma mark Setter And Getter
