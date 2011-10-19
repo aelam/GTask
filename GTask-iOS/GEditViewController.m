@@ -23,6 +23,9 @@
 - (void)appendToolbarAboveKeyboard:(UIView *)keyboard;
 - (void)updateUndoButtons;
 
+- (void)showDatePicker;
+- (void)hideDatePicker;
+
 @end
 
 #define TASK_TITLE_TEXT_FIELD_TAG   10101
@@ -40,6 +43,7 @@
 @synthesize undoButton = _undoButton;
 @synthesize redoButton = _redoButton;
 @synthesize datePicker = _datePicker;
+@synthesize pickedDate = _pickedDate;
 
 - (void)dealloc {
     
@@ -48,6 +52,7 @@
     [_titleLabel release];
     [_textView release];
     [_titleField release];
+    [_pickedDate release];
     [super dealloc];
 }
 
@@ -80,6 +85,7 @@
     [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter]removeObserver:self];
     [self hideKeyboard:nil];
+    [self hideDatePicker];
 }
 
 - (void)viewDidLoad
@@ -98,7 +104,13 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    // Return YES for supported orientations
+    if (isPickerShown) {
+        
+        [self.tableView beginUpdates];
+        [self.tableView endUpdates];
+        self.datePicker.frame = CGRectMake(0, CGRectGetMaxY(self.view.frame) - 216, self.view.frame.size.width, 216);
+    }
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
     } else {
@@ -190,7 +202,13 @@
             cell.textLabel.text = NSLocalizedString(@"Date", @"Date");
             cell.textLabel.font = [UIFont systemFontOfSize:14];
             cell.textLabel.textColor = [UIColor lightGrayColor];
+//            cell.detailTextLabel.tag = 101010;
+            UIButton *dateButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+            dateButton.frame = CGRectMake(40, 5, 200, 30);
+            dateButton.tag = 101010;
+            [cell.contentView addSubview:dateButton];
         }
+//        cell.detailTextLabel.text = [self.pickedDate description];
 
     } else if (indexPath.row == 2) {
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kDateChooseCellIndentifier];
@@ -301,17 +319,6 @@
     [self.navigationItem setRightBarButtonItem:nil animated:YES];
 }
 
-#pragma mark - 
-#pragma mark - DDDatePickerDelegate
-- (void)datePickerViewCancel:(DDDatePickerView *)datePickerView {
-    
-}
-
-- (void)datePickerView:(DDDatePickerView *)datePickerView didConfirmWithDate:(NSDate *)date {
-    
-}
-
-
 
 #pragma mark -
 #pragma mark IBAction
@@ -345,6 +352,8 @@
 #pragma mark keyboard Notification
 - (void)keyboardDidShow:(NSNotification *)note
 {
+    [self hideDatePicker];
+    
     NSDictionary *info = [note userInfo];    
     NSValue *keyBounds = [info objectForKey:UIKeyboardFrameBeginUserInfoKey];
     
@@ -426,41 +435,65 @@
     _redoButton.enabled = [self.textView.undoManager canRedo];
 }
 
+- (void)updateDate:(id)sender {
+    self.pickedDate = self.datePicker.date;
+    UIButton *dateButton = (UIButton *)[self.tableView viewWithTag:101010];
+    NIF_INFO(@"%@", [self.pickedDate locateTimeDescription]);
+    [dateButton setTitle:[self.pickedDate locateTimeDescription] forState:UIControlStateNormal];
+}
+
 - (UIDatePicker *)datePicker {
     if (_datePicker == nil) {
-        _datePicker = [[UIDatePicker alloc] init];
+        _datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, 480, self.tableView.frame.size.width, 216)];
         
-        _datePicker.datePickerMode = UIDatePickerModeDate;
+        _datePicker.datePickerMode = UIDatePickerModeDateAndTime;
         _datePicker.timeZone = [NSTimeZone localTimeZone];
-        _datePicker.minimumDate = [NSDate date];
         _datePicker.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth;
         [self.view addSubview:_datePicker];
+        [_datePicker addTarget:self action:@selector(updateDate:) forControlEvents:UIControlEventValueChanged];
     }
     return _datePicker;
 }
 
+- (void)setDatePicker:(UIDatePicker *)datePicker {
+    if (_datePicker != datePicker) {
+        [_datePicker release];
+        _datePicker = [datePicker retain];
+    }
+}
+
 - (void)showDatePicker {
+    [self hideKeyboard:nil];
     CGRect oldFrame = self.tableView.frame;
-    self.tableView.frame = CGRectMake(CGRectGetMinX(oldFrame), CGRectGetMinY(oldFrame),self.view.frame.size.width, self.view.frame.size.height - 216);
     self.navigationController.toolbarHidden = YES;
-//    self.tableView.frame = CGRectMake(0,0,320, 216);
+    
+    self.datePicker.frame = CGRectMake(0, 480, CGRectGetWidth(self.tableView.frame), 216);
+
+    self.tableView.frame = CGRectMake(0,0,CGRectGetWidth(self.view.frame), 216);
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
     
-    NIF_INFO(@"%@",NSStringFromCGRect(self.tableView.frame));
+    [UIView beginAnimations:nil context:NULL];
     self.datePicker.frame = CGRectMake(CGRectGetMinX(oldFrame), self.view.frame.size.height - 216, self.view.frame.size.width, 216);
-    NIF_INFO(@"%@", NSStringFromCGRect(self.datePicker.frame));
-//    [self.view layoutSubviews];
+    [UIView commitAnimations];
     
     isPickerShown = YES;
+    
+    UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(hideDatePicker)];
+    [self.navigationItem setRightBarButtonItem:cancelItem animated:YES];
 }
 
 - (void)hideDatePicker {
     self.navigationController.toolbarHidden = NO;
+    [self.navigationItem setRightBarButtonItem:nil animated:YES];
     isPickerShown = NO;
     self.tableView.frame = self.view.frame;
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
+
+    [UIView beginAnimations:nil context:NULL];
+    self.datePicker.frame = CGRectMake(0, 480, CGRectGetWidth(self.datePicker.frame), CGRectGetHeight(self.datePicker.frame));
+    [UIView commitAnimations];
 
 }
 
