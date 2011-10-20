@@ -25,6 +25,7 @@
 @synthesize localModifyTime = _localModifyTime;
 @synthesize tasks = _tasks;
 @synthesize link = _link;
+@synthesize displayOrder = _displayOrder;
 
 
 - (void)dealloc {

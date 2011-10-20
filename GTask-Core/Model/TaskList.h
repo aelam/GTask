@@ -25,5 +25,6 @@
 @property (assign)  double serverModifyTime;
 @property (assign)  double localModifyTime;
 @property (retain)  NSMutableArray *tasks;
+@property (assign)  NSInteger displayOrder;
 
 @end

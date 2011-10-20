@@ -11,6 +11,8 @@ CREATE TABLE task_lists (
     is_cleared              INTEGER NOT NULL DEFAULT 0,
     status                  INTEGER NOT NULL DEFAULT 0,
     sort_type               INTEGER NOT NULL DEFAULT 0,
+    
+    display_order           INTEGER,
 
     latest_sync_timestamp   INTEGER,
     server_modify_timestamp INTEGER,

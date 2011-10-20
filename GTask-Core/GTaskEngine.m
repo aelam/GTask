@@ -260,10 +260,11 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             list.isDefault = [rs boolForColumn:@"is_default"];
             list.isDeleted = [rs boolForColumn:@"is_deleted"];
             list.isCleared = [rs boolForColumn:@"is_cleared"];
-            list.status = [rs intForColumn:@"status"];
+//            list.status = [rs intForColumn:@"status"];
             list.lastestSyncTime = [rs doubleForColumn:@"latest_sync_timestamp"];
             list.serverModifyTime = [rs doubleForColumn:@"server_modify_timestamp"];
             list.localModifyTime = [rs doubleForColumn:@"local_modify_timestamp"];
+            list.displayOrder = [rs intForColumn:@"display_order"];
             
             [taskLists addObject:list];
             [list release];
