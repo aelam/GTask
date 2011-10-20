@@ -38,6 +38,14 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     return [[[self alloc] init] autorelease];
 }
 
+- (NSMutableArray *)sharedTaskLists {
+    static NSMutableArray *taskLists = nil;
+    if (taskLists == nil) {
+        taskLists = [[self localTaskLists] retain];
+    }
+    return taskLists;
+}
+
 - (BOOL)_saveTaskListsFromJSON:(NSDictionary *)json {
     FMDatabase *db = [FMDatabase database];
     if (![db open]) {
@@ -538,6 +546,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     }
 }
 
+- (void)moveTaskAndSubTasks:(Task *)task fromList:(TaskList *)fromList toList:(TaskList *)toList {
+    
+}
 
 @end
 

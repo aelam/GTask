@@ -22,6 +22,9 @@ typedef enum {
 + (GTaskEngine *)sharedEngine;
 + (GTaskEngine *)engine;
 
+
+- (NSMutableArray *)sharedTaskLists;
+
 // Lists
 
 - (void)fetchServerTaskListsWithResultHander:(void(^)(GTaskEngine *,NSMutableArray *))resultHander;
@@ -57,5 +60,7 @@ typedef enum {
 - (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks;
 
 - (void)deleteTaskAtIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks;
+
+- (void)moveTaskAndSubTasks:(Task *)task fromList:(TaskList *)fromList toList:(TaskList *)toList;
 
 @end

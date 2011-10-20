@@ -10,8 +10,11 @@
 
 @class Task;
 @class UIPlaceHolderTextView;
+@class GListChooseController;
+@protocol GListChooseDelegate;
 
-@interface GEditViewController : UIViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource> {
+
+@interface GEditViewController : UIViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource,GListChooseDelegate> {
 
     BOOL isKeyboardHidden;
     BOOL isPickerShown;
@@ -32,7 +35,8 @@
 @property (retain) UIDatePicker *datePicker;
 @property (retain) NSDate *pickedDate;
 
-@property (strong, nonatomic) NSMutableArray *taskLists;
+//@property (strong, nonatomic) NSMutableArray *taskLists;
+@property (strong, nonatomic) GListChooseController *listChooseController;
 
 
 @end

@@ -15,4 +15,6 @@
 @property (strong, nonatomic) RWDetailViewController *detailViewController;
 @property (strong, nonatomic) NSMutableArray *taskLists;
 
+@property (strong, nonatomic) NSMutableArray *customCategories;
+
 @end

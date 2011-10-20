@@ -35,7 +35,7 @@
 @synthesize statusItem = _statusItem;
 @synthesize quickInputField = _quickInputField;
 
-@synthesize taskLists = _taskLists;
+//@synthesize taskLists = _taskLists;
 
 - (void)dealloc
 {
@@ -48,7 +48,7 @@
     [_editViewController release];
     [_statusItem release];
     [_quickInputField release];
-    [_taskLists release];
+//    [_taskLists release];
     [super dealloc];
 }
 
@@ -153,7 +153,6 @@
         }];
     }
 
-//    NIF_INFO(@"%@",self.tasks);
     [super viewWillAppear:animated];
 }
 
@@ -258,7 +257,7 @@
 
     self.editViewController.task = [self.tasks objectAtIndex:indexPath.row];
     self.editViewController.tempTask = self.editViewController.task;
-    self.editViewController.taskLists = self.taskLists;
+//    self.editViewController.taskLists = self.taskLists;
     [self.navigationController pushViewController:self.editViewController animated:YES];
 }
 

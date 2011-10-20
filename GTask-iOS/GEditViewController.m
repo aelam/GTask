@@ -13,7 +13,8 @@
 #import "UIPlaceHolderTextView.h"
 #import "NSDate+RFC3339.h"
 #import "UICheckBox.h"
-#import "DDDatePickerView.h"
+#import "GListChooseController.h"
+#import "TaskList.h"
 
 @interface GEditViewController (Plus)
 
@@ -44,7 +45,8 @@
 @synthesize redoButton = _redoButton;
 @synthesize datePicker = _datePicker;
 @synthesize pickedDate = _pickedDate;
-@synthesize taskLists = _taskLists;
+//@synthesize taskLists = _taskLists;
+@synthesize listChooseController = _listChooseController;
 
 - (void)dealloc {
     
@@ -54,7 +56,8 @@
     [_textView release];
     [_titleField release];
     [_pickedDate release];
-    [_taskLists release];
+//    [_taskLists release];
+    [_listChooseController release];
     [super dealloc];
 }
 
@@ -205,7 +208,7 @@
             cell.textLabel.font = [UIFont systemFontOfSize:14];
             cell.textLabel.textColor = [UIColor lightGrayColor];
             UIButton *dateButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-            dateButton.frame = CGRectMake(60, 5, 200, 30);
+            dateButton.frame = CGRectMake(80, 5, 200, 30);
             dateButton.tag = 101010;
             [cell.contentView addSubview:dateButton];
         }
@@ -219,9 +222,10 @@
         if(cell == nil) {
             cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:kDateChooseCellIndentifier] autorelease];
             cell.textLabel.text = NSLocalizedString(@"List", @"List");
-            cell.textLabel.font = [UIFont systemFontOfSize:14];
-            cell.textLabel.textColor = [UIColor lightGrayColor];
+//            cell.textLabel.textColor = [UIColor lightGrayColor];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         }
+        cell.detailTextLabel.text = self.tempTask.list.title;
 
     } else if (indexPath.row == 3) {
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kTextViewCellIndentifier];
@@ -249,6 +253,13 @@
     
     if (indexPath.row == 1 && !isPickerShown) {
         [self showDatePicker];
+    } else if(indexPath.row == 2) {
+        if (!self.listChooseController) {
+            self.listChooseController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGListChoose"];
+        }
+        self.listChooseController.chooseDelegate = self;
+        self.listChooseController.selectedList = self.tempTask.list;
+        [self.navigationController pushViewController:self.listChooseController animated:YES];
     }
 }
 
@@ -497,6 +508,14 @@
     self.datePicker.frame = CGRectMake(0, 480, CGRectGetWidth(self.datePicker.frame), CGRectGetHeight(self.datePicker.frame));
     [UIView commitAnimations];
 
+}
+
+#pragma mark - 
+#pragma mark 
+- (void)listChooseController:(GListChooseController *)listController didChooseList:(TaskList *)aList {
+    self.tempTask.list = aList;
+    [self.navigationController popToViewController:self animated:YES];
+    [self.tableView reloadData];
 }
 
 

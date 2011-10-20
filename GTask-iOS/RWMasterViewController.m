@@ -12,10 +12,38 @@
 #import "GTaskEngine.h"
 
 
+//MARK        TODO: add more such conditions to search tasks 
+
+
 @implementation RWMasterViewController
 
 @synthesize detailViewController = _detailViewController;
 @synthesize taskLists = _taskLists;
+@synthesize customCategories = _customCategories;
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    if (self = [super initWithCoder:aDecoder]) {
+        _customCategories = [[NSMutableArray alloc] initWithObjects:
+                             NSLocalizedString(@"Today's Tasks", @"Today's Tasks"),
+                             NSLocalizedString(@"All Tasks",@"All Tasks"),
+                             NSLocalizedString(@"Completed Tasks",@"Completed Tasks"),
+                             nil];
+    }
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        _customCategories = [[NSMutableArray alloc] initWithObjects:
+                             NSLocalizedString(@"Today's Tasks", @"Today's Tasks"),
+                             NSLocalizedString(@"All Tasks",@"All Tasks"),
+                             NSLocalizedString(@"Completed Tasks",@"Completed Tasks"),
+                             nil];
+    }
+    return self;
+}
+
+
 
 - (void)awakeFromNib
 {
@@ -38,7 +66,8 @@
 - (void)test {
     GTaskEngine *engine = [[[GTaskEngine alloc] init] autorelease];
     [engine fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *result) {
-        self.taskLists = result;
+//        self.taskLists = result;
+        self.taskLists = [engine sharedTaskLists];
         [self.tableView reloadData];
     }];
 
@@ -87,7 +116,7 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.taskLists = [[GTaskEngine engine] localTaskLists];
+    self.taskLists = [[GTaskEngine engine] sharedTaskLists];
     [self.tableView reloadData];
 }
 
@@ -116,8 +145,18 @@
     }
 }
 
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 2;
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [self.taskLists count];
+    if (section == 0) {
+        return [self.taskLists count];
+    } else if (section == 1){
+        return [self.customCategories count];
+    } else {
+        return 0;
+    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -127,28 +166,35 @@
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:kCellIndentifier] autorelease];
     }
     
-    TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
-    cell.textLabel.text = list.title;
-    cell.detailTextLabel.text = list.kind;
-    
+    if (indexPath.section == 0) {
+        TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
+        cell.textLabel.text = list.title;
+//        cell.detailTextLabel.text = list.kind;
+    } else if (indexPath.section == 1) {
+        cell.textLabel.text = [self.customCategories objectAtIndex:indexPath.row];
+        cell.detailTextLabel.text = nil;
+    }
     
     return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
 
-    @autoreleasepool {
-        if (!self.detailViewController) {
-            self.detailViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kDetailViewControllerIdentifier"];
-        }
+    if (indexPath.section == 0) {
+        @autoreleasepool {
+            if (!self.detailViewController) {
+                self.detailViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kDetailViewControllerIdentifier"];
+            }
+            
+            TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
+            self.detailViewController.taskList = list;
+            [self.navigationController pushViewController:self.detailViewController animated:YES];
+        }        
+    } else if (indexPath.section == 1) {
         
-        TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
-        self.detailViewController.taskList = list;
-        self.detailViewController.taskLists = self.taskLists;
-        [self.navigationController pushViewController:self.detailViewController animated:YES];
     }
+
 }
 
 /*

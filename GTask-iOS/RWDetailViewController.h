@@ -30,7 +30,7 @@ typedef enum {
 @property (strong, nonatomic) NSMutableArray *tasks;
 @property (strong, nonatomic) TaskList *taskList;
 
-@property (strong, nonatomic) NSMutableArray *taskLists;
+//@property (strong, nonatomic) NSMutableArray *taskLists;
 
 @property (strong, nonatomic) GEditViewController *editViewController;
 

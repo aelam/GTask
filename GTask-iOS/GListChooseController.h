@@ -9,10 +9,19 @@
 #import <UIKit/UIKit.h>
 
 @class TaskList;
+@protocol GListChooseDelegate;
 
 @interface GListChooseController : UITableViewController
 
+@property (assign) id<GListChooseDelegate> chooseDelegate;
 @property (strong, nonatomic) NSMutableArray *taskLists;
 @property (retain) TaskList *selectedList;
+
+@end
+
+
+@protocol GListChooseDelegate <NSObject>
+
+- (void)listChooseController:(GListChooseController *)listController didChooseList:(TaskList *)aList;
 
 @end

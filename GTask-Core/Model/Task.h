@@ -42,6 +42,7 @@
 - (void)setGenerationLevel:(NSInteger)generationLevel updateDB:(BOOL)update;
 - (void)setIsCompleted:(BOOL)isCompleted updateDB:(BOOL)update;
 
+- (void)setList:(TaskList *)aList updateDB:(BOOL)update;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)isFirstTaskAtTasks:(NSMutableArray *)tasks;

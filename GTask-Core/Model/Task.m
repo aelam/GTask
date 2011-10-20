@@ -8,6 +8,7 @@
 
 #import "Task.h"
 #import "FMDatabase.h"
+#import "TaskList.h"
 
 #define INITIAL_INTEGER -2
 
@@ -187,6 +188,21 @@
     }    
     self.generationLevel = aLevel;
 
+}
+
+- (void)setList:(TaskList *)aList updateDB:(BOOL)update {
+    if (update) {
+        FMDatabase *db = [FMDatabase database];
+        if (![db open]) {
+            NIF_ERROR(@"Could not open db.");            
+        } else {
+            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET local_list_id = %d WHERE local_task_id = %d",aList.localListId,self.localTaskId];
+            BOOL update = [db executeUpdate:sql];                           
+            NIF_INFO(@"UPDATE List of task SUCCESS ? : %d", update);
+            [db close];
+        }
+    }
+    self.list = aList;
 }
 
 - (NSInteger)generationLevelAtTasks:(NSMutableArray *)tasks {
