@@ -44,6 +44,7 @@
 @synthesize redoButton = _redoButton;
 @synthesize datePicker = _datePicker;
 @synthesize pickedDate = _pickedDate;
+@synthesize taskLists = _taskLists;
 
 - (void)dealloc {
     
@@ -53,6 +54,7 @@
     [_textView release];
     [_titleField release];
     [_pickedDate release];
+    [_taskLists release];
     [super dealloc];
 }
 
@@ -199,17 +201,19 @@
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kListChooseCellIndentifier];
         if(cell == nil) {
             cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:kListChooseCellIndentifier] autorelease];
-            cell.textLabel.text = NSLocalizedString(@"Date", @"Date");
+            cell.textLabel.text = NSLocalizedString(@"Due Date", @"Due Date");
             cell.textLabel.font = [UIFont systemFontOfSize:14];
             cell.textLabel.textColor = [UIColor lightGrayColor];
-//            cell.detailTextLabel.tag = 101010;
             UIButton *dateButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-            dateButton.frame = CGRectMake(40, 5, 200, 30);
+            dateButton.frame = CGRectMake(60, 5, 200, 30);
             dateButton.tag = 101010;
             [cell.contentView addSubview:dateButton];
         }
-//        cell.detailTextLabel.text = [self.pickedDate description];
+        
+        UIButton *dateButton = (UIButton *)[self.tableView viewWithTag:101010];
+        [dateButton setTitle:[self.pickedDate locateTimeDescription] forState:UIControlStateNormal];
 
+        
     } else if (indexPath.row == 2) {
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kDateChooseCellIndentifier];
         if(cell == nil) {
@@ -232,7 +236,6 @@
         cell.textView.delegate = self;
         cell.textView.frame = CGRectMake(0, 0, CGRectGetWidth(cell.bounds), CGRectGetHeight(cell.frame));
         cell.textView.placeholder = NSLocalizedString(@"Click here to edit", @"Click here to edit");
-//        cell.textView.backgroundColor = [UIColor greenColor];
 
         cell.textView.text = self.tempTask.notes;
         self.textView = cell.textView;
@@ -438,7 +441,6 @@
 - (void)updateDate:(id)sender {
     self.pickedDate = self.datePicker.date;
     UIButton *dateButton = (UIButton *)[self.tableView viewWithTag:101010];
-    NIF_INFO(@"%@", [self.pickedDate locateTimeDescription]);
     [dateButton setTitle:[self.pickedDate locateTimeDescription] forState:UIControlStateNormal];
 }
 

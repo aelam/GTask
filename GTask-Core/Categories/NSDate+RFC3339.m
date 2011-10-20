@@ -69,7 +69,7 @@
     // construct a date string in the NSDate format
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     NSString *dateStr = [NSString stringWithFormat:@"%@ %@ %@%@%@", datePart, timePart, tzSignPart, tzHourPart, tzMinPart];
-    [dateFormatter setDateFormat:@"YYYY-MM-dd HH:mm:ss +0000"];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss +0000"];
     NSDate *date = [dateFormatter dateFromString:dateStr];
     [dateFormatter release];
     return date;
@@ -77,21 +77,22 @@
 
 - (NSString *)locateTimeDescription {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm";
-    
-    NSTimeZone *gmt = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-    [dateFormatter setTimeZone:gmt];
-    NSString *timeStamp = [dateFormatter stringFromDate:[NSDate date]];
+    dateFormatter.dateFormat = @"yyyy-MM-dd EE HH:mm a";
+
+    NSTimeZone *timeZone = [NSTimeZone localTimeZone];
+
+    [dateFormatter setTimeZone:timeZone];
+    NSString *timeStamp = [dateFormatter stringFromDate:self];
     [dateFormatter release];
     return timeStamp;
 }
 
 - (NSString *)locateTimeDescriptionWithFormatter:(NSString *)formatter {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    dateFormatter.dateFormat = formatter;//@"yyyy-MM-dd";
+    dateFormatter.dateFormat = formatter;
     
-    NSTimeZone *gmt = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-    [dateFormatter setTimeZone:gmt];
+    NSTimeZone *timeZone = [NSTimeZone localTimeZone];
+    [dateFormatter setTimeZone:timeZone];
     NSString *timeStamp = [dateFormatter stringFromDate:self];
     [dateFormatter release];
     return timeStamp;

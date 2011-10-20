@@ -13,8 +13,9 @@
 
 @implementation Task
 
+@synthesize list = _list;
 @synthesize localTaskId = _localTaskId;
-@synthesize localListId = _localListId;
+//@synthesize localListId = _localListId;
 @synthesize localParentId = _localParentId;
 @synthesize serverTaskId = _serverTaskId;
 @synthesize title = _title;
@@ -75,9 +76,9 @@
 
 - (id)copyWithZone:(NSZone *)zone {
     Task *task = [[Task allocWithZone:zone] init];
-    task.localListId = self.localListId;
+    task.list = self.list;
     task.localTaskId = self.localTaskId;
-    task.localListId = self.localListId;
+//    task.localListId = self.localListId;
     task.localParentId = self.localParentId;
     task.serverTaskId = self.serverTaskId;
     task.title = self.title;
@@ -88,7 +89,6 @@
     task.isCompleted = self.isCompleted;
     task.isCleared = self.isCleared;
     task.isHidden = self.isHidden;
-//    task.status = self.status;
     task.completedTimestamp = self.completedTimestamp;
     task.reminderTimestamp = self.reminderTimestamp;
     task.due = self.due;
@@ -100,9 +100,10 @@
 }
 
 - (BOOL)isSameContent:(Task *)anotherTask {
-    return (anotherTask.localListId == self.localListId &&
+    return (//anotherTask.localListId == self.localListId &&
+            anotherTask.list == self.list &&
             anotherTask.localTaskId == self.localTaskId &&
-            anotherTask.localListId == self.localListId &&
+//            anotherTask.localListId == self.localListId &&
             anotherTask.localParentId == self.localParentId &&
             [anotherTask.serverTaskId isEqualToString:self.serverTaskId] &&
             [anotherTask.title isEqualToString:self.title]&&
@@ -202,7 +203,8 @@
 
     
 - (void)dealloc {
-    [_serverTaskId release];
+    [_list release];
+//    [_serverTaskId release];
     [_title release];
     [_notes release];
     [_link release];
@@ -316,7 +318,7 @@
 
 - (NSInteger)nextSiblingOrUncleIndexAtTask:(NSMutableArray *)tasks {
     NSInteger generationLevel = [self generationLevelAtTasks:tasks];
-    if (!tasks || [tasks count] == 0) return nil;
+    if (!tasks || [tasks count] == 0) return -1;
     NSInteger index = [tasks indexOfObject:self];
     if (index < [tasks count] - 1) {
         for(int i = index+1; i < [tasks count]; i++) {

@@ -8,10 +8,13 @@
 
 #import <objc/runtime.h>
 
+@class TaskList;
+
 @interface Task : NSObject
 
+@property (retain) TaskList *list;
 @property (assign) NSInteger localTaskId;
-@property (assign) NSInteger localListId;
+//@property (assign) NSInteger localListId;
 @property (assign) NSInteger localParentId;
 @property (copy)  NSString *serverTaskId;
 @property (copy)  NSString *title;
@@ -22,7 +25,6 @@
 @property (assign)  BOOL     isCompleted;
 @property (assign)  BOOL     isCleared;
 @property (assign)  BOOL     isHidden;
-//@property (assign)  NSInteger status;
 @property (assign)  double  completedTimestamp;
 @property (assign)  double  reminderTimestamp;
 @property (assign)  double  due;

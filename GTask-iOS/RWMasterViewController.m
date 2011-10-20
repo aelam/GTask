@@ -23,21 +23,15 @@
         self.clearsSelectionOnViewWillAppear = NO;
         self.contentSizeForViewInPopover = CGSizeMake(320.0, 600.0);
     }
-    
-    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonItemStyleDone target:self action:@selector(test)];
-    self.navigationItem.rightBarButtonItem = item;
-    [item release];
 
-    UIBarButtonItem *item2 = [[UIBarButtonItem alloc] initWithTitle:@"Logout" style:UIBarButtonItemStyleDone target:[GDataEngine class] action:@selector(logout)];
-    self.navigationItem.leftBarButtonItem = item2;
-    [item2 release];
-    
     self.navigationController.toolbarHidden = NO;
     
-    UIBarButtonItem *item22 = [[[UIBarButtonItem alloc]initWithTitle:@"test" style:UIBarButtonItemStyleDone target:self action:@selector(test)] autorelease];
-    self.toolbarItems = [NSArray arrayWithObject:item22];
-    
-//    self.toolbarItems = [NSArray arrayWithObject:@"test"];
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonItemStyleDone target:self action:@selector(test)];
+    UIBarButtonItem *item2 = [[UIBarButtonItem alloc] initWithTitle:@"Logout" style:UIBarButtonItemStyleDone target:[GDataEngine class] action:@selector(logout)];
+    self.toolbarItems = [NSArray arrayWithObjects:item,item2,nil];
+    [item release];
+    [item2 release];
+ 
     [super awakeFromNib];
 }
 
@@ -152,6 +146,7 @@
         
         TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
         self.detailViewController.taskList = list;
+        self.detailViewController.taskLists = self.taskLists;
         [self.navigationController pushViewController:self.detailViewController animated:YES];
     }
 }

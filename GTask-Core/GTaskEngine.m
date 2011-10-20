@@ -278,7 +278,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             Task *task = [[Task alloc] init];
             task.localTaskId = [rs intForColumn:@"local_task_id"];
             task.serverTaskId = [rs stringForColumn:@"server_task_id"];
-            task.localListId = [rs intForColumn:@"local_list_id"];
+//            task.localListId = [rs intForColumn:@"local_list_id"];
             task.localParentId = [rs intForColumn:@"local_parent_id"];
             task.title = [rs stringForColumn:@"title"];
             task.notes = [rs stringForColumn:@"notes"];
@@ -286,7 +286,6 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             task.isCompleted = [rs boolForColumn:@"is_completed"];
             task.isHidden = [rs boolForColumn:@"is_hidden"];
             task.isDeleted = [rs boolForColumn:@"is_deleted"];
-//            task.status = [rs intForColumn:@"status"];
             task.isCleared = [rs boolForColumn:@"is_cleared"];
             task.completedTimestamp = [rs doubleForColumn:@"completed_timestamp"];
             task.reminderTimestamp = [rs doubleForColumn:@"reminder_timestamp"];
@@ -295,6 +294,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             task.displayOrder = [rs intForColumn:@"display_order"];
             task.generationLevel = [rs intForColumn:@"generation_level"];
             
+            task.list = aList;
             [tasks addObject:task];
             [task release];
         }
@@ -495,7 +495,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
         NSString *sql = [NSString stringWithFormat:
                          @"INSERT INTO tasks (local_list_id,local_parent_id,notes,self_link,title,due,is_updated,display_order,is_completed,completed_timestamp,local_modify_timestamp) VALUES (%d,%d,%@,%@,%@,%0.0f,%d,%d,%d,%0.0f,%0.0f)",
-                         aTask.localListId,
+                         aTask.list.localListId,
                          aTask.localParentId,
                          note,
                          link,

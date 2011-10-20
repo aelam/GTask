@@ -35,6 +35,8 @@
 @synthesize statusItem = _statusItem;
 @synthesize quickInputField = _quickInputField;
 
+@synthesize taskLists = _taskLists;
+
 - (void)dealloc
 {
     [_detailItem release];
@@ -46,6 +48,7 @@
     [_editViewController release];
     [_statusItem release];
     [_quickInputField release];
+    [_taskLists release];
     [super dealloc];
 }
 
@@ -255,6 +258,7 @@
 
     self.editViewController.task = [self.tasks objectAtIndex:indexPath.row];
     self.editViewController.tempTask = self.editViewController.task;
+    self.editViewController.taskLists = self.taskLists;
     [self.navigationController pushViewController:self.editViewController animated:YES];
 }
 
@@ -425,7 +429,8 @@
     
     Task *task = [[Task alloc] init];
     task.displayOrder = 0;
-    task.localListId = self.taskList.localListId;
+//    task.localListId = self.taskList.localListId;
+    task.list = self.taskList;
     task.isUpdated = NO;
     task.isCompleted = NO;
     task.localModifyTime = [[NSDate date] timeIntervalSince1970];

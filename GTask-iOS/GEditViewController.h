@@ -32,4 +32,7 @@
 @property (retain) UIDatePicker *datePicker;
 @property (retain) NSDate *pickedDate;
 
+@property (strong, nonatomic) NSMutableArray *taskLists;
+
+
 @end

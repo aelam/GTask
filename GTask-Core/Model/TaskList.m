@@ -36,5 +36,8 @@
     [super dealloc];
 }
 
+- (NSString *)description {
+    return [NSString stringWithFormat:@"LocalListId : %d ServerListId : %@",self.localListId,self.serverListId];
+}
 
 @end
