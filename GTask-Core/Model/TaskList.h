@@ -8,6 +8,12 @@
 
 @class Task;
 
+typedef enum {
+    TaskOrderTypeByDisplayOrder,    // 按displayOrder排序
+    TaskOrderTypeByAlphabetical     // 字母排序
+}TaskOrderType;
+
+
 @interface TaskList : NSObject
 
 
