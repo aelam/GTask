@@ -33,4 +33,42 @@ typedef enum {
 @property (retain)  NSMutableArray *tasks;
 @property (assign)  NSInteger displayOrder;
 
+
+- (NSMutableArray *)tasks;
+- (void)setTasks:(NSMutableArray *)tasks;
+
+///////////////////////////////////////////////////////////////////////////////////////
+- (Task *)firstTask;
+- (Task *)lastTask;
+
+- (Task *)parentOfTask:(Task *)task;
+- (NSArray *)sonsOfTask:(Task *)task;
+
+- (NSInteger)generationLevelOfTask:(Task *)task;
+
+- (NSArray *)siblingsAndMeOfTask:(Task *)task;
+- (NSArray *)siblingsTaskOfTask:(Task *)task;
+
+// 前一任务 后一任务
+- (Task *)prevTaskOfTask:(Task *)task;
+- (Task *)nextTaskOfTask:(Task *)task;
+
+- (NSInteger)nextSiblingOrUncleIndexOfTask:(Task *)task;
+
+
+// 同级别前一任务 同级别后一任务
+- (Task *)prevSiblingOfTask:(Task *)task;
+- (Task *)nextSiblingOfTask:(Task *)task;
+
+- (NSArray *)youngerSiblingsOfTask:(Task *)task;
+
+// 所有子任务 递归
+- (NSArray *)allDescendantsOfTask:(Task *)task;
+
+//////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)deleteTask:(Task *)aTask;
+
+
+
+
 @end

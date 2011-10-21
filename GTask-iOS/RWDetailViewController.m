@@ -139,7 +139,7 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    NSArray *tasks = [[GTaskEngine engine] localTasksForList:self.taskList];
+    NSArray *tasks = self.taskList.tasks;
     if (tasks) {
         [self.tasks removeAllObjects];
         [self.tasks addObjectsFromArray:tasks];

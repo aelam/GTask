@@ -214,13 +214,9 @@
         return 0;
     }
 }
-
-
-
     
 - (void)dealloc {
     [_list release];
-//    [_serverTaskId release];
     [_title release];
     [_notes release];
     [_link release];
@@ -411,7 +407,10 @@
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-
+- (BOOL)isFirstLevelTask {
+    if (self.localParentId == -1)  return YES;
+    else return NO;
+}
 
 
 

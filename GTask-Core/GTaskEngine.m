@@ -237,9 +237,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     }
 }
 
-- (NSMutableArray *)localTaskLists{
-    return [self localTaskListsWithSortType:1];
-}
+//- (NSMutableArray *)localTaskLists{
+//    return [self localTaskListsWithSortType:1];
+//}
 
 - (NSMutableArray *)localTaskListsWithSortType:(NSInteger)sortType {
     NSMutableArray *taskLists = nil;
@@ -274,6 +274,8 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     }
 }
 
+
+/*
 - (NSMutableArray *)localTasksForList:(TaskList *)aList {
     NSMutableArray *tasks = nil;
     FMDatabase *db = [FMDatabase database];
@@ -311,7 +313,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         if([tasks count] == 0) return nil;
         return tasks;
     }
-}
+}*/
 
 - (void)fetchServerTaskListsWithResultHander:(void(^)(GTaskEngine *,NSMutableArray *))resultHander {
     NSURL *url = [NSURL URLWithString:kTaskListsURL];
