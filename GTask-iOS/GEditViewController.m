@@ -409,6 +409,7 @@
 #pragma mark - 
 #pragma mark ToolBar above keyboard
 - (void)appendToolbarAboveKeyboard:(UIView *)keyboard {
+    
     UIView *toolbar = [[UIView alloc] initWithFrame:CGRectMake(0, -40, keyboard.frame.size.width, 40)];
     toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth |UIViewAutoresizingFlexibleBottomMargin;
     toolbar.backgroundColor = RGB_COLOR(223,223,227);
@@ -441,6 +442,8 @@
     
     [keyboard addSubview:toolbar];
     [toolbar release];
+    
+//    [UIView commitAnimations];
 
 }
 

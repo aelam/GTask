@@ -104,7 +104,7 @@
     if (!self.tasks || [self.tasks count] == 0) return 0;
     Task *parent = [self parentOfTask:task];
     if (parent) {
-        return 1 + [self generationLevelOfTask:task];
+        return 1 + [self generationLevelOfTask:parent];
     } else {
         return 0;
     }
@@ -156,7 +156,7 @@
     if (!self.tasks || [self.tasks count] == 0) return nil;
     else if ([self lastTask] == nil || [self lastTask] == task) return nil;
     else {
-        NSInteger index = [self.tasks indexOfObject:self];
+        NSInteger index = [self.tasks indexOfObject:task];
         return [self.tasks objectAtIndex:index + 1];
     }
 }
@@ -176,8 +176,8 @@
     NSMutableArray *siblingsAndMe = [NSMutableArray arrayWithArray:[self siblingsAndMeOfTask:task]];
     if (siblingsAndMe == nil) {
         return nil;
-    } else if ([siblingsAndMe containsObject:self]) {
-        [siblingsAndMe removeObject:self];
+    } else if ([siblingsAndMe containsObject:task]) {
+        [siblingsAndMe removeObject:task];
         return siblingsAndMe;
     } else {
         NIF_ERROR(@"THIS SIBLINGS SHOULD INCLUDE ME!");
@@ -188,7 +188,7 @@
 - (NSInteger)nextSiblingOrUncleIndexOfTask:(Task *)task {
     NSInteger generationLevel = [self generationLevelOfTask:task];
     if (!self.tasks || [self.tasks count] == 0) return -1;
-    NSInteger index = [self.tasks indexOfObject:self];
+    NSInteger index = [self.tasks indexOfObject:task];
     if (index < [self.tasks count] - 1) {
         for(int i = index+1; i < [self.tasks count]; i++) {
             Task *tempTask = [self.tasks objectAtIndex:i];
@@ -207,7 +207,7 @@
 - (Task *)prevSiblingOfTask:(Task *)task {
     if (!self.tasks || [self.tasks count] == 0) return nil;
     NSArray *siblingsAndMe = [self siblingsAndMeOfTask:task];
-    NSInteger indexOfMe = [siblingsAndMe indexOfObject:self];
+    NSInteger indexOfMe = [siblingsAndMe indexOfObject:task];
     NIF_INFO(@"indexOfMe : %d", indexOfMe);
     if (indexOfMe > 0) {
         return [siblingsAndMe objectAtIndex:(indexOfMe - 1)];
@@ -219,7 +219,7 @@
 - (Task *)nextSiblingOfTask:(Task *)task {
     if (!self.tasks || [self.tasks count] == 0) return nil;
     NSArray *siblingsAndMe = [self siblingsAndMeOfTask:task];
-    NSInteger indexOfMe = [siblingsAndMe indexOfObject:self];
+    NSInteger indexOfMe = [siblingsAndMe indexOfObject:task];
     NIF_INFO(@"indexOfMe : %d", indexOfMe);
     if (indexOfMe < [self.tasks count] - 1) {
         return [siblingsAndMe objectAtIndex:(indexOfMe + 1)];
@@ -229,10 +229,9 @@
 }
 
 - (NSArray *)youngerSiblingsOfTask:(Task *)task {
-//- (NSArray *)youngerSiblingsTaskAtTasks:(NSMutableArray *)tasks {
     if (!self.tasks || [self.tasks count] == 0) return nil;
     NSArray *siblingsAndMe = [self siblingsAndMeOfTask:task];
-    NSInteger indexOfMe = [siblingsAndMe indexOfObject:self];
+    NSInteger indexOfMe = [siblingsAndMe indexOfObject:task];
     NIF_INFO(@"indexOfMe : %d", indexOfMe);
     if ([siblingsAndMe count] > 1) {
         NSIndexSet *indexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(indexOfMe + 1, [siblingsAndMe count] - indexOfMe - 1)];
@@ -246,10 +245,8 @@
 
 // 所有子任务 递归
 - (NSArray *)allDescendantsOfTask:(Task *)task {
-//- (NSArray *)allDescendantsAtTasks:(NSMutableArray *)tasks {
     NSMutableArray *descendants = [NSMutableArray array];
     
-//    NSArray *sons = [self sonsAtTasks:tasks];
     NSArray *sons = [self sonsOfTask:task];
     if (!sons || [sons count] == 0) {
         return nil;
@@ -286,26 +283,25 @@
     }
 }
 
-- (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex forTasks:(NSMutableArray *)tasks {
+- (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex {
     
-    Task *fromTask = [[tasks objectAtIndex:fromIndex] retain];
-    Task *toTask = [tasks objectAtIndex:toIndex];
+    Task *fromTask = [[self.tasks objectAtIndex:fromIndex] retain];
+    Task *toTask = [self.tasks objectAtIndex:toIndex];
     
+    NSArray *subTasks = [self allDescendantsOfTask:fromTask];
     
-    if ([[fromTask allDescendantsAtTasks:tasks] containsObject:toTask]) {
+    if ([subTasks containsObject:toTask]) {
         return;
     }
-    
-    NSArray *subTasks = [fromTask allDescendantsAtTasks:tasks];
-    
+        
     int begin = 0;
     int end = 0;
     if (fromTask.displayOrder > toTask.displayOrder) {  // *** 上移 ***
         
-        Task *prevToTask = [toTask prevTaskAtTasks:tasks];
+        Task *prevToTask = [self prevTaskOfTask:toTask];
         
-        NSInteger toTaskLevel = [toTask generationLevelAtTasks:tasks];
-        NSInteger prevToTaskLevel = [prevToTask generationLevelAtTasks:tasks];
+        NSInteger toTaskLevel = [self generationLevelOfTask:toTask];
+        NSInteger prevToTaskLevel = [self generationLevelOfTask:prevToTask];
         
         if (prevToTask == nil) {
             [fromTask setLocalParentId:-1 updateDB:YES];
@@ -323,19 +319,20 @@
         NSEnumerator *enumerator = [subTasks reverseObjectEnumerator];
         Task *aTask = nil;
         while (aTask = [enumerator nextObject]) {
-            [tasks removeObject:aTask];
-            [tasks insertObject:aTask atIndex:toIndex];
+            [self.tasks removeObject:aTask];
+            [self.tasks insertObject:aTask atIndex:toIndex];
         }
         
-        [tasks removeObject:fromTask];
-        [tasks insertObject:fromTask atIndex:toIndex];
+        [self.tasks removeObject:fromTask];
+        [self.tasks insertObject:fromTask atIndex:toIndex];
         [fromTask release];
         
         begin = toTask.displayOrder;
         end = fromTask.displayOrder + [subTasks count];
     } else if ( fromTask.displayOrder == toTask.displayOrder) {     // *** 移 ***
-        Task *prevTask = [fromTask prevTaskAtTasks:tasks];
-        Task *parent = [fromTask parentTaskAtTasks:tasks];
+        Task *prevTask = [self prevTaskOfTask:fromTask];
+        Task *parent = [self parentOfTask:fromTask];
+        
         if (prevTask  && prevTask != parent) {
             [fromTask setLocalParentId:prevTask.localParentId updateDB:YES];
         } else {
@@ -346,10 +343,10 @@
     else {                                                          // *** 下移 ***
         NIF_INFO(@"fromTask.displayOrder:%d > toTask.displayOrder: %d", fromTask.displayOrder ,toTask.displayOrder);
         
-        Task *nextToTask = [toTask nextTaskAtTasks:tasks];
+        Task *nextToTask = [self nextTaskOfTask:toTask];
         
-        NSInteger toTaskLevel = [toTask generationLevelAtTasks:tasks];
-        NSInteger nextToTaskLevel = [nextToTask generationLevelAtTasks:tasks];
+        NSInteger toTaskLevel = [self generationLevelOfTask:toTask];
+        NSInteger nextToTaskLevel = [self generationLevelOfTask:nextToTask];
         
         if (nextToTask == nil) {
             [fromTask setLocalParentId:toTask.localParentId updateDB:YES];     
@@ -363,15 +360,15 @@
             NIF_ERROR(@"HOW TO MOVE DOWN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
         
-        [tasks removeObject:fromTask];
-        [tasks insertObject:fromTask atIndex:toIndex];
+        [self.tasks removeObject:fromTask];
+        [self.tasks insertObject:fromTask atIndex:toIndex];
         [fromTask release];
         
         NSEnumerator *enumerator = [subTasks objectEnumerator];
         Task *aTask = nil;
         while (aTask = [enumerator nextObject]) {
-            [tasks removeObject:aTask];
-            [tasks insertObject:aTask atIndex:toIndex];
+            [self.tasks removeObject:aTask];
+            [self.tasks insertObject:aTask atIndex:toIndex];
         }
         
         begin = fromTask.displayOrder;
@@ -379,7 +376,7 @@
     }
     
     for (int i = begin;i <= end;i++) {
-        Task *task = [tasks objectAtIndex:i];
+        Task *task = [self.tasks objectAtIndex:i];
         [task setDisplayOrder:i updateDB:YES];
     }
 }

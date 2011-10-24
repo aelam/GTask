@@ -68,6 +68,9 @@ typedef enum {
 //////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)deleteTask:(Task *)aTask;
 
+- (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
+
+
 
 
 

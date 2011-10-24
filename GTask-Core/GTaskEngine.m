@@ -237,9 +237,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     }
 }
 
-//- (NSMutableArray *)localTaskLists{
-//    return [self localTaskListsWithSortType:1];
-//}
+- (NSMutableArray *)localTaskLists{
+    return [self localTaskListsWithSortType:1];
+}
 
 - (NSMutableArray *)localTaskListsWithSortType:(NSInteger)sortType {
     NSMutableArray *taskLists = nil;
@@ -260,7 +260,6 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             list.isDefault = [rs boolForColumn:@"is_default"];
             list.isDeleted = [rs boolForColumn:@"is_deleted"];
             list.isCleared = [rs boolForColumn:@"is_cleared"];
-//            list.status = [rs intForColumn:@"status"];
             list.lastestSyncTime = [rs doubleForColumn:@"latest_sync_timestamp"];
             list.serverModifyTime = [rs doubleForColumn:@"server_modify_timestamp"];
             list.localModifyTime = [rs doubleForColumn:@"local_modify_timestamp"];

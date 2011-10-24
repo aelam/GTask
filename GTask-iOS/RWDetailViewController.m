@@ -108,7 +108,7 @@
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
     if (self = [super initWithCoder:aDecoder]) {
-        _tasks = [[NSMutableArray alloc] init];
+//        _tasks = [[NSMutableArray alloc] init];
     }
     return self;
 }
@@ -140,10 +140,10 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     NSArray *tasks = self.taskList.tasks;
-    if (tasks) {
-        [self.tasks removeAllObjects];
-        [self.tasks addObjectsFromArray:tasks];
+    if (tasks && [tasks count]) {
+        self.tasks = self.taskList.tasks;
         [self.tableView reloadData];
+
     }
     else {
         [[GTaskEngine engine] fetchServerTasksForList:self.taskList resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
@@ -357,7 +357,8 @@
         return;
     }
 
-    [[GTaskEngine engine]moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row forTasks:self.tasks];
+//    [[GTaskEngine engine]moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row forTasks:self.tasks];
+    [self.taskList moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row];
     [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.3];
 }
 
