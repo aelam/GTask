@@ -9,6 +9,12 @@
 @class Task;
 
 typedef enum {
+    TaskUpgradeLevelUpLevel     = 1,
+    TaskUpgradeLevelDownLevel   = -1,
+    TaskUpgradeLevelNoChange    = 0,
+}TaskUpgradeLevel;
+
+typedef enum {
     TaskOrderTypeByDisplayOrder,    // 按displayOrder排序
     TaskOrderTypeByAlphabetical     // 字母排序
 }TaskOrderType;
@@ -66,9 +72,12 @@ typedef enum {
 - (NSArray *)allDescendantsOfTask:(Task *)task;
 
 //////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)insertTask:(Task *)aTask;
 - (BOOL)deleteTask:(Task *)aTask;
+- (BOOL)deleteTaskAtIndex:(NSInteger)index;
 
 - (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
+- (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index;
 
 
 

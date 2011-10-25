@@ -204,7 +204,8 @@
         cell.firstLabel.textColor = task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
     }];
             
-    task.generationLevel = [task generationLevelAtTasks:self.tasks];
+//    task.generationLevel = [task generationLevelAtTasks:self.tasks];
+    task.generationLevel = [self.taskList generationLevelOfTask:task];
     cell.checkBox.frame = CGRectMake(10 + 20 *task.generationLevel, 7, 20, 20);
     cell.firstLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     cell.firstLabel.frame = CGRectMake(44 + 20 *task.generationLevel, 5, cell.frame.size.width - 60 - 20 *task.generationLevel, 20);
@@ -212,7 +213,8 @@
     cell.checkBox.checked = task.isCompleted;
     cell.firstLabel.textColor = task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
     
-    NSArray *subTasks = [task allDescendantsAtTasks:self.tasks];
+//    NSArray *subTasks = [task allDescendantsAtTasks:self.tasks];
+    NSArray *subTasks = [self.taskList allDescendantsOfTask:task];
     
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:task.serverModifyTime];
 
@@ -245,7 +247,7 @@
 - (NSInteger)tableView:(UITableView *)tableView indentationLevelForRowAtIndexPath:(NSIndexPath *)indexPath {
     Task *task = [self.tasks objectAtIndex:indexPath.row];
     
-    task.generationLevel = [task generationLevelAtTasks:self.tasks];
+    task.generationLevel = [self.taskList generationLevelOfTask:task];
     return task.generationLevel * 2;    
 }
 
@@ -257,7 +259,6 @@
 
     self.editViewController.task = [self.tasks objectAtIndex:indexPath.row];
     self.editViewController.tempTask = self.editViewController.task;
-//    self.editViewController.taskLists = self.taskLists;
     [self.navigationController pushViewController:self.editViewController animated:YES];
 }
 
@@ -269,13 +270,15 @@
     
     Task *fromTask = [self.tasks objectAtIndex:sourceIndexPath.row];
     Task *toTask = [self.tasks objectAtIndex:proposedDestinationIndexPath.row];
-    NSArray *fromSubtasks = [fromTask allDescendantsAtTasks:self.tasks];
+//    NSArray *fromSubtasks = [fromTask allDescendantsAtTasks:self.tasks];
+    NSArray *fromSubtasks = [self.taskList allDescendantsOfTask:fromTask];
     
     if (sourceIndexPath.row >=  proposedDestinationIndexPath.row) { //**上移**
         return proposedDestinationIndexPath;
     } else {    // **下移**
         if ([fromSubtasks containsObject:toTask]) {
-            NSInteger targetIndex = [fromTask nextSiblingOrUncleIndexAtTask:self.tasks];
+//            NSInteger targetIndex = [fromTask nextSiblingOrUncleIndexAtTask:self.tasks];
+            NSInteger targetIndex = [self.taskList nextSiblingOrUncleIndexOfTask:fromTask];
             if (targetIndex != -1 && targetIndex != 0) {
                 NSIndexPath *supportedIndexPath = [NSIndexPath indexPathForRow:targetIndex inSection:sourceIndexPath.section];
                 // fixed a bug, when cell in supportedIndexPath is nil, it would raise a exception of NSArray out of bound
@@ -323,13 +326,14 @@
         [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
 
         Task *deletingTask = [[self.tasks objectAtIndex:indexPath.row] retain];
-        [self.tasks removeObjectAtIndex:indexPath.row];
-        [[GTaskEngine engine] deleteTask:deletingTask]; 
+        [self.taskList deleteTaskAtIndex:indexPath.row];
         
         [self.tableView endUpdates];
 
-        Task *parent = [deletingTask parentTaskAtTasks:self.tasks];
-        NSArray *sons = [deletingTask sonsAtTasks:self.tasks];
+//        Task *parent = [deletingTask parentTaskAtTasks:self.tasks];
+//        NSArray *sons = [deletingTask sonsAtTasks:self.tasks];
+        Task *parent = [self.taskList parentOfTask:deletingTask];
+        NSArray *sons = [self.taskList sonsOfTask:deletingTask];
         for(Task *son in sons) {
             if (parent) {
                 [son setLocalParentId:parent.localTaskId updateDB:YES];
@@ -357,7 +361,6 @@
         return;
     }
 
-//    [[GTaskEngine engine]moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row forTasks:self.tasks];
     [self.taskList moveTaskAtIndex:fromIndexPath.row toIndex:toIndexPath.row];
     [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.3];
 }
@@ -386,11 +389,11 @@
 
 - (void)tableView:(UITableView *)tableView didSwipeCellAtIndexPath:(NSIndexPath *)indexPath direction:(UISwipeGestureRecognizerDirection) direction{
     if (direction == UISwipeGestureRecognizerDirectionLeft) {
-        if([[GTaskEngine engine] upgradeTaskLevel:TaskUpgradeLevelUpLevel atIndex:indexPath.row forTasks:self.tasks]){
+        if ([self.taskList upgradeTaskLevel:TaskUpgradeLevelUpLevel atIndex:indexPath.row]) {
             [self.tableView reloadData];
         }
     } else if(direction == UISwipeGestureRecognizerDirectionRight) {
-        if([[GTaskEngine engine] upgradeTaskLevel:TaskUpgradeLevelDownLevel atIndex:indexPath.row forTasks:self.tasks]) {
+        if([self.taskList upgradeTaskLevel:TaskUpgradeLevelDownLevel atIndex:indexPath.row]) {
             [self.tableView reloadData];
         }
     }
@@ -429,7 +432,6 @@
     
     Task *task = [[Task alloc] init];
     task.displayOrder = 0;
-//    task.localListId = self.taskList.localListId;
     task.list = self.taskList;
     task.isUpdated = NO;
     task.isCompleted = NO;
@@ -442,8 +444,7 @@
          [e setDisplayOrder:i+1 updateDB:YES];
     }
     
-    [self.tasks insertObject:task atIndex:0];
-    [[GTaskEngine engine] insertTask:task]; 
+    [self.taskList insertTask:task];
     [task release];
     
     [self.tableView beginUpdates];

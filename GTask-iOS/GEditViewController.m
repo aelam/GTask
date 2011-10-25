@@ -207,15 +207,15 @@
             cell.textLabel.text = NSLocalizedString(@"Due Date", @"Due Date");
             cell.textLabel.font = [UIFont systemFontOfSize:14];
             cell.textLabel.textColor = [UIColor lightGrayColor];
-            UIButton *dateButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-            dateButton.frame = CGRectMake(80, 5, 200, 30);
-            dateButton.tag = 101010;
-            [cell.contentView addSubview:dateButton];
+//            UIButton *dateButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+//            dateButton.frame = CGRectMake(80, 5, 200, 30);
+//            dateButton.tag = 101010;
+//            [cell.contentView addSubview:dateButton];
         }
         
-        UIButton *dateButton = (UIButton *)[self.tableView viewWithTag:101010];
-        [dateButton setTitle:[self.pickedDate locateTimeDescription] forState:UIControlStateNormal];
-
+//        UIButton *dateButton = (UIButton *)[self.tableView viewWithTag:101010];
+//        [dateButton setTitle:[self.pickedDate locateTimeDescription] forState:UIControlStateNormal];
+        cell.detailTextLabel.text = [self.pickedDate locateTimeDescription];
         
     } else if (indexPath.row == 2) {
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kDateChooseCellIndentifier];
@@ -454,8 +454,9 @@
 
 - (void)updateDate:(id)sender {
     self.pickedDate = self.datePicker.date;
-    UIButton *dateButton = (UIButton *)[self.tableView viewWithTag:101010];
-    [dateButton setTitle:[self.pickedDate locateTimeDescription] forState:UIControlStateNormal];
+//    UIButton *dateButton = (UIButton *)[self.tableView viewWithTag:101010];
+//    [dateButton setTitle:[self.pickedDate locateTimeDescription] forState:UIControlStateNormal];
+    [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (UIDatePicker *)datePicker {

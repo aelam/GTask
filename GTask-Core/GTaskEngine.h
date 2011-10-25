@@ -11,12 +11,6 @@
 @class TaskList;
 @class Task;
 
-typedef enum {
-    TaskUpgradeLevelUpLevel     = 1,
-    TaskUpgradeLevelDownLevel   = -1,
-    TaskUpgradeLevelNoChange    = 0,
-}TaskUpgradeLevel;
-
 @interface GTaskEngine : GDataEngine
 
 + (GTaskEngine *)sharedEngine;
@@ -56,8 +50,8 @@ typedef enum {
 
 - (void)updateTask:(Task *)aTask;
 
-- (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex forTasks:(NSMutableArray *)tasks;
-- (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks;
+//- (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex forTasks:(NSMutableArray *)tasks;
+//- (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks;
 
 - (void)deleteTaskAtIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks;
 

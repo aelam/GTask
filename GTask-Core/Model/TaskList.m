@@ -263,6 +263,43 @@
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)insertTask:(Task *)aTask {
+    [self.tasks insertObject:aTask atIndex:0];
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NSLog(@"Could not open db.");
+		return NO;
+    } else {
+        
+        NSString *note = aTask.notes?[NSString stringWithFormat:@"'%@'",[aTask.notes stringByReplacingOccurrencesOfString:@"'" withString:@"''"]]:@"null";
+        NSString *title = aTask.title?[NSString stringWithFormat:@"'%@'",[aTask.title stringByReplacingOccurrencesOfString:@"'" withString:@"''"]]:@"null";
+        NSString *link = aTask.link?[NSString stringWithFormat:@"'%@'",[aTask.link stringByReplacingOccurrencesOfString:@"'" withString:@"''"]]:@"null";
+        
+        NSString *sql = [NSString stringWithFormat:
+                         @"INSERT INTO tasks (local_list_id,local_parent_id,notes,self_link,title,due,is_updated,display_order,is_completed,completed_timestamp,local_modify_timestamp) VALUES (%d,%d,%@,%@,%@,%0.0f,%d,%d,%d,%0.0f,%0.0f)",
+                         aTask.list.localListId,
+                         aTask.localParentId,
+                         note,
+                         link,
+                         title, 
+                         aTask.due,
+                         aTask.isUpdated,
+                         aTask.displayOrder,
+                         aTask.isCompleted,
+                         aTask.completedTimestamp,
+                         aTask.localModifyTime];
+        NIF_INFO(@"save to DB sql : %@", sql);
+        NSError *error = nil;
+        BOOL rs = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
+        if (error) {
+            NIF_INFO(@"%@", error);
+        }
+        aTask.localTaskId = [db lastInsertRowId];
+        
+        [db close];        
+        return rs;
+    }
+}
 
 - (BOOL)deleteTask:(Task *)aTask {
     FMDatabase *db = [FMDatabase database];
@@ -282,6 +319,30 @@
         return rs;
     }
 }
+
+- (BOOL)deleteTaskAtIndex:(NSInteger)index {
+    Task *aTask = [self.tasks objectAtIndex:index];
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NSLog(@"Could not open db.");
+		return NO;
+    } else {
+        NSString *sql = [NSString stringWithFormat:@"DELETE FROM tasks WHERE local_task_id = %d",aTask.localTaskId];
+        NIF_INFO(@"save to DB sql : %@", sql);
+        NSError *error = nil;
+        BOOL rs = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
+        if (error) {
+            NIF_INFO(@"%@", error);
+        }
+        [db close];        
+        if (rs) {
+            [self.tasks removeObject:aTask];
+        }
+        
+        return rs;
+    }
+}
+
 
 - (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex {
     
@@ -381,6 +442,45 @@
     }
 }
 
+
+- (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index {
+    Task *task = [self.tasks objectAtIndex:index];
+//    Task *prevSiblingTask = [task prevSiblingTaskAtTasks:self.tasks];
+    Task *prevSiblingTask = [self prevSiblingOfTask:task];
+    
+    if (level == TaskUpgradeLevelDownLevel) {
+        if (prevSiblingTask == nil) {
+            NIF_ERROR(@"NO task above this task!");
+            return NO;
+        } else {
+            [task setLocalParentId:prevSiblingTask.localTaskId updateDB:YES];
+            return YES;
+        }
+        
+    } else if (level == TaskUpgradeLevelUpLevel) {
+        if (task.localParentId == -1) {
+            NIF_ERROR(@"YOU'VE ALREADY IN 1ST LEVEL!");
+            return NO;
+        } else {
+//            Task *parent = [task parentTaskAtTasks:self.tasks];
+            Task *parent = [self parentOfTask:task];
+            
+//            NSArray *youngerSiblings = [task youngerSiblingsTaskAtTasks:self.tasks];
+            NSArray *youngerSiblings = [self youngerSiblingsOfTask:task];
+            NIF_INFO(@"%@", youngerSiblings);
+            for(Task *sibling in youngerSiblings) {
+                [sibling setLocalParentId:task.localTaskId updateDB:YES];
+            }
+            
+            [task setLocalParentId:parent.localParentId updateDB:YES];
+            return YES;
+        }
+        
+    } else {
+        NIF_ERROR(@"MAKE SURE YOU NEED UPGRADE OR DOWNGRADE??");
+        return NO;
+    }
+}
 
 
 
