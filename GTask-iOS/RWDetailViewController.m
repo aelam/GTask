@@ -253,13 +253,15 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
     if (!self.editViewController) {
         self.editViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGEditViewController"];
     }
-
+    
     self.editViewController.task = [self.tasks objectAtIndex:indexPath.row];
     self.editViewController.tempTask = self.editViewController.task;
     [self.navigationController pushViewController:self.editViewController animated:YES];
+    
 }
 
 
@@ -330,8 +332,6 @@
         
         [self.tableView endUpdates];
 
-//        Task *parent = [deletingTask parentTaskAtTasks:self.tasks];
-//        NSArray *sons = [deletingTask sonsAtTasks:self.tasks];
         Task *parent = [self.taskList parentOfTask:deletingTask];
         NSArray *sons = [self.taskList sonsOfTask:deletingTask];
         for(Task *son in sons) {

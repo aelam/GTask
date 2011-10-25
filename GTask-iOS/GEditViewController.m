@@ -435,8 +435,8 @@
     // Hide Keyboard Button
     UIButton *hideKeyboardButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     hideKeyboardButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-    hideKeyboardButton.frame = CGRectMake(CGRectGetWidth(toolbar.frame) - 110, 5, 100, 30);
-    [hideKeyboardButton setTitle:@"Hide|" forState:UIControlStateNormal];
+    hideKeyboardButton.frame = CGRectMake(CGRectGetWidth(toolbar.frame) - 80, 5, 60, 30);
+    [hideKeyboardButton setTitle:@"Hide" forState:UIControlStateNormal];
     [hideKeyboardButton addTarget:self action:@selector(hideKeyboard:) forControlEvents:UIControlEventTouchUpInside];
     [toolbar addSubview:hideKeyboardButton];
     

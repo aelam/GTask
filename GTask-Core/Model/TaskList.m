@@ -253,7 +253,7 @@
     }
     for(Task *son in sons) {
         [descendants addObject:son];
-        NSArray *sonz_sons = [self sonsOfTask:son];
+        NSArray *sonz_sons = [self allDescendantsOfTask:son];
         if (sonz_sons && [sonz_sons count]) {
             [descendants addObjectsFromArray:sonz_sons];            
         }
@@ -445,7 +445,6 @@
 
 - (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index {
     Task *task = [self.tasks objectAtIndex:index];
-//    Task *prevSiblingTask = [task prevSiblingTaskAtTasks:self.tasks];
     Task *prevSiblingTask = [self prevSiblingOfTask:task];
     
     if (level == TaskUpgradeLevelDownLevel) {
@@ -462,12 +461,9 @@
             NIF_ERROR(@"YOU'VE ALREADY IN 1ST LEVEL!");
             return NO;
         } else {
-//            Task *parent = [task parentTaskAtTasks:self.tasks];
             Task *parent = [self parentOfTask:task];
-            
-//            NSArray *youngerSiblings = [task youngerSiblingsTaskAtTasks:self.tasks];
             NSArray *youngerSiblings = [self youngerSiblingsOfTask:task];
-            NIF_INFO(@"%@", youngerSiblings);
+
             for(Task *sibling in youngerSiblings) {
                 [sibling setLocalParentId:task.localTaskId updateDB:YES];
             }
