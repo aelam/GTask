@@ -51,7 +51,7 @@
             _tasks = nil;
         } else {
             _tasks = [[NSMutableArray alloc] init];
-            FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d ORDER BY display_order",self.localListId]];
+            FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d AND is_deleted = 0 ORDER BY display_order",self.localListId]];
             while ([rs next]) {
                 Task *task = [[Task alloc] init];
                 task.localTaskId = [rs intForColumn:@"local_task_id"];
@@ -307,40 +307,23 @@
         NSLog(@"Could not open db.");
 		return NO;
     } else {
-        NSString *sql = [NSString stringWithFormat:@"DELETE FROM tasks WHERE local_task_id = %d",aTask.localTaskId];
-        NIF_INFO(@"save to DB sql : %@", sql);
+//        NSString *sql = [NSString stringWithFormat:@"DELETE FROM tasks WHERE local_task_id = %d",aTask.localTaskId];
+        NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET is_deleted = 1 WHERE local_task_id = %d",aTask.localTaskId];
+      NIF_INFO(@"save to DB sql : %@", sql);
         NSError *error = nil;
         BOOL rs = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
         if (error) {
             NIF_INFO(@"%@", error);
         }
         [db close];        
+        [self.tasks removeObject:aTask];
         
         return rs;
     }
 }
 
 - (BOOL)deleteTaskAtIndex:(NSInteger)index {
-    Task *aTask = [self.tasks objectAtIndex:index];
-    FMDatabase *db = [FMDatabase database];
-    if (![db open]) {
-        NSLog(@"Could not open db.");
-		return NO;
-    } else {
-        NSString *sql = [NSString stringWithFormat:@"DELETE FROM tasks WHERE local_task_id = %d",aTask.localTaskId];
-        NIF_INFO(@"save to DB sql : %@", sql);
-        NSError *error = nil;
-        BOOL rs = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
-        if (error) {
-            NIF_INFO(@"%@", error);
-        }
-        [db close];        
-        if (rs) {
-            [self.tasks removeObject:aTask];
-        }
-        
-        return rs;
-    }
+    return [self deleteTask:[self.tasks objectAtIndex:index]];
 }
 
 
