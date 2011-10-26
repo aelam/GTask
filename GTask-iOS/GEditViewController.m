@@ -290,6 +290,18 @@
 
 #pragma mark -
 #pragma mark UITextViewDelegate
+- (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
+    
+    [self hideDatePicker];
+    return YES;
+}
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
+
+    [self hideDatePicker];
+    return YES;
+}
+
 - (void)textViewDidBeginEditing:(UIPlaceHolderTextView *)textView {
     [self.navigationController setNavigationBarHidden:YES animated:!self.navigationController.navigationBarHidden];        
     [self addCancelAndDoneItems];
@@ -366,7 +378,7 @@
 #pragma mark keyboard Notification
 - (void)keyboardDidShow:(NSNotification *)note
 {
-    [self hideDatePicker];
+//    [self hideDatePicker];
     
     NSDictionary *info = [note userInfo];    
     NSValue *keyBounds = [info objectForKey:UIKeyboardFrameBeginUserInfoKey];
