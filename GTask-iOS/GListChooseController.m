@@ -64,6 +64,8 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    
+    
     self.taskLists = [[GTaskEngine engine] sharedTaskLists];
     
     [self.tableView reloadData];
@@ -73,6 +75,8 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    self.navigationController.toolbarHidden = YES;
+
 }
 
 - (void)viewWillDisappear:(BOOL)animated

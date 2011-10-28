@@ -27,6 +27,9 @@
 - (void)showDatePicker;
 - (void)hideDatePicker;
 
+- (void)clearDate;
+- (void)confirmDate;
+
 @end
 
 #define TASK_TITLE_TEXT_FIELD_TAG   10101
@@ -45,8 +48,8 @@
 @synthesize redoButton = _redoButton;
 @synthesize datePicker = _datePicker;
 @synthesize pickedDate = _pickedDate;
-//@synthesize taskLists = _taskLists;
 @synthesize listChooseController = _listChooseController;
+@synthesize type = _type;
 
 - (void)dealloc {
     
@@ -56,7 +59,6 @@
     [_textView release];
     [_titleField release];
     [_pickedDate release];
-//    [_taskLists release];
     [_listChooseController release];
     [super dealloc];
 }
@@ -76,7 +78,7 @@
         
     self.titleLabel.text = self.tempTask.title;
     NIF_INFO(@"%@", self.task);
-
+    
     [self.tableView reloadData];
     
     isKeyboardHidden = YES;
@@ -207,22 +209,21 @@
             cell.textLabel.text = NSLocalizedString(@"Due Date", @"Due Date");
             cell.textLabel.font = [UIFont systemFontOfSize:14];
             cell.textLabel.textColor = [UIColor lightGrayColor];
-//            UIButton *dateButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-//            dateButton.frame = CGRectMake(80, 5, 200, 30);
-//            dateButton.tag = 101010;
-//            [cell.contentView addSubview:dateButton];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         }
         
-//        UIButton *dateButton = (UIButton *)[self.tableView viewWithTag:101010];
-//        [dateButton setTitle:[self.pickedDate locateTimeDescription] forState:UIControlStateNormal];
-        cell.detailTextLabel.text = [self.pickedDate locateTimeDescription];
+        if (self.tempTask.due == nil || [self.tempTask.due timeIntervalSince1970] <= 0) {
+            cell.detailTextLabel.text = NSLocalizedString(@"None",@"None");            
+        } else {
+            cell.detailTextLabel.text = [self.tempTask.due locateTimeDescription];
+        }
         
     } else if (indexPath.row == 2) {
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kDateChooseCellIndentifier];
         if(cell == nil) {
             cell = [[[GTableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:kDateChooseCellIndentifier] autorelease];
             cell.textLabel.text = NSLocalizedString(@"List", @"List");
-//            cell.textLabel.textColor = [UIColor lightGrayColor];
+
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         }
         cell.detailTextLabel.text = self.tempTask.list.title;
@@ -254,6 +255,9 @@
     if (indexPath.row == 1 && !isPickerShown) {
         [self showDatePicker];
     } else if(indexPath.row == 2) {
+        if (isPickerShown) {
+            [self hideDatePicker];            
+        }
         if (!self.listChooseController) {
             self.listChooseController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGListChoose"];
         }
@@ -268,11 +272,11 @@
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     BOOL isHidden = self.navigationController.navigationBarHidden;
     [self.navigationController setNavigationBarHidden:YES animated:!isHidden];        
-    [self addCancelAndDoneItems];
+    //[self addCancelAndDoneItems];
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
-    [self removeItems];
+    //[self removeItems];
 }
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
@@ -336,13 +340,13 @@
     [cancelItem release];
     
     UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(doneAction:)];
-    [self.navigationItem setRightBarButtonItem:doneItem animated:YES];
+    [self.navigationItem setRightBarButtonItem:doneItem animated:NO];
     [doneItem release];
 }
 
 - (void)removeItems {
     [self.navigationItem setLeftBarButtonItem:nil animated:NO];
-    [self.navigationItem setRightBarButtonItem:nil animated:YES];
+    [self.navigationItem setRightBarButtonItem:nil animated:NO];
 }
 
 
@@ -465,9 +469,7 @@
 }
 
 - (void)updateDate:(id)sender {
-    self.pickedDate = self.datePicker.date;
-//    UIButton *dateButton = (UIButton *)[self.tableView viewWithTag:101010];
-//    [dateButton setTitle:[self.pickedDate locateTimeDescription] forState:UIControlStateNormal];
+    self.tempTask.due = self.datePicker.date;
     [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
 }
 
@@ -475,7 +477,13 @@
     if (_datePicker == nil) {
         _datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, 480, self.tableView.frame.size.width, 216)];
         
-        _datePicker.datePickerMode = UIDatePickerModeDateAndTime;
+        if (self.tempTask.due == nil || [self.tempTask.due timeIntervalSince1970] <= 0) {
+            _datePicker.date = [NSDate date];
+        } else {
+            _datePicker.date = self.tempTask.due;
+        }
+
+        _datePicker.datePickerMode = UIDatePickerModeDate;
         _datePicker.timeZone = [NSTimeZone localTimeZone];
         _datePicker.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth;
         [self.view addSubview:_datePicker];
@@ -497,8 +505,11 @@
     self.navigationController.toolbarHidden = YES;
     
     self.datePicker.frame = CGRectMake(0, 480, CGRectGetWidth(self.tableView.frame), 216);
-
     self.tableView.frame = CGRectMake(0,0,CGRectGetWidth(self.view.frame), 216);
+    
+    //[self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+    [self updateDate:nil];
+    
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
     
@@ -508,26 +519,59 @@
     
     isPickerShown = YES;
     
-    UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(hideDatePicker)];
-    [self.navigationItem setRightBarButtonItem:cancelItem animated:YES];
+    UIBarButtonItem *clearItem = [[UIBarButtonItem alloc] initWithTitle:@"Clear" style:UIBarButtonItemStylePlain target:self action:@selector(clearDate)];
+    [self.navigationItem setLeftBarButtonItem:clearItem animated:NO];
+    [clearItem release];
+    
+    UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStylePlain target:self action:@selector(confirmDate)];
+    [self.navigationItem setRightBarButtonItem:doneItem animated:NO];
+    [doneItem release];
+    
+    
 }
 
 - (void)hideDatePicker {
-    self.navigationController.toolbarHidden = NO;
-    [self.navigationItem setRightBarButtonItem:nil animated:YES];
+    if (!isPickerShown) {
+        return;
+    }
+    [self.navigationItem setLeftBarButtonItem:nil animated:NO];
+    [self.navigationItem setRightBarButtonItem:nil animated:NO];
     isPickerShown = NO;
     self.tableView.frame = self.view.frame;
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
 
-    [UIView beginAnimations:nil context:NULL];
-    self.datePicker.frame = CGRectMake(0, 480, CGRectGetWidth(self.datePicker.frame), CGRectGetHeight(self.datePicker.frame));
-    [UIView commitAnimations];
+    [UIView animateWithDuration:0.2f animations:^{
+        self.datePicker.frame = CGRectMake(0, 480, CGRectGetWidth(self.datePicker.frame), CGRectGetHeight(self.datePicker.frame));
+    } completion:^(BOOL finished) {
+//        self.navigationController.toolbarHidden = NO;
+    }];
+    
+    self.pickedDate = nil;
 
 }
 
+
+
+- (void)clearDate {
+//    self.pickedDate = nil;
+    self.tempTask.due = nil;
+    [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+    [self hideDatePicker];
+}
+
+- (void)confirmDate {
+    self.tempTask.due = self.datePicker.date;
+    [self hideDatePicker];    
+}
+
+- (void)saveTask {
+    
+}
+
+
 #pragma mark - 
-#pragma mark 
+#pragma mark - GListChooseDelegate
 - (void)listChooseController:(GListChooseController *)listController didChooseList:(TaskList *)aList {
     self.tempTask.list = aList;
     [self.navigationController popToViewController:self animated:YES];
@@ -538,9 +582,6 @@
 #pragma mark -
 #pragma mark Setter And Getter
 - (Task *)tempTask {
-    if (_tempTask == nil) {
-        _tempTask = [self.task copy];
-    }
     return _tempTask;
 }
 

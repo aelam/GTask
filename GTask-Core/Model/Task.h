@@ -25,11 +25,12 @@
 @property (assign)  BOOL     isCompleted;
 @property (assign)  BOOL     isCleared;
 @property (assign)  BOOL     isHidden;
-@property (assign)  double  completedTimestamp;
-@property (assign)  double  reminderTimestamp;
-@property (assign)  double  due;
-@property (assign)  double serverModifyTime;
-@property (assign)  double localModifyTime;
+
+@property (retain)  NSDate  *completedDate;
+@property (retain)  NSDate  *reminderDate;
+@property (retain)  NSDate  *due;
+@property (retain)  NSDate  *serverModifyTime;
+@property (retain)  NSDate  *localModifyTime;
 
 @property (assign)  NSInteger displayOrder;
 @property (assign)  NSInteger generationLevel;

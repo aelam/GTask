@@ -16,7 +16,6 @@
 
 @synthesize list = _list;
 @synthesize localTaskId = _localTaskId;
-//@synthesize localListId = _localListId;
 @synthesize localParentId = _localParentId;
 @synthesize serverTaskId = _serverTaskId;
 @synthesize title = _title;
@@ -26,14 +25,14 @@
 @synthesize isCompleted = _isCompleted;
 @synthesize isCleared = _isCleared;
 @synthesize isHidden = _isHidden;
-//@synthesize status = _status;
-@synthesize completedTimestamp = _completedTimestamp;
-@synthesize reminderTimestamp = _reminderTimestamp;
+@synthesize link = _link;
+@synthesize displayOrder = _displayOrder;
+
+@synthesize completedDate = _completedDate;
+@synthesize reminderDate = _reminderDate;
 @synthesize due = _due;
 @synthesize serverModifyTime = _serverModifyTime;
 @synthesize localModifyTime = _localModifyTime;
-@synthesize link = _link;
-@synthesize displayOrder = _displayOrder;
 
 @synthesize generationLevel = _generationLevel;
 
@@ -55,7 +54,7 @@
             @"localTaskId   : %d\
             title           : %@\
             parent          : %d\
-            updated         : %0.0f\
+            updated         : %@\
             displayOrder    : %d",self.localTaskId,self.title,self.localParentId,self.serverModifyTime,self.displayOrder];
 #elif DESCRIPTION_LEVEL == 2
     return [NSString stringWithFormat:
@@ -68,7 +67,7 @@
     return [NSString stringWithFormat:
             @"localTaskId   : %d\
             title           : %@\
-            due             : %0.0f\
+            due             : %@\
             ",self.localTaskId,self.title,self.due];
     
 #endif
@@ -79,7 +78,6 @@
     Task *task = [[Task allocWithZone:zone] init];
     task.list = self.list;
     task.localTaskId = self.localTaskId;
-//    task.localListId = self.localListId;
     task.localParentId = self.localParentId;
     task.serverTaskId = self.serverTaskId;
     task.title = self.title;
@@ -90,8 +88,8 @@
     task.isCompleted = self.isCompleted;
     task.isCleared = self.isCleared;
     task.isHidden = self.isHidden;
-    task.completedTimestamp = self.completedTimestamp;
-    task.reminderTimestamp = self.reminderTimestamp;
+    task.completedDate = self.completedDate;
+    task.reminderDate = self.reminderDate;
     task.due = self.due;
     task.serverModifyTime = self.serverModifyTime;
     task.localModifyTime = self.localModifyTime;
@@ -101,10 +99,9 @@
 }
 
 - (BOOL)isSameContent:(Task *)anotherTask {
-    return (//anotherTask.localListId == self.localListId &&
+    return (
             anotherTask.list == self.list &&
             anotherTask.localTaskId == self.localTaskId &&
-//            anotherTask.localListId == self.localListId &&
             anotherTask.localParentId == self.localParentId &&
             [anotherTask.serverTaskId isEqualToString:self.serverTaskId] &&
             [anotherTask.title isEqualToString:self.title]&&
@@ -115,8 +112,8 @@
             anotherTask.isCompleted == self.isCompleted &&
             anotherTask.isCleared == self.isCleared &&
             anotherTask.isHidden == self.isHidden &&
-            anotherTask.completedTimestamp == self.completedTimestamp &&
-            anotherTask.reminderTimestamp == self.reminderTimestamp &&
+            anotherTask.completedDate == self.completedDate &&
+            anotherTask.reminderDate == self.reminderDate &&
             anotherTask.due == self.due &&
             anotherTask.serverModifyTime == self.serverModifyTime &&
             anotherTask.localModifyTime == self.localModifyTime &&
@@ -131,9 +128,8 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
-            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET display_order = %d WHERE local_task_id = %d",order,self.localTaskId];
-            BOOL update = [db executeUpdate:sql];
-            //NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET display_order = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:order],[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
+            NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
             [db close];
         }        
     }
@@ -148,8 +144,7 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
-            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET local_parent_id = %d WHERE local_task_id = %d",aParentId,self.localTaskId];
-            BOOL update = [db executeUpdate:sql];
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET local_parent_id = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:aParentId],[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
             NIF_INFO(@"UPDATE PARENT_ID SUCCESS ? : %d", update);
             [db close];
         }
@@ -164,8 +159,7 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
-            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET is_completed = %d WHERE local_task_id = %d",isCompleted,self.localTaskId];
-            BOOL update = [db executeUpdate:sql];
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET is_completed = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:isCompleted],[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
             NIF_INFO(@"UPDATE is_complete SUCCESS ? : %d", update);
             [db close];
         }
@@ -180,8 +174,7 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
-            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET generation_level = %d WHERE local_task_id = %d",aLevel,self.localTaskId];
-            BOOL update = [db executeUpdate:sql];                           
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET generation_level = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:aLevel],[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
             NIF_INFO(@"UPDATE GENERATION SUCCESS ? : %d", update);
             [db close];
         }
@@ -196,8 +189,7 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");            
         } else {
-            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET local_list_id = %d WHERE local_task_id = %d",aList.localListId,self.localTaskId];
-            BOOL update = [db executeUpdate:sql];                           
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET local_list_id = %d,local_modify_timestamp = ? WHERE local_task_id = %d",[NSNumber numberWithInt:aList.localListId],[NSDate date],self.localTaskId];                           
             NIF_INFO(@"UPDATE List of task SUCCESS ? : %d", update);
             [db close];
         }
@@ -210,6 +202,11 @@
     [_title release];
     [_notes release];
     [_link release];
+    [_completedDate release];
+    [_reminderDate release];
+    [_due release];
+    [_serverModifyTime release];
+    [_localModifyTime release];
     [super dealloc];
 }
 

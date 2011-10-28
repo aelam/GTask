@@ -42,19 +42,16 @@
 - (void)syncTasks;
 - (void)syncTasksForList:(TaskList *)aList;
 
-- (BOOL)insertTask:(Task *)aTask;
-- (BOOL)deleteTask:(Task *)aTask;
-
-- (void)deleteTask:(Task *)aTask atIndex:(NSInteger)index forList:(TaskList *)aList;
-- (void)modifyTask:(Task *)aTask forList:(TaskList *)aList;
-
-- (void)updateTask:(Task *)aTask;
-
-//- (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex forTasks:(NSMutableArray *)tasks;
-//- (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks;
-
-- (void)deleteTaskAtIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks;
-
-- (void)moveTaskAndSubTasks:(Task *)task fromList:(TaskList *)fromList toList:(TaskList *)toList;
+//- (BOOL)insertTask:(Task *)aTask;
+//- (BOOL)deleteTask:(Task *)aTask;
+//
+//- (void)deleteTask:(Task *)aTask atIndex:(NSInteger)index forList:(TaskList *)aList;
+//- (void)modifyTask:(Task *)aTask forList:(TaskList *)aList;
+//
+//- (void)updateTask:(Task *)aTask;
+//
+//- (void)deleteTaskAtIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks;
+//
+//- (void)moveTaskAndSubTasks:(Task *)task fromList:(TaskList *)fromList toList:(TaskList *)toList;
 
 @end

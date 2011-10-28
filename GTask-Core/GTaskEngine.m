@@ -155,10 +155,14 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             }
 
             NSString *completedDate = [item objectForKey:@"completed"];
-            double completedTimestamp = [[NSDate dateFromRFC3339:completedDate] timeIntervalSince1970];
+//            double completedTimestamp = [[NSDate dateFromRFC3339:completedDate] timeIntervalSince1970];
+//            
+//            double updated = [[NSDate dateFromRFC3339:[item objectForKey:@"updated"]] timeIntervalSince1970];
+//            double due = [[NSDate dateFromRFC3339:[item objectForKey:@"due"]] timeIntervalSince1970];
             
-            double updated = [[NSDate dateFromRFC3339:[item objectForKey:@"updated"]] timeIntervalSince1970];
-            double due = [[NSDate dateFromRFC3339:[item objectForKey:@"due"]] timeIntervalSince1970];
+            NSDate *completedTime = [NSDate dateFromRFC3339:completedDate];
+            NSDate *updated = [NSDate dateFromRFC3339:[item objectForKey:@"updated"]];
+            NSDate *due = [NSDate dateFromRFC3339:[item objectForKey:@"due"]];
             
             
             NSInteger localParentId = -1;
@@ -175,40 +179,30 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             FMResultSet *set = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE server_task_id = '%@'",_id]];
             if ([set next]) {
                 //                NIF_INFO(@"已经存在记录了");
-                double local_modify_timestamp = [set doubleForColumn:@"local_modify_timestamp"];
-                double server_modify_timestamp = [set doubleForColumn:@"server_modify_timestamp"];
-                if (local_modify_timestamp > server_modify_timestamp) {
+                NSDate *local_modify_time = [set dateForColumn:@"local_modify_timestamp"];
+                NSDate *server_modify_time = [set dateForColumn:@"server_modify_timestamp"];
+                if ([local_modify_time timeIntervalSinceDate:server_modify_time] > 0) {
                     
                 }
                 
             } else {
-                NSString *sql = [NSString stringWithFormat:
-                                 @"INSERT INTO tasks (server_task_id,local_list_id,local_parent_id,notes,self_link,title,due,server_modify_timestamp,display_order,is_completed,completed_timestamp) VALUES ('%@',%d,%d,'%@','%@','%@',%0.0f,%0.0f,%d,%d,%0.0f)",
-                                 _id,
-                                 aList.localListId,
-                                 localParentId,
-                                 notes?[notes stringByReplacingOccurrencesOfString:@"'" withString:@"''"]:@"",
-                                 link,
-                                 [title stringByReplacingOccurrencesOfString:@"'" withString:@"''"],
-                                 due,
-                                 updated,
-                                 order,
-                                 isCompleted,
-                                 completedTimestamp];
-                NIF_INFO(@"save to DB sql : %@", sql);
-                //rs = [db executeUpdate:sql];
-                NSError *error = nil;
-                rs = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
-                if (error) {
-                    NIF_INFO(@"%@", error);
-                }
-                NIF_INFO(@"%d", rs);   
+                rs = [db executeUpdate:@"INSERT INTO tasks (server_task_id,local_list_id,local_parent_id,notes,self_link,title,due,server_modify_timestamp,display_order,is_completed,completed_timestamp) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                      _id,
+                      [NSNumber numberWithInt:aList.localListId],
+                      [NSNumber numberWithInt:localParentId],
+                      notes,
+                      link,
+                      title,
+                      due,
+                      updated,
+                      [NSNumber numberWithInt:order],
+                      [NSNumber numberWithInt:isCompleted],
+                      completedTime];
             }
             order++;
 
         }
         [db close];
-//        [self _syncParentIdWithItems:parentItems];
         return rs;
     }    
 }
@@ -260,9 +254,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             list.isDefault = [rs boolForColumn:@"is_default"];
             list.isDeleted = [rs boolForColumn:@"is_deleted"];
             list.isCleared = [rs boolForColumn:@"is_cleared"];
-            list.lastestSyncTime = [rs doubleForColumn:@"latest_sync_timestamp"];
-            list.serverModifyTime = [rs doubleForColumn:@"server_modify_timestamp"];
-            list.localModifyTime = [rs doubleForColumn:@"local_modify_timestamp"];
+            list.lastestSyncTime = [rs dateForColumn:@"latest_sync_timestamp"];
+            list.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
+            list.localModifyTime = [rs dateForColumn:@"local_modify_timestamp"];
             list.displayOrder = [rs intForColumn:@"display_order"];
             
             [taskLists addObject:list];
@@ -310,9 +304,6 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 
-- (void)moveTaskAndSubTasks:(Task *)task fromList:(TaskList *)fromList toList:(TaskList *)toList {
-    
-}
 
 @end
 

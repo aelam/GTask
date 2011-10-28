@@ -35,6 +35,9 @@
     [_title release];
     [_tasks release];
     [_link release];
+    [_lastestSyncTime release];
+    [_serverModifyTime release];
+    [_localModifyTime release];
     [super dealloc];
 }
 
@@ -64,10 +67,10 @@
                 task.isHidden = [rs boolForColumn:@"is_hidden"];
                 task.isDeleted = [rs boolForColumn:@"is_deleted"];
                 task.isCleared = [rs boolForColumn:@"is_cleared"];
-                task.completedTimestamp = [rs doubleForColumn:@"completed_timestamp"];
-                task.reminderTimestamp = [rs doubleForColumn:@"reminder_timestamp"];
-                task.due = [rs doubleForColumn:@"due"];
-                task.serverModifyTime = [rs doubleForColumn:@"server_modify_timestamp"];
+                task.completedDate = [rs dateForColumn:@"completed_timestamp"];
+                task.reminderDate = [rs dateForColumn:@"reminder_timestamp"];
+                task.due = [rs dateForColumn:@"due"];
+                task.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
                 task.displayOrder = [rs intForColumn:@"display_order"];
                 task.generationLevel = [rs intForColumn:@"generation_level"];
                 
@@ -274,26 +277,22 @@
         NSString *note = aTask.notes?[NSString stringWithFormat:@"'%@'",[aTask.notes stringByReplacingOccurrencesOfString:@"'" withString:@"''"]]:@"null";
         NSString *title = aTask.title?[NSString stringWithFormat:@"'%@'",[aTask.title stringByReplacingOccurrencesOfString:@"'" withString:@"''"]]:@"null";
         NSString *link = aTask.link?[NSString stringWithFormat:@"'%@'",[aTask.link stringByReplacingOccurrencesOfString:@"'" withString:@"''"]]:@"null";
+
+        BOOL rs = [db executeUpdate:
+                   @"INSERT INTO tasks (local_list_id,local_parent_id,notes,self_link,title,due,is_updated,display_order,is_completed,completed_timestamp,local_modify_timestamp) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                   [NSNumber numberWithInt:aTask.list.localListId],
+                   [NSNumber numberWithInt:aTask.localParentId],
+                   note,
+                   link,
+                   title, 
+                   aTask.due,
+                   [NSNumber numberWithBool:aTask.isUpdated],
+                   [NSNumber numberWithInt:aTask.displayOrder],
+                   [NSNumber numberWithBool:aTask.isCompleted],
+                   aTask.completedDate,
+                   aTask.localModifyTime
+                ];
         
-        NSString *sql = [NSString stringWithFormat:
-                         @"INSERT INTO tasks (local_list_id,local_parent_id,notes,self_link,title,due,is_updated,display_order,is_completed,completed_timestamp,local_modify_timestamp) VALUES (%d,%d,%@,%@,%@,%0.0f,%d,%d,%d,%0.0f,%0.0f)",
-                         aTask.list.localListId,
-                         aTask.localParentId,
-                         note,
-                         link,
-                         title, 
-                         aTask.due,
-                         aTask.isUpdated,
-                         aTask.displayOrder,
-                         aTask.isCompleted,
-                         aTask.completedTimestamp,
-                         aTask.localModifyTime];
-        NIF_INFO(@"save to DB sql : %@", sql);
-        NSError *error = nil;
-        BOOL rs = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
-        if (error) {
-            NIF_INFO(@"%@", error);
-        }
         aTask.localTaskId = [db lastInsertRowId];
         
         [db close];        
@@ -307,7 +306,6 @@
         NSLog(@"Could not open db.");
 		return NO;
     } else {
-//        NSString *sql = [NSString stringWithFormat:@"DELETE FROM tasks WHERE local_task_id = %d",aTask.localTaskId];
         NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET is_deleted = 1 WHERE local_task_id = %d",aTask.localTaskId];
       NIF_INFO(@"save to DB sql : %@", sql);
         NSError *error = nil;
@@ -461,6 +459,15 @@
     }
 }
 
+- (void)moveTaskWithSubTasks:(Task *)task toList:(TaskList *)toList {
+    NSArray *subTasks = [self allDescendantsOfTask:task];
+    [task setList:toList updateDB:YES];
+    for (int i = 0; i < [subTasks count]; i++) {
+        Task *e = [subTasks objectAtIndex:i];
+        [task setList:toList updateDB:YES];
+    }
+    
+}
 
 
 @end

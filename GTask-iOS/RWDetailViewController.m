@@ -35,8 +35,6 @@
 @synthesize statusItem = _statusItem;
 @synthesize quickInputField = _quickInputField;
 
-//@synthesize taskLists = _taskLists;
-
 - (void)dealloc
 {
     [_detailItem release];
@@ -48,7 +46,6 @@
     [_editViewController release];
     [_statusItem release];
     [_quickInputField release];
-//    [_taskLists release];
     [super dealloc];
 }
 
@@ -77,7 +74,7 @@
     [super setEditing:editing animated:animated];
     [self.tableView setEditing:editing animated:animated];
     
-    [self.navigationItem setRightBarButtonItem:editing?self.editButtonItem:nil animated:YES];
+//    [self.navigationItem setRightBarButtonItem:editing?self.editButtonItem:nil animated:YES];
 }
 
 - (void)configureView
@@ -128,6 +125,11 @@
     
     self.quickInputField.placeholder = NSLocalizedString(@"Quick Input", @"Quick Input");
     self.quickInputField.clearButtonMode = UITextFieldViewModeWhileEditing;
+
+    UIBarButtonItem *addTaskItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addTaskAction:)];
+    [self.navigationItem setRightBarButtonItem:addTaskItem animated:YES];
+    [addTaskItem release];
+
 }
 
 - (void)viewDidUnload
@@ -204,7 +206,6 @@
         cell.firstLabel.textColor = task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
     }];
             
-//    task.generationLevel = [task generationLevelAtTasks:self.tasks];
     task.generationLevel = [self.taskList generationLevelOfTask:task];
     cell.checkBox.frame = CGRectMake(10 + 20 *task.generationLevel, 7, 20, 20);
     cell.firstLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -213,12 +214,12 @@
     cell.checkBox.checked = task.isCompleted;
     cell.firstLabel.textColor = task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
     
-//    NSArray *subTasks = [task allDescendantsAtTasks:self.tasks];
     NSArray *subTasks = [self.taskList allDescendantsOfTask:task];
     
-    NSDate *date = [NSDate dateWithTimeIntervalSince1970:task.serverModifyTime];
+//    NSDate *date = [NSDate dateWithTimeIntervalSince1970:task.serverModifyTime];
 
-    cell.firstLabel.text = [NSString stringWithFormat:@"%d - %@ ",[subTasks count],task.title];
+//    cell.firstLabel.text = [NSString stringWithFormat:@"%d - %@ ",[subTasks count],task.title];
+    cell.firstLabel.text = task.title;
 //    cell.detailTextLabel.text = [NSString stringWithFormat:@"order:%d id: %d parent :%d  - %@", task.displayOrder,task.localTaskId,task.localParentId,[date description]];
     
     return cell;
@@ -258,6 +259,7 @@
         self.editViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGEditViewController"];
     }
     
+    self.editViewController.type = TaskEditTypeModifyOldTask;
     self.editViewController.task = [self.tasks objectAtIndex:indexPath.row];
     self.editViewController.tempTask = self.editViewController.task;
     [self.navigationController pushViewController:self.editViewController animated:YES];
@@ -272,14 +274,13 @@
     
     Task *fromTask = [self.tasks objectAtIndex:sourceIndexPath.row];
     Task *toTask = [self.tasks objectAtIndex:proposedDestinationIndexPath.row];
-//    NSArray *fromSubtasks = [fromTask allDescendantsAtTasks:self.tasks];
+
     NSArray *fromSubtasks = [self.taskList allDescendantsOfTask:fromTask];
     
     if (sourceIndexPath.row >=  proposedDestinationIndexPath.row) { //**上移**
         return proposedDestinationIndexPath;
     } else {    // **下移**
         if ([fromSubtasks containsObject:toTask]) {
-//            NSInteger targetIndex = [fromTask nextSiblingOrUncleIndexAtTask:self.tasks];
             NSInteger targetIndex = [self.taskList nextSiblingOrUncleIndexOfTask:fromTask];
             if (targetIndex != -1 && targetIndex != 0) {
                 NSIndexPath *supportedIndexPath = [NSIndexPath indexPathForRow:targetIndex inSection:sourceIndexPath.section];
@@ -435,7 +436,7 @@
     task.list = self.taskList;
     task.isUpdated = NO;
     task.isCompleted = NO;
-    task.localModifyTime = [[NSDate date] timeIntervalSince1970];
+    task.localModifyTime = [NSDate date];
     task.localParentId = -1;
     task.title = text;
     
@@ -450,6 +451,22 @@
     [self.tableView beginUpdates];
     [self.tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationTop];
     [self.tableView endUpdates];
+}
+
+- (void)addTaskAction:(id)sender {
+    if (!self.editViewController) {
+        self.editViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGEditViewController"];
+    }
+    
+    self.editViewController.type = TaskEditTypeModifyOldTask;
+
+    Task *newTask = [[Task alloc] init];
+    newTask.list = self.taskList;
+    self.editViewController.tempTask = newTask;
+    [newTask release];
+    
+    [self.navigationController pushViewController:self.editViewController animated:YES];
+
 }
 
 

@@ -77,7 +77,7 @@
 
 - (NSString *)locateTimeDescription {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    dateFormatter.dateFormat = @"yyyy-MM-dd EE HH:mm";
+    dateFormatter.dateFormat = @"yyyy-MM-dd EE";
 
     NSTimeZone *timeZone = [NSTimeZone localTimeZone];
 

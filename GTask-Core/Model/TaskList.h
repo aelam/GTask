@@ -33,11 +33,12 @@ typedef enum {
 @property (assign)  BOOL    isCleared;
 @property (assign)  NSInteger status;
 @property (assign)  NSInteger  sortType;
-@property (assign)  double lastestSyncTime;
-@property (assign)  double serverModifyTime;
-@property (assign)  double localModifyTime;
 @property (retain)  NSMutableArray *tasks;
 @property (assign)  NSInteger displayOrder;
+
+@property (retain)  NSDate *lastestSyncTime;
+@property (retain)  NSDate *serverModifyTime;
+@property (retain)  NSDate *localModifyTime;
 
 
 - (NSMutableArray *)tasks;

@@ -7,11 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "GListChooseController.h"
+
+typedef enum{
+    TaskEditTypeModifyOldTask,
+    TaskEditTypeAddNewTask
+}TaskEditType;
 
 @class Task;
 @class UIPlaceHolderTextView;
 @class GListChooseController;
-@protocol GListChooseDelegate;
 
 
 @interface GEditViewController : UIViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource,GListChooseDelegate> {
@@ -20,6 +25,8 @@
     BOOL isPickerShown;
 }
 
+
+@property (assign) TaskEditType type;
 @property (retain) Task *task;
 @property (copy)   Task *tempTask;
 @property (retain) UITextField *titleField;
@@ -35,7 +42,6 @@
 @property (retain) UIDatePicker *datePicker;
 @property (retain) NSDate *pickedDate;
 
-//@property (strong, nonatomic) NSMutableArray *taskLists;
 @property (strong, nonatomic) GListChooseController *listChooseController;
 
 
