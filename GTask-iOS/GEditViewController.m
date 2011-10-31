@@ -15,6 +15,7 @@
 #import "UICheckBox.h"
 #import "GListChooseController.h"
 #import "TaskList.h"
+#import "RWDetailViewController.h"
 
 @interface GEditViewController (Plus)
 
@@ -50,6 +51,7 @@
 @synthesize pickedDate = _pickedDate;
 @synthesize listChooseController = _listChooseController;
 @synthesize type = _type;
+@synthesize editDelegate = _editDelegate;
 
 - (void)dealloc {
     
@@ -86,6 +88,18 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardWillHideNotification object:nil];    
+
+    if (self.type == TaskEditTypeAddNewTask) {
+        
+        UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"Cancel") style:UIBarButtonItemStylePlain target:self action:@selector(cancelAction:)];
+        [self.navigationItem setLeftBarButtonItem:cancelItem animated:YES];
+        [cancelItem release];
+        
+        UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(doneAction:)];
+        [self.navigationItem setRightBarButtonItem:doneItem animated:YES];
+        [doneItem release];
+    }
+
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -256,8 +270,9 @@
         [self showDatePicker];
     } else if(indexPath.row == 2) {
         if (isPickerShown) {
-            [self hideDatePicker];            
+            [self hideDatePicker];
         }
+        [self hideKeyboard:nil];
         if (!self.listChooseController) {
             self.listChooseController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGListChoose"];
         }
@@ -270,9 +285,9 @@
 #pragma mark -
 #pragma mark UITextFieldDelegate
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
-    BOOL isHidden = self.navigationController.navigationBarHidden;
-    [self.navigationController setNavigationBarHidden:YES animated:!isHidden];        
-    //[self addCancelAndDoneItems];
+//    BOOL isHidden = self.navigationController.navigationBarHidden;
+//    [self.navigationController setNavigationBarHidden:YES animated:!isHidden];        
+    [self addCancelAndDoneItems];
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
@@ -307,7 +322,7 @@
 }
 
 - (void)textViewDidBeginEditing:(UIPlaceHolderTextView *)textView {
-    [self.navigationController setNavigationBarHidden:YES animated:!self.navigationController.navigationBarHidden];        
+//    [self.navigationController setNavigationBarHidden:YES animated:!self.navigationController.navigationBarHidden];        
     [self addCancelAndDoneItems];
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
@@ -336,28 +351,60 @@
 
 - (void)addCancelAndDoneItems {
     UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"Cancel") style:UIBarButtonItemStylePlain target:self action:@selector(cancelAction:)];
-    [self.navigationItem setLeftBarButtonItem:cancelItem animated:NO];
+    [self.navigationItem setLeftBarButtonItem:cancelItem animated:YES];
     [cancelItem release];
     
     UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(doneAction:)];
-    [self.navigationItem setRightBarButtonItem:doneItem animated:NO];
+    [self.navigationItem setRightBarButtonItem:doneItem animated:YES];
     [doneItem release];
 }
 
 - (void)removeItems {
-    [self.navigationItem setLeftBarButtonItem:nil animated:NO];
-    [self.navigationItem setRightBarButtonItem:nil animated:NO];
+    [self.navigationItem setLeftBarButtonItem:nil animated:YES];
+    [self.navigationItem setRightBarButtonItem:nil animated:YES];
 }
 
 
 #pragma mark -
 #pragma mark IBAction
 - (void)cancelAction:(id)sender {
+    [self removeItems];
     [self hideKeyboard:sender];
+
+    if (self.type == TaskEditTypeAddNewTask) {
+        [self.navigationController dismissModalViewControllerAnimated:YES];
+    }
 }
 
 - (void)doneAction:(id)sender {
+    [self removeItems];
     [self hideKeyboard:sender];
+    if (self.type == TaskEditTypeAddNewTask) {
+        /// SAVE THIS TASK;
+        
+        [self.navigationController dismissViewControllerAnimated:YES completion:^{
+            if (!self.tempTask.title || self.tempTask.title.length == 0) {
+                self.tempTask.title = NSLocalizedString(@"Untitled", @"Untitled");
+            }
+
+            self.tempTask.displayOrder = 0;
+            self.tempTask.isUpdated = NO;
+            self.tempTask.isCompleted = NO;
+            self.tempTask.localModifyTime = [NSDate date];
+            self.tempTask.localParentId = -1;
+            for (int i = 0; i < [self.tempTask.list.tasks count]; i++) {
+                Task *e = [self.tempTask.list.tasks objectAtIndex:i];
+                [e setDisplayOrder:i+1 updateDB:YES];
+            }
+            
+            [self.tempTask.list insertTask:self.tempTask];
+
+            if([self.editDelegate respondsToSelector:@selector(editControllerDidAddNewTask:)]) {
+                [self.editDelegate editControllerDidAddNewTask:self];
+            }
+            
+        }];
+    }
 }
 
 - (void)hideKeyboard:(id)sender {
@@ -365,7 +412,7 @@
     
     [self.titleField resignFirstResponder];
     [self.textView resignFirstResponder];    
-    [self.navigationController setNavigationBarHidden:NO animated:YES];        
+//    [self.navigationController setNavigationBarHidden:NO animated:YES];        
 }
 
 - (void)undoAction:(UIButton *)sender {
@@ -544,7 +591,7 @@
     [UIView animateWithDuration:0.2f animations:^{
         self.datePicker.frame = CGRectMake(0, 480, CGRectGetWidth(self.datePicker.frame), CGRectGetHeight(self.datePicker.frame));
     } completion:^(BOOL finished) {
-//        self.navigationController.toolbarHidden = NO;
+        
     }];
     
     self.pickedDate = nil;
@@ -573,6 +620,7 @@
 #pragma mark - 
 #pragma mark - GListChooseDelegate
 - (void)listChooseController:(GListChooseController *)listController didChooseList:(TaskList *)aList {
+    // move from old list to new list
     self.tempTask.list = aList;
     [self.navigationController popToViewController:self animated:YES];
     [self.tableView reloadData];

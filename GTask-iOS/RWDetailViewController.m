@@ -144,7 +144,6 @@
     NSArray *tasks = self.taskList.tasks;
     if (tasks && [tasks count]) {
         self.tasks = self.taskList.tasks;
-        [self.tableView reloadData];
 
     }
     else {
@@ -154,7 +153,8 @@
             [self.tableView reloadData];
         }];
     }
-
+    
+    [self.tableView reloadData];
     [super viewWillAppear:animated];
 }
 
@@ -166,6 +166,7 @@
 - (void)viewWillDisappear:(BOOL)animated
 {
 	[super viewWillDisappear:animated];
+    [self.quickInputField resignFirstResponder];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -458,16 +459,24 @@
         self.editViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGEditViewController"];
     }
     
-    self.editViewController.type = TaskEditTypeModifyOldTask;
-
+    self.editViewController.type = TaskEditTypeAddNewTask;
+    self.editViewController.editDelegate = self;
+    
     Task *newTask = [[Task alloc] init];
     newTask.list = self.taskList;
     self.editViewController.tempTask = newTask;
     [newTask release];
     
-    [self.navigationController pushViewController:self.editViewController animated:YES];
-
+    UINavigationController *navigtor = [[UINavigationController alloc] initWithRootViewController:self.editViewController];
+    [self.navigationController presentModalViewController:navigtor animated:YES];
+    [navigtor release];
 }
+
+
+- (void)editControllerDidAddNewTask:(GEditViewController *)editController {
+    [self.tableView reloadData];
+}
+
 
 
 - (IBAction)changeEditStatus:(UIBarButtonItem *)sender {

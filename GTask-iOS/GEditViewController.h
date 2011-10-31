@@ -17,6 +17,7 @@ typedef enum{
 @class Task;
 @class UIPlaceHolderTextView;
 @class GListChooseController;
+@protocol EditProtocol;
 
 
 @interface GEditViewController : UIViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource,GListChooseDelegate> {
@@ -44,5 +45,6 @@ typedef enum{
 
 @property (strong, nonatomic) GListChooseController *listChooseController;
 
+@property (assign) id <EditProtocol> editDelegate;
 
 @end

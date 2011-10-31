@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+
 @class TaskList;
 @class GEditViewController;
 
@@ -17,8 +18,16 @@ typedef enum {
     EditStatusDeleting  =   2,
 }EditStatus;
 
+@protocol EditProtocol <NSObject>
 
-@interface RWDetailViewController : UIViewController <UISplitViewControllerDelegate,UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate>
+@optional
+- (void)editControllerDidAddNewTask:(GEditViewController *)editController;
+- (void)editControllerDidModifyOldTask:(GEditViewController *)editController;
+
+@end
+
+
+@interface RWDetailViewController : UIViewController <UISplitViewControllerDelegate,UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate,EditProtocol>
 
 @property (strong, nonatomic) id detailItem;
 

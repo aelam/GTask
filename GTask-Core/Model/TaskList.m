@@ -273,18 +273,13 @@
         NSLog(@"Could not open db.");
 		return NO;
     } else {
-        
-        NSString *note = aTask.notes?[NSString stringWithFormat:@"'%@'",[aTask.notes stringByReplacingOccurrencesOfString:@"'" withString:@"''"]]:@"null";
-        NSString *title = aTask.title?[NSString stringWithFormat:@"'%@'",[aTask.title stringByReplacingOccurrencesOfString:@"'" withString:@"''"]]:@"null";
-        NSString *link = aTask.link?[NSString stringWithFormat:@"'%@'",[aTask.link stringByReplacingOccurrencesOfString:@"'" withString:@"''"]]:@"null";
-
         BOOL rs = [db executeUpdate:
                    @"INSERT INTO tasks (local_list_id,local_parent_id,notes,self_link,title,due,is_updated,display_order,is_completed,completed_timestamp,local_modify_timestamp) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                    [NSNumber numberWithInt:aTask.list.localListId],
                    [NSNumber numberWithInt:aTask.localParentId],
-                   note,
-                   link,
-                   title, 
+                   aTask.notes,
+                   aTask.link,
+                   aTask.title, 
                    aTask.due,
                    [NSNumber numberWithBool:aTask.isUpdated],
                    [NSNumber numberWithInt:aTask.displayOrder],
