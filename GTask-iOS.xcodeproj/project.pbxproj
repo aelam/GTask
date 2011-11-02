@@ -35,6 +35,7 @@
 		9466432D144EC65900E41345 /* button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9466432B144EC65900E41345 /* button@2x.png */; };
 		946C7F0914298A79004E97A9 /* NSMutableURLRequest+Shorten.m in Sources */ = {isa = PBXBuildFile; fileRef = 946C7F0814298A79004E97A9 /* NSMutableURLRequest+Shorten.m */; };
 		946C7F1E14298F8C004E97A9 /* RSimpleConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 946C7F1D14298F8B004E97A9 /* RSimpleConnection.m */; };
+		947B9DB31461446C001AF70B /* InputViewLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 947B9DB21461446C001AF70B /* InputViewLabel.m */; };
 		94C1BEFA144FCA2400CF07FF /* GListChooseController.m in Sources */ = {isa = PBXBuildFile; fileRef = 94C1BEF9144FCA2300CF07FF /* GListChooseController.m */; };
 		94C21FC814286C85007B3483 /* YAJL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94C21FC714286C85007B3483 /* YAJL.framework */; };
 		94DC62DA14273A5A00151B26 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94DC62D914273A5A00151B26 /* UIKit.framework */; };
@@ -102,6 +103,8 @@
 		946C7F0814298A79004E97A9 /* NSMutableURLRequest+Shorten.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableURLRequest+Shorten.m"; sourceTree = "<group>"; };
 		946C7F1C14298F8B004E97A9 /* RSimpleConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSimpleConnection.h; path = "GTask-Core/RSimpleConnection.h"; sourceTree = SOURCE_ROOT; };
 		946C7F1D14298F8B004E97A9 /* RSimpleConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RSimpleConnection.m; path = "GTask-Core/RSimpleConnection.m"; sourceTree = SOURCE_ROOT; };
+		947B9DB11461446C001AF70B /* InputViewLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputViewLabel.h; sourceTree = "<group>"; };
+		947B9DB21461446C001AF70B /* InputViewLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InputViewLabel.m; sourceTree = "<group>"; };
 		94C1BEF8144FCA2300CF07FF /* GListChooseController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GListChooseController.h; sourceTree = "<group>"; };
 		94C1BEF9144FCA2300CF07FF /* GListChooseController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GListChooseController.m; sourceTree = "<group>"; };
 		94C21FC714286C85007B3483 /* YAJL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = YAJL.framework; path = "GTask-Core/YAJL.framework"; sourceTree = "<group>"; };
@@ -217,6 +220,8 @@
 				94664320144EC40E00E41345 /* UIWebView+Blocks.m */,
 				94664326144EC4AD00E41345 /* UIImage+Categories.h */,
 				94664327144EC4AE00E41345 /* UIImage+Categories.m */,
+				947B9DB11461446C001AF70B /* InputViewLabel.h */,
+				947B9DB21461446C001AF70B /* InputViewLabel.m */,
 			);
 			path = Categories;
 			sourceTree = "<group>";
@@ -433,6 +438,7 @@
 				94664321144EC40E00E41345 /* UIWebView+Blocks.m in Sources */,
 				94664328144EC4AE00E41345 /* UIImage+Categories.m in Sources */,
 				94C1BEFA144FCA2400CF07FF /* GListChooseController.m in Sources */,
+				947B9DB31461446C001AF70B /* InputViewLabel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

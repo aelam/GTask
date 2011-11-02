@@ -19,14 +19,7 @@
 
 @interface GEditViewController (Plus)
 
-- (void)addCancelAndDoneItems;
-- (void)removeItems;
-- (void)hideKeyboard:(id)sender;
-- (void)appendToolbarAboveKeyboard:(UIView *)keyboard;
 - (void)updateUndoButtons;
-
-- (void)showDatePicker;
-- (void)hideDatePicker;
 
 - (void)clearDate;
 - (void)confirmDate;
@@ -44,7 +37,7 @@
 @synthesize textView = _textView;
 @synthesize textViewHeight = _textViewHeight;
 @synthesize titleField = _titleField;
-@synthesize tableView = _tableView;
+@synthesize dateField = _dateField;
 @synthesize undoButton = _undoButton;
 @synthesize redoButton = _redoButton;
 @synthesize datePicker = _datePicker;
@@ -52,12 +45,15 @@
 @synthesize listChooseController = _listChooseController;
 @synthesize type = _type;
 @synthesize editDelegate = _editDelegate;
+@synthesize dateLabel = _dateLabel;
 
 - (void)dealloc {
     
     [_task release];
     [_tempTask release];
     [_titleLabel release];
+    [_dateField release];
+    [_dateLabel release];
     [_textView release];
     [_titleField release];
     [_pickedDate release];
@@ -82,12 +78,7 @@
     NIF_INFO(@"%@", self.task);
     
     [self.tableView reloadData];
-    
-    isKeyboardHidden = YES;
-    isPickerShown = NO;
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardWillHideNotification object:nil];    
+        
 
     if (self.type == TaskEditTypeAddNewTask) {
         
@@ -105,8 +96,7 @@
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter]removeObserver:self];
-    [self hideKeyboard:nil];
-    [self hideDatePicker];
+
 }
 
 - (void)viewDidLoad
@@ -125,12 +115,6 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    if (isPickerShown) {
-        
-        [self.tableView beginUpdates];
-        [self.tableView endUpdates];
-        self.datePicker.frame = CGRectMake(0, CGRectGetMaxY(self.view.frame) - 216, self.view.frame.size.width, 216);
-    }
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
@@ -224,11 +208,27 @@
             cell.textLabel.font = [UIFont systemFontOfSize:14];
             cell.textLabel.textColor = [UIColor lightGrayColor];
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            
+            cell.textField.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            cell.textField.font = [UIFont boldSystemFontOfSize:17];
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.textField.returnKeyType = UIReturnKeyDone;
+            cell.textField.delegate = self;
+            cell.textField.frame = cell.contentView.bounds;
+            cell.textField.textAlignment = UITextAlignmentCenter;            
+        
+            cell.textField.alpha = 0.02;
+            cell.detailTextLabel.frame = CGRectMake(80, 10, 240, 30);
+            cell.detailTextLabel.textAlignment = UITextAlignmentCenter;            
         }
         
+        self.dateLabel = cell.detailTextLabel;
+    
+        self.dateField = cell.textField;
+
         if (self.tempTask.due == nil || [self.tempTask.due timeIntervalSince1970] <= 0) {
-            cell.detailTextLabel.text = NSLocalizedString(@"None",@"None");            
-        } else {
+            cell.detailTextLabel.text = NSLocalizedString(@"None",@"None");            //[self.tempTask.due locateTimeDescription];
+       } else {
             cell.detailTextLabel.text = [self.tempTask.due locateTimeDescription];
         }
         
@@ -266,28 +266,48 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    if (indexPath.row == 1 && !isPickerShown) {
-        [self showDatePicker];
-    } else if(indexPath.row == 2) {
-        if (isPickerShown) {
-            [self hideDatePicker];
-        }
-        [self hideKeyboard:nil];
+    if (indexPath.row == 1 ) {
+
+        [self.dateField becomeFirstResponder];
+        return;
+    }
         if (!self.listChooseController) {
             self.listChooseController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGListChoose"];
         }
         self.listChooseController.chooseDelegate = self;
         self.listChooseController.selectedList = self.tempTask.list;
         [self.navigationController pushViewController:self.listChooseController animated:YES];
-    }
 }
 
 #pragma mark -
 #pragma mark UITextFieldDelegate
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
-//    BOOL isHidden = self.navigationController.navigationBarHidden;
-//    [self.navigationController setNavigationBarHidden:YES animated:!isHidden];        
-    [self addCancelAndDoneItems];
+
+    if (textField == self.titleField) {
+        
+    } else if (textField == self.dateField) {
+        textField.inputView = self.datePicker;
+    }
+    
+    if (textField.inputAccessoryView == nil) {
+        
+        UIToolbar *_actionBar = [[UIToolbar alloc] init];
+        _actionBar.translucent = YES;
+        [_actionBar sizeToFit];
+        _actionBar.barStyle = UIBarStyleBlackTranslucent;
+        
+        UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done"
+                                                                       style:UIBarButtonItemStyleDone target:self
+                                                                      action:@selector(textFieldMustReturn:)];
+        
+        UIBarButtonItem *flexible = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        [_actionBar setItems:[NSArray arrayWithObjects:/*prevNextWrapper,*/ flexible, doneButton, nil]];
+        
+        textField.inputAccessoryView = _actionBar;
+        
+        [_actionBar release];        
+    }
+
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
@@ -302,8 +322,13 @@
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    [self hideKeyboard:textField];
     return YES;
+}
+
+- (BOOL)textFieldMustReturn:(id)sender{
+    [self.titleField resignFirstResponder];
+    [self.dateField resignFirstResponder];
+    return NO;
 }
 
 
@@ -311,28 +336,28 @@
 #pragma mark UITextViewDelegate
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
     
-    [self hideDatePicker];
+//    [self hideDatePicker];
     return YES;
 }
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
 
-    [self hideDatePicker];
     return YES;
 }
 
 - (void)textViewDidBeginEditing:(UIPlaceHolderTextView *)textView {
-//    [self.navigationController setNavigationBarHidden:YES animated:!self.navigationController.navigationBarHidden];        
-    [self addCancelAndDoneItems];
+
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
     [UIView beginAnimations:nil context:NULL];
     self.textView.bounds = self.textView.superview.bounds;
     [UIView commitAnimations];
+    
+//    NIF_INFO(@"%@", self.ta)
 }
 
 - (void)textViewDidEndEditing:(UIPlaceHolderTextView *)textView{
-    [self removeItems];
+    //[self removeItems];
     self.textView.bounds = self.textView.superview.bounds;
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
@@ -368,8 +393,6 @@
 #pragma mark -
 #pragma mark IBAction
 - (void)cancelAction:(id)sender {
-    [self removeItems];
-    [self hideKeyboard:sender];
 
     if (self.type == TaskEditTypeAddNewTask) {
         [self.navigationController dismissModalViewControllerAnimated:YES];
@@ -378,7 +401,6 @@
 
 - (void)doneAction:(id)sender {
     [self removeItems];
-    [self hideKeyboard:sender];
     if (self.type == TaskEditTypeAddNewTask) {
         /// SAVE THIS TASK;
         
@@ -405,14 +427,6 @@
             
         }];
     }
-}
-
-- (void)hideKeyboard:(id)sender {
-    isKeyboardHidden = YES;
-    
-    [self.titleField resignFirstResponder];
-    [self.textView resignFirstResponder];    
-//    [self.navigationController setNavigationBarHidden:NO animated:YES];        
 }
 
 - (void)undoAction:(UIButton *)sender {
@@ -447,7 +461,7 @@
             
             if([[keyboard description] hasPrefix:@"<UIPeripheralHostView"] == YES)
             {
-                [self appendToolbarAboveKeyboard:keyboard];
+                //[self appendToolbarAboveKeyboard:keyboard];
 
                 bndKey = keyboard.frame;
                 
@@ -462,7 +476,7 @@
 }
 
 - (void)keyboardDidHide:(NSNotification *)note {
-    isKeyboardHidden = YES;
+//    isKeyboardHidden = YES;
     self.tableView.frame = self.view.frame;
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
@@ -506,8 +520,6 @@
     [keyboard addSubview:toolbar];
     [toolbar release];
     
-//    [UIView commitAnimations];
-
 }
 
 - (void)updateUndoButtons {
@@ -517,7 +529,8 @@
 
 - (void)updateDate:(id)sender {
     self.tempTask.due = self.datePicker.date;
-    [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+
+    self.dateLabel.text = [self.tempTask.due locateTimeDescription];
 }
 
 - (UIDatePicker *)datePicker {
@@ -535,6 +548,7 @@
         _datePicker.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth;
         [self.view addSubview:_datePicker];
         [_datePicker addTarget:self action:@selector(updateDate:) forControlEvents:UIControlEventValueChanged];
+        
     }
     return _datePicker;
 }
@@ -546,62 +560,7 @@
     }
 }
 
-- (void)showDatePicker {
-    [self hideKeyboard:nil];
-    CGRect oldFrame = self.tableView.frame;
-    self.navigationController.toolbarHidden = YES;
-    
-    self.datePicker.frame = CGRectMake(0, 480, CGRectGetWidth(self.tableView.frame), 216);
-    self.tableView.frame = CGRectMake(0,0,CGRectGetWidth(self.view.frame), 216);
-    
-    //[self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-    [self updateDate:nil];
-    
-    [self.tableView beginUpdates];
-    [self.tableView endUpdates];
-    
-    [UIView beginAnimations:nil context:NULL];
-    self.datePicker.frame = CGRectMake(CGRectGetMinX(oldFrame), self.view.frame.size.height - 216, self.view.frame.size.width, 216);
-    [UIView commitAnimations];
-    
-    isPickerShown = YES;
-    
-    UIBarButtonItem *clearItem = [[UIBarButtonItem alloc] initWithTitle:@"Clear" style:UIBarButtonItemStylePlain target:self action:@selector(clearDate)];
-    [self.navigationItem setLeftBarButtonItem:clearItem animated:NO];
-    [clearItem release];
-    
-    UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStylePlain target:self action:@selector(confirmDate)];
-    [self.navigationItem setRightBarButtonItem:doneItem animated:NO];
-    [doneItem release];
-    
-    
-}
-
-- (void)hideDatePicker {
-    if (!isPickerShown) {
-        return;
-    }
-    [self.navigationItem setLeftBarButtonItem:nil animated:NO];
-    [self.navigationItem setRightBarButtonItem:nil animated:NO];
-    isPickerShown = NO;
-    self.tableView.frame = self.view.frame;
-    [self.tableView beginUpdates];
-    [self.tableView endUpdates];
-
-    [UIView animateWithDuration:0.2f animations:^{
-        self.datePicker.frame = CGRectMake(0, 480, CGRectGetWidth(self.datePicker.frame), CGRectGetHeight(self.datePicker.frame));
-    } completion:^(BOOL finished) {
-        
-    }];
-    
-    self.pickedDate = nil;
-
-}
-
-
-
 - (void)clearDate {
-//    self.pickedDate = nil;
     self.tempTask.due = nil;
     [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
     [self hideDatePicker];

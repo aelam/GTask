@@ -20,22 +20,24 @@ typedef enum{
 @protocol EditProtocol;
 
 
-@interface GEditViewController : UIViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource,GListChooseDelegate> {
+@interface GEditViewController : UITableViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource,GListChooseDelegate> {
 
-    BOOL isKeyboardHidden;
-    BOOL isPickerShown;
+//    BOOL isKeyboardHidden;
+//    BOOL isPickerShown;
 }
 
 
 @property (assign) TaskEditType type;
 @property (retain) Task *task;
 @property (copy)   Task *tempTask;
-@property (retain) UITextField *titleField;
+@property (retain) UITextField  *titleField;
+@property (retain) UITextField  *dateField; //fake
+@property (retain) UILabel      *dateLabel;
 @property (retain) UIPlaceHolderTextView *textView;
 @property (assign) float textViewHeight;
 
 @property (retain) IBOutlet UILabel *titleLabel;
-@property (retain) IBOutlet UITableView *tableView;
+//@property (retain) IBOutlet UITableView *tableView;
 
 @property (assign) UIButton *undoButton;
 @property (assign) UIButton *redoButton;

@@ -121,42 +121,42 @@
             </objects>
             <point key="canvasLocation" x="890" y="72"/>
         </scene>
-        <scene sceneID="ShM-S4-paL">
+        <scene sceneID="TZ4-Mr-7F7">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="FXn-5Q-B7u" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <viewController storyboardIdentifier="kGEditViewController" id="L5d-4U-cLQ" customClass="GEditViewController" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="YOR-B7-7Uf">
+                <placeholder placeholderIdentifier="IBFirstResponder" id="HrF-fG-tq8" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tableViewController storyboardIdentifier="kGEditViewController" id="tUU-na-6ia" customClass="GEditViewController" sceneMemberID="viewController">
+                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="Mnv-yX-CEo">
                         <rect key="frame" x="0.0" y="20" width="320" height="460"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="Bw0-x3-Z2w">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="460"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <connections>
-                                    <outlet property="dataSource" destination="L5d-4U-cLQ" id="KJy-LW-tdJ"/>
-                                    <outlet property="delegate" destination="L5d-4U-cLQ" id="K0D-JD-7fW"/>
-                                </connections>
-                            </tableView>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                    </view>
-                    <connections>
-                        <outlet property="tableView" destination="Bw0-x3-Z2w" id="Vbu-mm-xkT"/>
-                    </connections>
-                </viewController>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <prototypes>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="bNu-XR-35m">
+                                <rect key="frame" x="0.0" y="22" width="320" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                </view>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="tUU-na-6ia" id="EPz-lN-elG"/>
+                            <outlet property="delegate" destination="tUU-na-6ia" id="HCV-ft-qZw"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
             </objects>
-            <point key="canvasLocation" x="1294" y="69"/>
+            <point key="canvasLocation" x="1265" y="91"/>
         </scene>
     </scenes>
     <resources>
         <image name="checkbox_not_selected@2x.png" width="53" height="53"/>
     </resources>
     <classes>
-        <class className="GEditViewController" superclassName="UIViewController">
+        <class className="GEditViewController" superclassName="UITableViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/GEditViewController.h"/>
             <relationships>
-                <relationship kind="outlet" name="tableView" candidateClass="UITableView"/>
                 <relationship kind="outlet" name="titleLabel" candidateClass="UILabel"/>
             </relationships>
         </class>
