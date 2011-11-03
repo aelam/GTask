@@ -21,9 +21,8 @@ typedef enum{
 
 
 @interface GEditViewController : UITableViewController <UITextFieldDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource,GListChooseDelegate> {
-
-//    BOOL isKeyboardHidden;
-//    BOOL isPickerShown;
+    
+    UISegmentedControl *_undoControl;    // weak;
 }
 
 
@@ -37,7 +36,6 @@ typedef enum{
 @property (assign) float textViewHeight;
 
 @property (retain) IBOutlet UILabel *titleLabel;
-//@property (retain) IBOutlet UITableView *tableView;
 
 @property (assign) UIButton *undoButton;
 @property (assign) UIButton *redoButton;

@@ -464,7 +464,7 @@
     
     Task *newTask = [[Task alloc] init];
     newTask.list = self.taskList;
-    self.editViewController.tempTask = newTask;
+    self.editViewController.task = newTask;
     [newTask release];
     
     UINavigationController *navigtor = [[UINavigationController alloc] initWithRootViewController:self.editViewController];

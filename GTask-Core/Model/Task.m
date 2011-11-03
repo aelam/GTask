@@ -99,24 +99,25 @@
 }
 
 - (BOOL)isSameContent:(Task *)anotherTask {
+
     return (
             anotherTask.list == self.list &&
             anotherTask.localTaskId == self.localTaskId &&
             anotherTask.localParentId == self.localParentId &&
-            [anotherTask.serverTaskId isEqualToString:self.serverTaskId] &&
-            [anotherTask.title isEqualToString:self.title]&&
-            [anotherTask.notes isEqualToString:self.notes]&&
-            [anotherTask.link isEqualToString:self.link]&&
+            ([anotherTask.serverTaskId isEqualToString:self.serverTaskId]||(anotherTask.serverTaskId == nil && self.serverTaskId == nil))&&
+            ([anotherTask.title isEqualToString:self.title]||(anotherTask.title == nil && self.title == nil))&&
+            ([anotherTask.notes isEqualToString:self.notes]||(anotherTask.notes == nil && self.notes == nil))&&
+            ([anotherTask.link isEqualToString:self.link]||(anotherTask.link == nil && self.link == nil))&&
             anotherTask.isUpdated == self.isUpdated &&
             anotherTask.isDeleted == self.isDeleted &&
             anotherTask.isCompleted == self.isCompleted &&
             anotherTask.isCleared == self.isCleared &&
             anotherTask.isHidden == self.isHidden &&
-            anotherTask.completedDate == self.completedDate &&
-            anotherTask.reminderDate == self.reminderDate &&
-            anotherTask.due == self.due &&
-            anotherTask.serverModifyTime == self.serverModifyTime &&
-            anotherTask.localModifyTime == self.localModifyTime &&
+            [anotherTask.completedDate timeIntervalSinceDate:self.completedDate] == 0 &&
+            [anotherTask.reminderDate timeIntervalSinceDate:self.reminderDate] == 0 &&
+            [anotherTask.due timeIntervalSinceDate:self.due] == 0 &&
+            [anotherTask.serverModifyTime timeIntervalSinceDate:self.serverModifyTime] == 0 &&
+            [anotherTask.localModifyTime timeIntervalSinceDate:self.localModifyTime] == 0 &&
             anotherTask.displayOrder == self.displayOrder);
 
     return YES;

@@ -454,13 +454,17 @@
     }
 }
 
+#warning --- modify array already exists, and modify db data
 - (void)moveTaskWithSubTasks:(Task *)task toList:(TaskList *)toList {
     NSArray *subTasks = [self allDescendantsOfTask:task];
     [task setList:toList updateDB:YES];
+    
     for (int i = 0; i < [subTasks count]; i++) {
         Task *e = [subTasks objectAtIndex:i];
-        [task setList:toList updateDB:YES];
+        [e setList:toList updateDB:YES];
     }
+    [self.tasks removeObjectsInArray:subTasks];
+    [self.tasks removeObject:task];
     
 }
 

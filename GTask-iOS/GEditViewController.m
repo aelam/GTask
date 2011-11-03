@@ -24,6 +24,8 @@
 - (void)clearDate;
 - (void)confirmDate;
 
+- (void)updateDate:(id)sender;
+
 @end
 
 #define TASK_TITLE_TEXT_FIELD_TAG   10101
@@ -74,11 +76,10 @@
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
         
-    self.titleLabel.text = self.tempTask.title;
+    self.titleLabel.text = self.task.title;
     NIF_INFO(@"%@", self.task);
     
     [self.tableView reloadData];
-        
 
     if (self.type == TaskEditTypeAddNewTask) {
         
@@ -89,6 +90,8 @@
         UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(doneAction:)];
         [self.navigationItem setRightBarButtonItem:doneItem animated:YES];
         [doneItem release];
+    } else if (self.type == TaskEditTypeModifyOldTask) {
+        
     }
 
 }
@@ -96,6 +99,20 @@
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter]removeObserver:self];
+    
+    if (self.type == TaskEditTypeAddNewTask) {
+        
+    } else if (self.type == TaskEditTypeModifyOldTask) {
+        if ([self.tempTask isSameContent:self.task]) {
+            NIF_INFO(@"No modify for this task");
+        } else if (self.task.list != self.tempTask.list) {
+            NSArray *subtasks = [self.tempTask.list allDescendantsOfTask:self.task];
+            // self.tempTask.list is the old task list 
+            // 
+            [self.tempTask.list moveTaskWithSubTasks:self.task toList:self.task.list];
+        }
+    }
+
 
 }
 
@@ -145,17 +162,20 @@
     if (indexPath.row < 3) {
         return 40;
     } else {
+        NSInteger realHeight = 0;
         NSInteger height = CGRectGetHeight(self.tableView.frame) - 3 * 40;
-        NSString *content = self.tempTask.notes;    
+        NSString *content = self.task.notes;    
         if (content && content.length) {
             CGSize contentSize = [content sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(CGRectGetWidth(self.tableView.frame), 10000)];
             if (contentSize.height  + 40 > height) {
-                return contentSize.height + 40;
+                realHeight = contentSize.height + 40;
             } else {
-                return height;
+                realHeight = height;
             }
         }
-        return height > 130?height:130;
+        realHeight = height > 130?height:130;
+        
+        return realHeight;
     }
 }
 
@@ -185,20 +205,20 @@
         }
         
         [cell.checkBox handleCheckEventWithBlock:^{
-            self.tempTask.isCompleted = !self.tempTask.isCompleted;
+            self.task.isCompleted = !self.task.isCompleted;
             
-            cell.checkBox.checked = self.tempTask.isCompleted;
-            cell.textField.textColor = self.tempTask.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
+            cell.checkBox.checked = self.task.isCompleted;
+            cell.textField.textColor = self.task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
         }];
 
-        cell.checkBox.checked = self.tempTask.isCompleted;
-        cell.textField.textColor = self.tempTask.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
+        cell.checkBox.checked = self.task.isCompleted;
+        cell.textField.textColor = self.task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
         
         cell.textField.frame = CGRectMake(35, 12, cell.frame.size.width - 60 - 20, 25);
         cell.textField.tag = TASK_TITLE_TEXT_FIELD_TAG;
         self.titleField = cell.textField;
         
-        cell.textField.text = self.tempTask.title;
+        cell.textField.text = self.task.title;
                 
     } else if(indexPath.row == 1){
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kListChooseCellIndentifier];
@@ -222,14 +242,13 @@
             cell.detailTextLabel.textAlignment = UITextAlignmentCenter;            
         }
         
+        self.dateField = cell.textField;
         self.dateLabel = cell.detailTextLabel;
     
-        self.dateField = cell.textField;
-
-        if (self.tempTask.due == nil || [self.tempTask.due timeIntervalSince1970] <= 0) {
-            cell.detailTextLabel.text = NSLocalizedString(@"None",@"None");            //[self.tempTask.due locateTimeDescription];
+        if (self.task.due == nil || [self.task.due timeIntervalSince1970] <= 0) {
+            cell.detailTextLabel.text = NSLocalizedString(@"None",@"None");            //[self.task.due locateTimeDescription];
        } else {
-            cell.detailTextLabel.text = [self.tempTask.due locateTimeDescription];
+            cell.detailTextLabel.text = [self.task.due locateTimeDescription];
         }
         
     } else if (indexPath.row == 2) {
@@ -240,7 +259,7 @@
 
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         }
-        cell.detailTextLabel.text = self.tempTask.list.title;
+        cell.detailTextLabel.text = self.task.list.title;
 
     } else if (indexPath.row == 3) {
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kTextViewCellIndentifier];
@@ -256,7 +275,7 @@
         cell.textView.frame = CGRectMake(0, 0, CGRectGetWidth(cell.bounds), CGRectGetHeight(cell.frame));
         cell.textView.placeholder = NSLocalizedString(@"Click here to edit", @"Click here to edit");
 
-        cell.textView.text = self.tempTask.notes;
+        cell.textView.text = self.task.notes;
         self.textView = cell.textView;
         
     }
@@ -275,53 +294,24 @@
             self.listChooseController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGListChoose"];
         }
         self.listChooseController.chooseDelegate = self;
-        self.listChooseController.selectedList = self.tempTask.list;
+        self.listChooseController.selectedList = self.task.list;
         [self.navigationController pushViewController:self.listChooseController animated:YES];
 }
 
 #pragma mark -
 #pragma mark UITextFieldDelegate
-- (void)textFieldDidBeginEditing:(UITextField *)textField {
-
-    if (textField == self.titleField) {
-        
-    } else if (textField == self.dateField) {
-        textField.inputView = self.datePicker;
-    }
-    
-    if (textField.inputAccessoryView == nil) {
-        
-        UIToolbar *_actionBar = [[UIToolbar alloc] init];
-        _actionBar.translucent = YES;
-        [_actionBar sizeToFit];
-        _actionBar.barStyle = UIBarStyleBlackTranslucent;
-        
-        UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done"
-                                                                       style:UIBarButtonItemStyleDone target:self
-                                                                      action:@selector(textFieldMustReturn:)];
-        
-        UIBarButtonItem *flexible = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-        [_actionBar setItems:[NSArray arrayWithObjects:/*prevNextWrapper,*/ flexible, doneButton, nil]];
-        
-        textField.inputAccessoryView = _actionBar;
-        
-        [_actionBar release];        
-    }
-
-}
-
-- (void)textFieldDidEndEditing:(UITextField *)textField {
-    //[self removeItems];
-}
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
     if (textField.tag == TASK_TITLE_TEXT_FIELD_TAG) {
-        self.tempTask.title = textField.text;        
+        self.task.title = textField.text;        
     }
     return YES;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    if (textField == self.titleField) {
+        [textField endEditing:YES];
+    }
     return YES;
 }
 
@@ -331,33 +321,109 @@
     return NO;
 }
 
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
+    [self.tableView beginUpdates];
+    [self.tableView endUpdates];
+    
+    if (textField == self.titleField) {
+        if (textField.inputAccessoryView == nil) {
+            
+        }
+
+    } else if (textField == self.dateField) {
+        textField.inputView = self.datePicker;
+        [self updateDate:nil];
+        
+        if (textField.inputAccessoryView == nil) {
+            
+            UIToolbar *_actionBar = [[UIToolbar alloc] init];
+            _actionBar.translucent = YES;
+            [_actionBar sizeToFit];
+            _actionBar.barStyle = UIBarStyleBlackTranslucent;
+            
+            
+            
+            UIBarButtonItem *clearButton = [[UIBarButtonItem alloc] initWithTitle:@"Clear"
+                                                                            style:UIBarButtonItemStyleDone target:self
+                                                                           action:@selector(clearDate)];
+            
+            
+            UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done"
+                                                                           style:UIBarButtonItemStyleDone target:self
+                                                                          action:@selector(textFieldMustReturn:)];
+            
+            UIBarButtonItem *flexible = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+            [_actionBar setItems:[NSArray arrayWithObjects:/*prevNextWrapper,*/clearButton, flexible, doneButton, nil]];
+            
+            textField.inputAccessoryView = _actionBar;
+            
+            [clearButton release];
+            [doneButton release];
+            [flexible release];
+            [_actionBar release];        
+        }
+    }
+    
+
+    return YES;
+}
+
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
+    [self.tableView beginUpdates];
+    [self.tableView endUpdates];
+}
 
 #pragma mark -
 #pragma mark UITextViewDelegate
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
     
-//    [self hideDatePicker];
+    if (textView.inputAccessoryView == nil) {
+        
+        UIToolbar *_actionBar = [[UIToolbar alloc] init];
+        _actionBar.translucent = YES;
+        [_actionBar sizeToFit];
+        _actionBar.barStyle = UIBarStyleBlackTranslucent;
+        
+        
+        
+        UISegmentedControl *prevNext = [[UISegmentedControl alloc] initWithItems:[NSArray arrayWithObjects:@"Undo", @"Redo", nil]];
+        prevNext.momentary = YES;
+        prevNext.segmentedControlStyle = UISegmentedControlStyleBar;
+        prevNext.tintColor = [UIColor darkGrayColor];
+        [prevNext addTarget:self action:@selector(undoAction:) forControlEvents:UIControlEventValueChanged];
+        _undoControl = prevNext;
+        UIBarButtonItem *prevNextWrapper = [[UIBarButtonItem alloc] initWithCustomView:prevNext];
+        
+        
+        UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done"
+                                                                       style:UIBarButtonItemStyleDone target:textView
+                                                                      action:@selector(resignFirstResponder)];
+        
+        UIBarButtonItem *flexible = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        [_actionBar setItems:[NSArray arrayWithObjects:prevNextWrapper, flexible, doneButton, nil]];
+        
+        textView.inputAccessoryView = _actionBar;
+        
+        [prevNext release];
+        [doneButton release];
+        [flexible release];
+        [prevNextWrapper release];
+        [_actionBar release];        
+        
+    }
+
+    [self updateUndoButtons];
+
     return YES;
 }
 
-- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
-
-    return YES;
-}
-
-- (void)textViewDidBeginEditing:(UIPlaceHolderTextView *)textView {
-
+- (void)textViewDidBeginEditing:(UITextView *)textView {
     [self.tableView beginUpdates];
-    [self.tableView endUpdates];
-    [UIView beginAnimations:nil context:NULL];
-    self.textView.bounds = self.textView.superview.bounds;
-    [UIView commitAnimations];
+    [self.tableView endUpdates];   
     
-//    NIF_INFO(@"%@", self.ta)
 }
 
 - (void)textViewDidEndEditing:(UIPlaceHolderTextView *)textView{
-    //[self removeItems];
     self.textView.bounds = self.textView.superview.bounds;
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
@@ -366,7 +432,7 @@
 
 - (void)textViewDidChange:(UITextView *)textView {
     
-    self.tempTask.notes = textView.text;
+    self.task.notes = textView.text;
     self.textView.bounds = self.textView.superview.bounds;
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
@@ -405,21 +471,21 @@
         /// SAVE THIS TASK;
         
         [self.navigationController dismissViewControllerAnimated:YES completion:^{
-            if (!self.tempTask.title || self.tempTask.title.length == 0) {
-                self.tempTask.title = NSLocalizedString(@"Untitled", @"Untitled");
+            if (!self.task.title || self.task.title.length == 0) {
+                self.task.title = NSLocalizedString(@"Untitled", @"Untitled");
             }
 
-            self.tempTask.displayOrder = 0;
-            self.tempTask.isUpdated = NO;
-            self.tempTask.isCompleted = NO;
-            self.tempTask.localModifyTime = [NSDate date];
-            self.tempTask.localParentId = -1;
-            for (int i = 0; i < [self.tempTask.list.tasks count]; i++) {
-                Task *e = [self.tempTask.list.tasks objectAtIndex:i];
+            self.task.displayOrder = 0;
+            self.task.isUpdated = NO;
+            self.task.isCompleted = NO;
+            self.task.localModifyTime = [NSDate date];
+            self.task.localParentId = -1;
+            for (int i = 0; i < [self.task.list.tasks count]; i++) {
+                Task *e = [self.task.list.tasks objectAtIndex:i];
                 [e setDisplayOrder:i+1 updateDB:YES];
             }
             
-            [self.tempTask.list insertTask:self.tempTask];
+            [self.task.list insertTask:self.task];
 
             if([self.editDelegate respondsToSelector:@selector(editControllerDidAddNewTask:)]) {
                 [self.editDelegate editControllerDidAddNewTask:self];
@@ -429,118 +495,35 @@
     }
 }
 
-- (void)undoAction:(UIButton *)sender {
-    [self.textView.undoManager undo];
+- (void)undoAction:(UISegmentedControl *)sender {
+    if (sender.selectedSegmentIndex == 0) {
+        [self.textView.undoManager undo];       // Undo
+    } else {
+        [self.textView.undoManager redo];       // Redo
+    }
+    
     [self updateUndoButtons];
-}
-
-- (void)redoAction:(UIButton *)sender {
-    [self.textView.undoManager redo];
-    [self updateUndoButtons];
-}
-
-#pragma mark -
-#pragma mark keyboard Notification
-- (void)keyboardDidShow:(NSNotification *)note
-{
-//    [self hideDatePicker];
-    
-    NSDictionary *info = [note userInfo];    
-    NSValue *keyBounds = [info objectForKey:UIKeyboardFrameBeginUserInfoKey];
-    
-    CGRect bndKey;
-    [keyBounds getValue:&bndKey];
-        
-    
-    NSArray *windows = [[UIApplication sharedApplication] windows];
-    for(UIView *tempWindow in windows) {
-        for(int i = 0; i < [tempWindow.subviews count]; i++)
-        {
-            //Get a reference of the current view 
-            UIView *keyboard = [tempWindow.subviews objectAtIndex:i];
-            
-            if([[keyboard description] hasPrefix:@"<UIPeripheralHostView"] == YES)
-            {
-                //[self appendToolbarAboveKeyboard:keyboard];
-
-                bndKey = keyboard.frame;
-                
-                [UIView animateWithDuration:0.2 animations:^{
-                    CGRect oldFrame = self.tableView.frame;
-                    self.tableView.frame = CGRectMake(CGRectGetMinX(oldFrame), CGRectGetMinY(oldFrame),bndKey.size.width, CGRectGetMinY(bndKey)-60); 
-                }];
-
-            }
-        }
-    }    
-}
-
-- (void)keyboardDidHide:(NSNotification *)note {
-//    isKeyboardHidden = YES;
-    self.tableView.frame = self.view.frame;
-    [self.tableView beginUpdates];
-    [self.tableView endUpdates];
-}
-
-
-#pragma mark - 
-#pragma mark ToolBar above keyboard
-- (void)appendToolbarAboveKeyboard:(UIView *)keyboard {
-    
-    UIView *toolbar = [[UIView alloc] initWithFrame:CGRectMake(0, -40, keyboard.frame.size.width, 40)];
-    toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth |UIViewAutoresizingFlexibleBottomMargin;
-    toolbar.backgroundColor = RGB_COLOR(223,223,227);
-    
-    // Undo Button
-    _undoButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    _undoButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-    _undoButton.frame = CGRectMake(5, 5, 50, 30);
-    [_undoButton setTitle:@"undo" forState:UIControlStateNormal];
-    [_undoButton addTarget:self action:@selector(undoAction:) forControlEvents:UIControlEventTouchUpInside];
-    [toolbar addSubview:_undoButton];
-    
-    // Redo Button
-    _redoButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    _redoButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-    _redoButton.frame = CGRectMake(60, 5, 60, 30);
-    [_redoButton setTitle:@"redo" forState:UIControlStateNormal];
-    [_redoButton addTarget:self action:@selector(redoAction:) forControlEvents:UIControlEventTouchUpInside];
-    [toolbar addSubview:_redoButton];
-
-    [self updateUndoButtons];
-    
-    // Hide Keyboard Button
-    UIButton *hideKeyboardButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    hideKeyboardButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-    hideKeyboardButton.frame = CGRectMake(CGRectGetWidth(toolbar.frame) - 80, 5, 60, 30);
-    [hideKeyboardButton setTitle:@"Hide" forState:UIControlStateNormal];
-    [hideKeyboardButton addTarget:self action:@selector(hideKeyboard:) forControlEvents:UIControlEventTouchUpInside];
-    [toolbar addSubview:hideKeyboardButton];
-    
-    [keyboard addSubview:toolbar];
-    [toolbar release];
-    
-}
-
-- (void)updateUndoButtons {
-    _undoButton.enabled =[self.textView.undoManager canUndo];
-    _redoButton.enabled = [self.textView.undoManager canRedo];
 }
 
 - (void)updateDate:(id)sender {
-    self.tempTask.due = self.datePicker.date;
-
-    self.dateLabel.text = [self.tempTask.due locateTimeDescription];
+    self.task.due = self.datePicker.date;
+    self.dateLabel.text = [self.task.due locateTimeDescription];
 }
+
+- (void)updateUndoButtons {
+    [_undoControl setEnabled:[self.textView.undoManager canUndo] forSegmentAtIndex:0];
+    [_undoControl setEnabled:[self.textView.undoManager canRedo] forSegmentAtIndex:1];
+}
+
 
 - (UIDatePicker *)datePicker {
     if (_datePicker == nil) {
         _datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, 480, self.tableView.frame.size.width, 216)];
         
-        if (self.tempTask.due == nil || [self.tempTask.due timeIntervalSince1970] <= 0) {
+        if (self.task.due == nil || [self.task.due timeIntervalSince1970] <= 0) {
             _datePicker.date = [NSDate date];
         } else {
-            _datePicker.date = self.tempTask.due;
+            _datePicker.date = self.task.due;
         }
 
         _datePicker.datePickerMode = UIDatePickerModeDate;
@@ -561,14 +544,14 @@
 }
 
 - (void)clearDate {
-    self.tempTask.due = nil;
+    self.task.due = nil;
+    self.dateLabel.text = @"";
+    [self.dateField endEditing:YES];
     [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-    [self hideDatePicker];
 }
 
 - (void)confirmDate {
-    self.tempTask.due = self.datePicker.date;
-    [self hideDatePicker];    
+    self.task.due = self.datePicker.date;
 }
 
 - (void)saveTask {
@@ -580,7 +563,13 @@
 #pragma mark - GListChooseDelegate
 - (void)listChooseController:(GListChooseController *)listController didChooseList:(TaskList *)aList {
     // move from old list to new list
-    self.tempTask.list = aList;
+    if (self.type == TaskEditTypeAddNewTask) {
+        self.task.list = aList;        
+    } else if (self.type == TaskEditTypeModifyOldTask) {
+        self.task.list = aList;
+        if (self.task.list != self.tempTask.list) {
+        }
+    }
     [self.navigationController popToViewController:self animated:YES];
     [self.tableView reloadData];
 }

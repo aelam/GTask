@@ -42,16 +42,4 @@
 - (void)syncTasks;
 - (void)syncTasksForList:(TaskList *)aList;
 
-//- (BOOL)insertTask:(Task *)aTask;
-//- (BOOL)deleteTask:(Task *)aTask;
-//
-//- (void)deleteTask:(Task *)aTask atIndex:(NSInteger)index forList:(TaskList *)aList;
-//- (void)modifyTask:(Task *)aTask forList:(TaskList *)aList;
-//
-//- (void)updateTask:(Task *)aTask;
-//
-//- (void)deleteTaskAtIndex:(NSInteger)index forTasks:(NSMutableArray *)tasks;
-//
-//- (void)moveTaskAndSubTasks:(Task *)task fromList:(TaskList *)fromList toList:(TaskList *)toList;
-
 @end

@@ -58,7 +58,7 @@
         unsigned int attributeCount;
         objc_property_attribute_t *attribute_t = property_copyAttributeList(propertyList[i], &attributeCount);
         for(int i = 0; i < attributeCount;i++){
-            NSLog(@"--------------  name : %s value : %s",attribute_t[i].name,attribute_t[i].value);
+//            NSLog(@"--------------  name : %s value : %s",attribute_t[i].name,attribute_t[i].value);
         }
         free(attribute_t);
         

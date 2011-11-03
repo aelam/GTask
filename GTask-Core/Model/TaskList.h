@@ -77,9 +77,10 @@ typedef enum {
 - (BOOL)deleteTask:(Task *)aTask;
 - (BOOL)deleteTaskAtIndex:(NSInteger)index;
 
-- (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
-- (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index;
+//- (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
+//- (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index;
 
+- (void)moveTaskWithSubTasks:(Task *)task toList:(TaskList *)toList;
 
 
 
