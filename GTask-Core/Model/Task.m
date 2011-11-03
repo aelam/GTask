@@ -190,13 +190,42 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");            
         } else {
-            BOOL update = [db executeUpdate:@"UPDATE tasks SET local_list_id = %d,local_modify_timestamp = ? WHERE local_task_id = %d",[NSNumber numberWithInt:aList.localListId],[NSDate date],self.localTaskId];                           
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET local_list_id = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:aList.localListId],[NSDate date],[NSNumber numberWithInt:self.localTaskId]];                           
             NIF_INFO(@"UPDATE List of task SUCCESS ? : %d", update);
             [db close];
         }
     }
     self.list = aList;
 }
+
+- (void)update {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NIF_ERROR(@"Could not open db.");            
+    } else {
+        BOOL update = [db executeUpdate:@"UPDATE tasks SET server_task_id = ?,local_parent_id = ?,title = ?,notes = ?,is_updated = ?,is_completed = ?,is_hidden = ?,is_deleted = ?,is_cleared = ?,completed_timestamp = ?,reminder_timestamp = ?,due = ?,server_modify_timestamp = ?,display_order = ? WHERE local_task_id = ?",
+                       self.serverTaskId,
+                       [NSNumber numberWithInt:self.localParentId],
+                       self.title,
+                       self.notes,
+                       [NSNumber numberWithBool:self.isUpdated],
+                       [NSNumber numberWithBool:self.isCompleted],
+                       [NSNumber numberWithBool:self.isHidden],
+                       [NSNumber numberWithBool:self.isDeleted],
+                       [NSNumber numberWithBool:self.isCleared],
+                       self.completedDate,
+                       self.reminderDate,
+                       self.due,
+                       self.serverModifyTime,
+                       [NSNumber numberWithInt:self.displayOrder],
+                       [NSNumber numberWithInt:self.localTaskId]
+                       ];                           
+        NIF_INFO(@"UPDATE task SUCCESS ? : %d", update);
+        [db close];
+    }
+    
+}
+
     
 - (void)dealloc {
     [_list release];

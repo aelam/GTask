@@ -262,7 +262,7 @@
     
     self.editViewController.type = TaskEditTypeModifyOldTask;
     self.editViewController.task = [self.tasks objectAtIndex:indexPath.row];
-    self.editViewController.tempTask = self.editViewController.task;
+    self.editViewController.tempTask = self.editViewController.task;    // COPY
     [self.navigationController pushViewController:self.editViewController animated:YES];
     
 }

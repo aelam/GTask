@@ -14,7 +14,6 @@
 
 @property (retain) TaskList *list;
 @property (assign) NSInteger localTaskId;
-//@property (assign) NSInteger localListId;
 @property (assign) NSInteger localParentId;
 @property (copy)  NSString *serverTaskId;
 @property (copy)  NSString *title;
@@ -50,6 +49,7 @@
 
 - (BOOL)isFirstLevelTask;
 
+- (void)update;
 
 
 @end

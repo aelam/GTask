@@ -72,7 +72,7 @@
                 task.due = [rs dateForColumn:@"due"];
                 task.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
                 task.displayOrder = [rs intForColumn:@"display_order"];
-                task.generationLevel = [rs intForColumn:@"generation_level"];
+//                task.generationLevel = [rs intForColumn:@"generation_level"];
                 
                 task.list = self;
                 [_tasks addObject:task];

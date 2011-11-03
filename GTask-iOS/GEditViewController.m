@@ -17,6 +17,11 @@
 #import "TaskList.h"
 #import "RWDetailViewController.h"
 
+void * test() {
+    printf("%s",__func__);
+    return NULL;
+}
+
 @interface GEditViewController (Plus)
 
 - (void)updateUndoButtons;
@@ -78,6 +83,7 @@
         
     self.titleLabel.text = self.task.title;
     NIF_INFO(@"%@", self.task);
+    [self addObserver:self forKeyPath:@"task.title" options:NSKeyValueObservingOptionNew context:(void *)test];
     
     [self.tableView reloadData];
 
@@ -100,6 +106,7 @@
     [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter]removeObserver:self];
     
+    
     if (self.type == TaskEditTypeAddNewTask) {
         
     } else if (self.type == TaskEditTypeModifyOldTask) {
@@ -110,7 +117,10 @@
             // self.tempTask.list is the old task list 
             // 
             [self.tempTask.list moveTaskWithSubTasks:self.task toList:self.task.list];
+        } else {
+            [self.task update];
         }
+            
     }
 
 
