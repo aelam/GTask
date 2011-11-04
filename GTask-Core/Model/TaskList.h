@@ -82,7 +82,8 @@ typedef enum {
 
 - (void)moveTaskWithSubTasks:(Task *)task toList:(TaskList *)toList;
 
-
+// Private method, when move task from a list to another list
+- (void)updateListIdAndOrders;
 
 
 @end

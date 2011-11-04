@@ -45,7 +45,7 @@
     return self;
 }
 
-#define NAME_AND_DUE      4
+#define NAME_AND_DUE      3
 #define DESCRIPTION_LEVEL NAME_AND_DUE
 
 - (NSString *)description {
@@ -53,9 +53,10 @@
     return [NSString stringWithFormat:
             @"localTaskId   : %d\
             title           : %@\
+            list            : %@\
             parent          : %d\
             updated         : %@\
-            displayOrder    : %d",self.localTaskId,self.title,self.localParentId,self.serverModifyTime,self.displayOrder];
+            displayOrder    : %d",self.localTaskId,self.title,self.list.title,self.localParentId,self.serverModifyTime,self.displayOrder];
 #elif DESCRIPTION_LEVEL == 2
     return [NSString stringWithFormat:
             @"localTaskId: %d title : %@ parent: %d\

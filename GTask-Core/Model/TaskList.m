@@ -42,18 +42,24 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"LocalListId : %d ServerListId : %@",self.localListId,self.serverListId];
+    return [NSString stringWithFormat:@"List: %@ LocalListId : %d ServerListId : %@",self.title,self.localListId,self.serverListId];
 }
 
+- (id)init {
+    if (self = [super init]) {
+        _tasks = [[NSMutableArray alloc] init];
+    }
+    return self;
+}
 
 - (NSMutableArray *)tasks {
-    if (_tasks == nil) {
+    if (_tasks == nil || [_tasks count] == 0) {
         FMDatabase *db = [FMDatabase database];
         if (![db open]) {
             NSLog(@"Could not open db.");
-            _tasks = nil;
+//            _tasks = nil;
         } else {
-            _tasks = [[NSMutableArray alloc] init];
+            [_tasks removeAllObjects];
             FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d AND is_deleted = 0 ORDER BY display_order",self.localListId]];
             while ([rs next]) {
                 Task *task = [[Task alloc] init];
@@ -454,18 +460,55 @@
     }
 }
 
-#warning --- modify array already exists, and modify db data
 - (void)moveTaskWithSubTasks:(Task *)task toList:(TaskList *)toList {
+    NIF_INFO(@"MOVE TASK:%@ TO LIST: %@", task.title,toList.title);
+    
     NSArray *subTasks = [self allDescendantsOfTask:task];
-    [task setList:toList updateDB:YES];
     
-    for (int i = 0; i < [subTasks count]; i++) {
-        Task *e = [subTasks objectAtIndex:i];
-        [e setList:toList updateDB:YES];
+    if (subTasks && [subTasks count] > 0) {
+        for (int i = [subTasks count] - 1 ; i >= 0 ; i--) {
+            Task *e = [subTasks objectAtIndex:i];
+            e.list = toList;
+            if (![toList.tasks containsObject:e]) {
+                [toList.tasks insertObject:e atIndex:0];
+                [self.tasks removeObject:e];
+                
+            }
+        }
     }
-    [self.tasks removeObjectsInArray:subTasks];
-    [self.tasks removeObject:task];
     
+    if (![toList.tasks containsObject:task]) {
+        task.list = toList;
+        [task setLocalParentId:-1 updateDB:YES];
+        [toList.tasks insertObject:task atIndex:0];
+        [self.tasks removeObject:task];        
+    }
+    
+    [self updateListIdAndOrders];
+    [toList updateListIdAndOrders];
+    
+}
+
+- (void)updateListIdAndOrders {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NIF_ERROR(@"Could not open db.");            
+    } else {
+        for(int i = 0; i < [self.tasks count];i++) {
+            Task *e = [self.tasks objectAtIndex:i];
+            e.displayOrder = i;
+            NSError *error = nil;
+
+            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET display_order = %d,local_list_id = %d WHERE local_task_id = %d",e.displayOrder,e.list.localListId,e.localTaskId];
+            BOOL update = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
+            
+//            NIF_INFO(@"UPDATE task SUCCESS ? : %d", update);
+//            if (error) {
+//                NIF_INFO(@"%@", error);
+//            }
+        }
+        [db close];
+    }
 }
 
 

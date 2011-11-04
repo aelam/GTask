@@ -6,6 +6,18 @@
 //  Copyright (c) 2011年 __MyCompanyName__. All rights reserved.
 //
 
+/**
+ *  
+ * 两种编辑模式
+ *  1. 添加一个新任务， 这个时候点击DONE的时候更新数组同时加入数据库，
+ *  2. 修改子任务
+ *     - 未修改分组： 在textFieldDidEndEditing/textViewDidEndEditing/dateDidPick里面更新数据库
+ *     - 修改了分组： 在textFieldDidEndEditing/textViewDidEndEditing/dateDidPick里面更新数据库
+ *                   在修改了所属List的时候需要更新所有排序
+ *      
+ */
+
+
 #import "GEditViewController.h"
 #import "Task.h"
 #import "GTableViewCell.h"
@@ -16,11 +28,6 @@
 #import "GListChooseController.h"
 #import "TaskList.h"
 #import "RWDetailViewController.h"
-
-void * test() {
-    printf("%s",__func__);
-    return NULL;
-}
 
 @interface GEditViewController (Plus)
 
@@ -81,9 +88,7 @@ void * test() {
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
         
-    self.titleLabel.text = self.task.title;
-    NIF_INFO(@"%@", self.task);
-    [self addObserver:self forKeyPath:@"task.title" options:NSKeyValueObservingOptionNew context:(void *)test];
+    self.titleLabel.text = self.tempTask.title;
     
     [self.tableView reloadData];
 
@@ -97,7 +102,8 @@ void * test() {
         [self.navigationItem setRightBarButtonItem:doneItem animated:YES];
         [doneItem release];
     } else if (self.type == TaskEditTypeModifyOldTask) {
-        
+        [self.navigationItem setLeftBarButtonItem:nil animated:NO];
+        [self.navigationItem setRightBarButtonItem:nil animated:NO];
     }
 
 }
@@ -105,31 +111,12 @@ void * test() {
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter]removeObserver:self];
-    
-    
-    if (self.type == TaskEditTypeAddNewTask) {
-        
-    } else if (self.type == TaskEditTypeModifyOldTask) {
-        if ([self.tempTask isSameContent:self.task]) {
-            NIF_INFO(@"No modify for this task");
-        } else if (self.task.list != self.tempTask.list) {
-            NSArray *subtasks = [self.tempTask.list allDescendantsOfTask:self.task];
-            // self.tempTask.list is the old task list 
-            // 
-            [self.tempTask.list moveTaskWithSubTasks:self.task toList:self.task.list];
-        } else {
-            [self.task update];
-        }
-            
-    }
-
 
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];    
-//    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
 }
 
@@ -174,7 +161,7 @@ void * test() {
     } else {
         NSInteger realHeight = 0;
         NSInteger height = CGRectGetHeight(self.tableView.frame) - 3 * 40;
-        NSString *content = self.task.notes;    
+        NSString *content = self.tempTask.notes;    
         if (content && content.length) {
             CGSize contentSize = [content sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(CGRectGetWidth(self.tableView.frame), 10000)];
             if (contentSize.height  + 40 > height) {
@@ -215,20 +202,22 @@ void * test() {
         }
         
         [cell.checkBox handleCheckEventWithBlock:^{
-            self.task.isCompleted = !self.task.isCompleted;
+            self.tempTask.isCompleted = !self.tempTask.isCompleted;
+            cell.checkBox.checked = self.tempTask.isCompleted;
             
-            cell.checkBox.checked = self.task.isCompleted;
-            cell.textField.textColor = self.task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
+            [self.task setIsCompleted:!self.task.isCompleted updateDB:YES];
+            
+            cell.textField.textColor = self.tempTask.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
         }];
 
-        cell.checkBox.checked = self.task.isCompleted;
-        cell.textField.textColor = self.task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
+        cell.checkBox.checked = self.tempTask.isCompleted;
+        cell.textField.textColor = self.tempTask.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
         
         cell.textField.frame = CGRectMake(35, 12, cell.frame.size.width - 60 - 20, 25);
         cell.textField.tag = TASK_TITLE_TEXT_FIELD_TAG;
         self.titleField = cell.textField;
         
-        cell.textField.text = self.task.title;
+        cell.textField.text = self.tempTask.title;
                 
     } else if(indexPath.row == 1){
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kListChooseCellIndentifier];
@@ -255,10 +244,10 @@ void * test() {
         self.dateField = cell.textField;
         self.dateLabel = cell.detailTextLabel;
     
-        if (self.task.due == nil || [self.task.due timeIntervalSince1970] <= 0) {
-            cell.detailTextLabel.text = NSLocalizedString(@"None",@"None");            //[self.task.due locateTimeDescription];
+        if (self.tempTask.due == nil || [self.tempTask.due timeIntervalSince1970] <= 0) {
+            cell.detailTextLabel.text = NSLocalizedString(@"None",@"None");            //[self.tempTask.due locateTimeDescription];
        } else {
-            cell.detailTextLabel.text = [self.task.due locateTimeDescription];
+            cell.detailTextLabel.text = [self.tempTask.due locateTimeDescription];
         }
         
     } else if (indexPath.row == 2) {
@@ -269,7 +258,7 @@ void * test() {
 
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         }
-        cell.detailTextLabel.text = self.task.list.title;
+        cell.detailTextLabel.text = self.tempTask.list.title;
 
     } else if (indexPath.row == 3) {
         cell = (GTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kTextViewCellIndentifier];
@@ -285,7 +274,7 @@ void * test() {
         cell.textView.frame = CGRectMake(0, 0, CGRectGetWidth(cell.bounds), CGRectGetHeight(cell.frame));
         cell.textView.placeholder = NSLocalizedString(@"Click here to edit", @"Click here to edit");
 
-        cell.textView.text = self.task.notes;
+        cell.textView.text = self.tempTask.notes;
         self.textView = cell.textView;
         
     }
@@ -304,7 +293,7 @@ void * test() {
             self.listChooseController = [self.storyboard instantiateViewControllerWithIdentifier:@"kGListChoose"];
         }
         self.listChooseController.chooseDelegate = self;
-        self.listChooseController.selectedList = self.task.list;
+        self.listChooseController.selectedList = self.tempTask.list;
         [self.navigationController pushViewController:self.listChooseController animated:YES];
 }
 
@@ -313,15 +302,16 @@ void * test() {
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
     if (textField.tag == TASK_TITLE_TEXT_FIELD_TAG) {
-        self.task.title = textField.text;        
+        self.tempTask.title = textField.text;        
     }
     return YES;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    if (textField == self.titleField) {
-        [textField endEditing:YES];
+    if (textField.tag == TASK_TITLE_TEXT_FIELD_TAG) {
+        [textField endEditing:YES];        
     }
+
     return YES;
 }
 
@@ -360,7 +350,7 @@ void * test() {
             
             UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done"
                                                                            style:UIBarButtonItemStyleDone target:self
-                                                                          action:@selector(textFieldMustReturn:)];
+                                                                          action:@selector(confirmDate)];
             
             UIBarButtonItem *flexible = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
             [_actionBar setItems:[NSArray arrayWithObjects:/*prevNextWrapper,*/clearButton, flexible, doneButton, nil]];
@@ -382,6 +372,22 @@ void * test() {
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
 }
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+    // Title 编辑完成
+    if (textField.tag == TASK_TITLE_TEXT_FIELD_TAG) {
+        self.tempTask.title = textField.text;
+        self.task.title = textField.text;
+
+        if (self.type == TaskEditTypeAddNewTask) {
+        
+        } else if (self.type == TaskEditTypeModifyOldTask) {
+            [self.task update];            
+        }
+    }
+}
+
+
 
 #pragma mark -
 #pragma mark UITextViewDelegate
@@ -428,21 +434,36 @@ void * test() {
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView {
-    [self.tableView beginUpdates];
-    [self.tableView endUpdates];   
+//    [self.tableView beginUpdates];
+//    [self.tableView endUpdates];   
     
 }
 
 - (void)textViewDidEndEditing:(UIPlaceHolderTextView *)textView{
     self.textView.bounds = self.textView.superview.bounds;
-    [self.tableView beginUpdates];
-    [self.tableView endUpdates];
+//    [self.tableView beginUpdates];
+//    [self.tableView endUpdates];
+    
+
+    self.tempTask.notes = textView.text;
+
+    // UPDATE to DB
+    if (self.type == TaskEditTypeAddNewTask) {
+        self.task.notes = textView.text;
+   
+    } else if (self.type == TaskEditTypeModifyOldTask) {
+        if (![self.task.notes isEqualToString:textView.text]) {
+            self.task.notes = textView.text;
+            [self.task update];                        
+        }
+    }
+    
 
 }
 
 - (void)textViewDidChange:(UITextView *)textView {
     
-    self.task.notes = textView.text;
+    self.tempTask.notes = textView.text;
     self.textView.bounds = self.textView.superview.bounds;
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
@@ -465,6 +486,21 @@ void * test() {
     [self.navigationItem setRightBarButtonItem:nil animated:YES];
 }
 
+// Hide cut/copy/paste menu
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+    
+    if (sender == self.dateField) {
+        UIMenuController *menuController = [UIMenuController sharedMenuController];
+        if (menuController) {
+            [UIMenuController sharedMenuController].menuVisible = NO;
+            
+        }
+        return NO;        
+    }
+    return YES;
+    
+}
+
 
 #pragma mark -
 #pragma mark IBAction
@@ -476,26 +512,25 @@ void * test() {
 }
 
 - (void)doneAction:(id)sender {
-    [self removeItems];
     if (self.type == TaskEditTypeAddNewTask) {
         /// SAVE THIS TASK;
         
         [self.navigationController dismissViewControllerAnimated:YES completion:^{
-            if (!self.task.title || self.task.title.length == 0) {
-                self.task.title = NSLocalizedString(@"Untitled", @"Untitled");
+            if (!self.tempTask.title || self.tempTask.title.length == 0) {
+                self.tempTask.title = NSLocalizedString(@"Untitled", @"Untitled");
             }
 
-            self.task.displayOrder = 0;
-            self.task.isUpdated = NO;
-            self.task.isCompleted = NO;
-            self.task.localModifyTime = [NSDate date];
-            self.task.localParentId = -1;
-            for (int i = 0; i < [self.task.list.tasks count]; i++) {
-                Task *e = [self.task.list.tasks objectAtIndex:i];
+            self.tempTask.displayOrder = 0;
+            self.tempTask.isUpdated = NO;
+//            self.tempTask.isCompleted = NO;
+            self.tempTask.localModifyTime = [NSDate date];
+            self.tempTask.localParentId = -1;
+            for (int i = 0; i < [self.tempTask.list.tasks count]; i++) {
+                Task *e = [self.tempTask.list.tasks objectAtIndex:i];
                 [e setDisplayOrder:i+1 updateDB:YES];
             }
             
-            [self.task.list insertTask:self.task];
+            [self.tempTask.list insertTask:self.tempTask];
 
             if([self.editDelegate respondsToSelector:@selector(editControllerDidAddNewTask:)]) {
                 [self.editDelegate editControllerDidAddNewTask:self];
@@ -516,8 +551,8 @@ void * test() {
 }
 
 - (void)updateDate:(id)sender {
-    self.task.due = self.datePicker.date;
-    self.dateLabel.text = [self.task.due locateTimeDescription];
+    self.tempTask.due = self.datePicker.date;
+    self.dateLabel.text = [self.tempTask.due locateTimeDescription];
 }
 
 - (void)updateUndoButtons {
@@ -530,10 +565,10 @@ void * test() {
     if (_datePicker == nil) {
         _datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, 480, self.tableView.frame.size.width, 216)];
         
-        if (self.task.due == nil || [self.task.due timeIntervalSince1970] <= 0) {
+        if (self.tempTask.due == nil || [self.tempTask.due timeIntervalSince1970] <= 0) {
             _datePicker.date = [NSDate date];
         } else {
-            _datePicker.date = self.task.due;
+            _datePicker.date = self.tempTask.due;
         }
 
         _datePicker.datePickerMode = UIDatePickerModeDate;
@@ -554,14 +589,33 @@ void * test() {
 }
 
 - (void)clearDate {
-    self.task.due = nil;
+    self.tempTask.due = nil;
     self.dateLabel.text = @"";
     [self.dateField endEditing:YES];
+    
+    if (self.type == TaskEditTypeAddNewTask) {
+        
+    } else if (self.type == TaskEditTypeModifyOldTask) {
+        self.task.due = nil;
+        [self.task update];
+    }
+
+    
     [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (void)confirmDate {
+    [self.titleField endEditing:YES];
+    [self.dateField endEditing:YES];
+    self.tempTask.due = self.datePicker.date;
     self.task.due = self.datePicker.date;
+    
+    if (self.type == TaskEditTypeAddNewTask) {
+        
+    } else if (self.type == TaskEditTypeModifyOldTask) {
+        [self.task update];
+    }
+
 }
 
 - (void)saveTask {
@@ -574,10 +628,12 @@ void * test() {
 - (void)listChooseController:(GListChooseController *)listController didChooseList:(TaskList *)aList {
     // move from old list to new list
     if (self.type == TaskEditTypeAddNewTask) {
-        self.task.list = aList;        
+        self.tempTask.list = aList;        
     } else if (self.type == TaskEditTypeModifyOldTask) {
-        self.task.list = aList;
-        if (self.task.list != self.tempTask.list) {
+        self.tempTask.list = aList;
+        if (self.tempTask.list != self.task.list) {
+            [self.task.list moveTaskWithSubTasks:self.task toList:self.tempTask.list];
+            self.task.list = self.tempTask.list;
         }
     }
     [self.navigationController popToViewController:self animated:YES];
@@ -592,10 +648,8 @@ void * test() {
 }
 
 - (void)setTempTask:(Task *)aTask {
-    if (_tempTask != aTask) {
         [_tempTask release];
         _tempTask = [aTask copy];        
-    }
 }
 
 @end

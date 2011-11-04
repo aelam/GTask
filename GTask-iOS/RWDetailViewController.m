@@ -155,6 +155,10 @@
     }
     
     [self.tableView reloadData];
+    
+    self.navigationController.toolbarHidden = NO;
+    
+    
     [super viewWillAppear:animated];
 }
 
@@ -210,12 +214,12 @@
     task.generationLevel = [self.taskList generationLevelOfTask:task];
     cell.checkBox.frame = CGRectMake(10 + 20 *task.generationLevel, 7, 20, 20);
     cell.firstLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    cell.firstLabel.frame = CGRectMake(44 + 20 *task.generationLevel, 5, cell.frame.size.width - 60 - 20 *task.generationLevel, 20);
+    cell.firstLabel.frame = CGRectMake(44 + 20 *task.generationLevel, 5, cell.frame.size.width - 70 - 20 *task.generationLevel, 20);
     
     cell.checkBox.checked = task.isCompleted;
     cell.firstLabel.textColor = task.isCompleted?[UIColor lightGrayColor]:[UIColor blackColor];
     
-    NSArray *subTasks = [self.taskList allDescendantsOfTask:task];
+//    NSArray *subTasks = [self.taskList allDescendantsOfTask:task];
     
 //    NSDate *date = [NSDate dateWithTimeIntervalSince1970:task.serverModifyTime];
 
@@ -464,8 +468,9 @@
     
     Task *newTask = [[Task alloc] init];
     newTask.list = self.taskList;
-    self.editViewController.task = newTask;
+    self.editViewController.tempTask = newTask;
     [newTask release];
+    self.editViewController.task = nil;
     
     UINavigationController *navigtor = [[UINavigationController alloc] initWithRootViewController:self.editViewController];
     [self.navigationController presentModalViewController:navigtor animated:YES];
