@@ -244,7 +244,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)isFirstLevelTask {
-    if (self.localParentId == -1)  return YES;
+    if (_localParentId == -1)  return YES;
     else return NO;
 }
 

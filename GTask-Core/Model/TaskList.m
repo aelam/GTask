@@ -42,7 +42,7 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"List: %@ LocalListId : %d ServerListId : %@",self.title,self.localListId,self.serverListId];
+    return [NSString stringWithFormat:@"List: %@ LocalListId : %d ServerListId : %@",_title,_localListId,_serverListId];
 }
 
 - (id)init {
@@ -60,7 +60,7 @@
 //            _tasks = nil;
         } else {
             [_tasks removeAllObjects];
-            FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d AND is_deleted = 0 ORDER BY display_order",self.localListId]];
+            FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d AND is_deleted = 0 ORDER BY display_order",_localListId]];
             while ([rs next]) {
                 Task *task = [[Task alloc] init];
                 task.localTaskId = [rs intForColumn:@"local_task_id"];
@@ -100,17 +100,17 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 - (Task *)firstTask {
-    if (!self.tasks || [self.tasks count] == 0) return nil; 
-    return [self.tasks objectAtIndex:0];
+    if (!_tasks || [_tasks count] == 0) return nil; 
+    return [_tasks objectAtIndex:0];
 }
 
 - (Task *)lastTask {
-    if (!self.tasks || [self.tasks count] == 0) return nil;
-    return [self.tasks lastObject];
+    if (!_tasks || [_tasks count] == 0) return nil;
+    return [_tasks lastObject];
 }
 
 - (NSInteger)generationLevelOfTask:(Task *)task {
-    if (!self.tasks || [self.tasks count] == 0) return 0;
+    if (!_tasks || [_tasks count] == 0) return 0;
     Task *parent = [self parentOfTask:task];
     if (parent) {
         return 1 + [self generationLevelOfTask:parent];
@@ -120,11 +120,11 @@
 }
 
 - (Task *)parentOfTask:(Task *)task {
-    if (!self.tasks || [self.tasks count] == 0) return nil;
+    if (!_tasks || [_tasks count] == 0) return nil;
     if ([task isFirstLevelTask]) return nil;
     else {
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"localTaskId = %d",task.localParentId];
-        NSArray *filteredParents = [self.tasks filteredArrayUsingPredicate:predicate];
+        NSArray *filteredParents = [_tasks filteredArrayUsingPredicate:predicate];
         if (filteredParents == nil || [filteredParents count] == 0) {
             NIF_ERROR(@"THIS TASK SHOULD HAVE A PARENT!!");
             return nil;
@@ -136,11 +136,11 @@
 
 // 
 - (NSArray *)sonsOfTask:(Task *)task {
-    if (!self.tasks || [self.tasks count] == 0) return nil;
+    if (!_tasks || [_tasks count] == 0) return nil;
     NSAssert(task.localTaskId != task.localParentId,@"%@ taskId and parentId is the same!",task.title);
     
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"localParentId = %d",task.localTaskId];
-    NSArray *subtasks = [self.tasks filteredArrayUsingPredicate:predicate];
+    NSArray *subtasks = [_tasks filteredArrayUsingPredicate:predicate];
     if (subtasks == nil || [subtasks count] == 0) {
         return nil;
     } else {
@@ -151,29 +151,29 @@
 
 // 前一任务 后一任务
 - (Task *)prevTaskOfTask:(Task *)task {
-    if (!self.tasks || [self.tasks count] == 0) return nil;
+    if (!_tasks || [_tasks count] == 0) return nil;
     else if ([self firstTask] == nil || [self firstTask] == task) {
         return nil;
     }
     else {
-        NSInteger index = [self.tasks indexOfObject:task];
-        return [self.tasks objectAtIndex:index - 1];
+        NSInteger index = [_tasks indexOfObject:task];
+        return [_tasks objectAtIndex:index - 1];
     }
 }
 
 - (Task *)nextTaskOfTask:(Task *)task {
-    if (!self.tasks || [self.tasks count] == 0) return nil;
+    if (!_tasks || [_tasks count] == 0) return nil;
     else if ([self lastTask] == nil || [self lastTask] == task) return nil;
     else {
-        NSInteger index = [self.tasks indexOfObject:task];
-        return [self.tasks objectAtIndex:index + 1];
+        NSInteger index = [_tasks indexOfObject:task];
+        return [_tasks objectAtIndex:index + 1];
     }
 }
 
 - (NSArray *)siblingsAndMeOfTask:(Task *)task {
-    if (!self.tasks || [self.tasks count] == 0) return nil;
+    if (!_tasks || [_tasks count] == 0) return nil;
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"localParentId = %d",task.localParentId];
-    NSArray *siblings = [self.tasks filteredArrayUsingPredicate:predicate];
+    NSArray *siblings = [_tasks filteredArrayUsingPredicate:predicate];
     if(siblings == nil || [siblings count] == 0) {
         return nil;
     } else {
@@ -196,11 +196,11 @@
 
 - (NSInteger)nextSiblingOrUncleIndexOfTask:(Task *)task {
     NSInteger generationLevel = [self generationLevelOfTask:task];
-    if (!self.tasks || [self.tasks count] == 0) return -1;
-    NSInteger index = [self.tasks indexOfObject:task];
-    if (index < [self.tasks count] - 1) {
-        for(int i = index+1; i < [self.tasks count]; i++) {
-            Task *tempTask = [self.tasks objectAtIndex:i];
+    if (!_tasks || [_tasks count] == 0) return -1;
+    NSInteger index = [_tasks indexOfObject:task];
+    if (index < [_tasks count] - 1) {
+        for(int i = index+1; i < [_tasks count]; i++) {
+            Task *tempTask = [_tasks objectAtIndex:i];
             if ([self generationLevelOfTask:tempTask] <= generationLevel) {
                 return i;
             }
@@ -214,7 +214,7 @@
 
 // 同级别前一任务 同级别后一任务
 - (Task *)prevSiblingOfTask:(Task *)task {
-    if (!self.tasks || [self.tasks count] == 0) return nil;
+    if (!_tasks || [_tasks count] == 0) return nil;
     NSArray *siblingsAndMe = [self siblingsAndMeOfTask:task];
     NSInteger indexOfMe = [siblingsAndMe indexOfObject:task];
     NIF_INFO(@"indexOfMe : %d", indexOfMe);
@@ -226,11 +226,11 @@
 }
 
 - (Task *)nextSiblingOfTask:(Task *)task {
-    if (!self.tasks || [self.tasks count] == 0) return nil;
+    if (!_tasks || [_tasks count] == 0) return nil;
     NSArray *siblingsAndMe = [self siblingsAndMeOfTask:task];
     NSInteger indexOfMe = [siblingsAndMe indexOfObject:task];
     NIF_INFO(@"indexOfMe : %d", indexOfMe);
-    if (indexOfMe < [self.tasks count] - 1) {
+    if (indexOfMe < [_tasks count] - 1) {
         return [siblingsAndMe objectAtIndex:(indexOfMe + 1)];
     } else {
         return nil;
@@ -238,7 +238,7 @@
 }
 
 - (NSArray *)youngerSiblingsOfTask:(Task *)task {
-    if (!self.tasks || [self.tasks count] == 0) return nil;
+    if (!_tasks || [_tasks count] == 0) return nil;
     NSArray *siblingsAndMe = [self siblingsAndMeOfTask:task];
     NSInteger indexOfMe = [siblingsAndMe indexOfObject:task];
     NIF_INFO(@"indexOfMe : %d", indexOfMe);
@@ -273,7 +273,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)insertTask:(Task *)aTask {
-    [self.tasks insertObject:aTask atIndex:0];
+    [_tasks insertObject:aTask atIndex:0];
     FMDatabase *db = [FMDatabase database];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -315,21 +315,21 @@
             NIF_INFO(@"%@", error);
         }
         [db close];        
-        [self.tasks removeObject:aTask];
+        [_tasks removeObject:aTask];
         
         return rs;
     }
 }
 
 - (BOOL)deleteTaskAtIndex:(NSInteger)index {
-    return [self deleteTask:[self.tasks objectAtIndex:index]];
+    return [self deleteTask:[_tasks objectAtIndex:index]];
 }
 
 
 - (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex {
     
-    Task *fromTask = [[self.tasks objectAtIndex:fromIndex] retain];
-    Task *toTask = [self.tasks objectAtIndex:toIndex];
+    Task *fromTask = [[_tasks objectAtIndex:fromIndex] retain];
+    Task *toTask = [_tasks objectAtIndex:toIndex];
     
     NSArray *subTasks = [self allDescendantsOfTask:fromTask];
     
@@ -362,12 +362,12 @@
         NSEnumerator *enumerator = [subTasks reverseObjectEnumerator];
         Task *aTask = nil;
         while (aTask = [enumerator nextObject]) {
-            [self.tasks removeObject:aTask];
-            [self.tasks insertObject:aTask atIndex:toIndex];
+            [_tasks removeObject:aTask];
+            [_tasks insertObject:aTask atIndex:toIndex];
         }
         
-        [self.tasks removeObject:fromTask];
-        [self.tasks insertObject:fromTask atIndex:toIndex];
+        [_tasks removeObject:fromTask];
+        [_tasks insertObject:fromTask atIndex:toIndex];
         [fromTask release];
         
         begin = toTask.displayOrder;
@@ -403,15 +403,15 @@
             NIF_ERROR(@"HOW TO MOVE DOWN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
         
-        [self.tasks removeObject:fromTask];
-        [self.tasks insertObject:fromTask atIndex:toIndex];
+        [_tasks removeObject:fromTask];
+        [_tasks insertObject:fromTask atIndex:toIndex];
         [fromTask release];
         
         NSEnumerator *enumerator = [subTasks objectEnumerator];
         Task *aTask = nil;
         while (aTask = [enumerator nextObject]) {
-            [self.tasks removeObject:aTask];
-            [self.tasks insertObject:aTask atIndex:toIndex];
+            [_tasks removeObject:aTask];
+            [_tasks insertObject:aTask atIndex:toIndex];
         }
         
         begin = fromTask.displayOrder;
@@ -419,14 +419,14 @@
     }
     
     for (int i = begin;i <= end;i++) {
-        Task *task = [self.tasks objectAtIndex:i];
+        Task *task = [_tasks objectAtIndex:i];
         [task setDisplayOrder:i updateDB:YES];
     }
 }
 
 
 - (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index {
-    Task *task = [self.tasks objectAtIndex:index];
+    Task *task = [_tasks objectAtIndex:index];
     Task *prevSiblingTask = [self prevSiblingOfTask:task];
     
     if (level == TaskUpgradeLevelDownLevel) {
@@ -471,7 +471,8 @@
             e.list = toList;
             if (![toList.tasks containsObject:e]) {
                 [toList.tasks insertObject:e atIndex:0];
-                [self.tasks removeObject:e];
+                NIF_INFO(@"[_tasks containsObject:e] = %d", [_tasks containsObject:e]);
+                [_tasks removeObject:e];
                 
             }
         }
@@ -481,11 +482,15 @@
         task.list = toList;
         [task setLocalParentId:-1 updateDB:YES];
         [toList.tasks insertObject:task atIndex:0];
-        [self.tasks removeObject:task];        
+        NIF_INFO(@"[_tasks containsObject:task] = %d", [_tasks containsObject:task]);
+        [_tasks removeObject:task];        
     }
     
     [self updateListIdAndOrders];
     [toList updateListIdAndOrders];
+    
+    NIF_INFO(@"%@ count : %d", self,[_tasks count]);
+    NIF_INFO(@"%@ count : %d", toList,[toList.tasks count]);
     
 }
 
@@ -494,8 +499,9 @@
     if (![db open]) {
         NIF_ERROR(@"Could not open db.");            
     } else {
-        for(int i = 0; i < [self.tasks count];i++) {
-            Task *e = [self.tasks objectAtIndex:i];
+        
+        for(int i = 0; i < [_tasks count];i++) {
+            Task *e = [_tasks objectAtIndex:i];
             e.displayOrder = i;
             NSError *error = nil;
 

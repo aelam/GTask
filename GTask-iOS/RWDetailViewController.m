@@ -141,18 +141,18 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    NSArray *tasks = self.taskList.tasks;
-    if (tasks && [tasks count]) {
+ //   NSArray *tasks = self.taskList.tasks;
+//    if (tasks && [tasks count]) {
         self.tasks = self.taskList.tasks;
 
-    }
-    else {
-        [[GTaskEngine engine] fetchServerTasksForList:self.taskList resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
-            [self.tasks removeAllObjects];            
-            [self.tasks addObjectsFromArray:result];
-            [self.tableView reloadData];
-        }];
-    }
+//    }
+//    else {
+//        [[GTaskEngine engine] fetchServerTasksForList:self.taskList resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
+//            [self.tasks removeAllObjects];            
+//            [self.tasks addObjectsFromArray:result];
+//            [self.tableView reloadData];
+//        }];
+//    }
     
     [self.tableView reloadData];
     
@@ -223,7 +223,7 @@
     
 //    NSDate *date = [NSDate dateWithTimeIntervalSince1970:task.serverModifyTime];
 
-//    cell.firstLabel.text = [NSString stringWithFormat:@"%d - %@ ",[subTasks count],task.title];
+//    cell.firstLabel.text = [NSString stringWithFormat:@"[%@]:%d - %@ ",task.list.title,[subTasks count],task.title];
     cell.firstLabel.text = task.title;
 //    cell.detailTextLabel.text = [NSString stringWithFormat:@"order:%d id: %d parent :%d  - %@", task.displayOrder,task.localTaskId,task.localParentId,[date description]];
     
