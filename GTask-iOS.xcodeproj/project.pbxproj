@@ -304,6 +304,8 @@
 		94DC632C14273C2F00151B26 /* GTask-Core */ = {
 			isa = PBXGroup;
 			children = (
+				9447F617142C862A002B32DF /* GTaskEngine.h */,
+				9447F618142C862A002B32DF /* GTaskEngine.m */,
 				94512ACD142B1CF800903FC2 /* Model */,
 				94512ABA142B174B00903FC2 /* FMDataBase */,
 				94DC633E142741B400151B26 /* Categories */,
@@ -314,8 +316,6 @@
 				94DC633214273F7E00151B26 /* GDataScopes.plist */,
 				94DC633514273FBD00151B26 /* GDataEngine.h */,
 				94DC633614273FBD00151B26 /* GDataEngine.m */,
-				9447F617142C862A002B32DF /* GTaskEngine.h */,
-				9447F618142C862A002B32DF /* GTaskEngine.m */,
 				94DC633714273FBD00151B26 /* GDataLoginDialog.h */,
 				94DC633814273FBD00151B26 /* GDataLoginDialog.m */,
 			);

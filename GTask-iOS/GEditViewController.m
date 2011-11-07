@@ -41,6 +41,7 @@
 @end
 
 #define TASK_TITLE_TEXT_FIELD_TAG   10101
+#define TASK_DATE_FIELD_TAG         10201
 
 
 @implementation GEditViewController
@@ -61,6 +62,8 @@
 @synthesize editDelegate = _editDelegate;
 @synthesize dateLabel = _dateLabel;
 
+@synthesize firstResponder = _firstResponder;
+
 - (void)dealloc {
     
     [_task release];
@@ -72,6 +75,7 @@
     [_titleField release];
     [_pickedDate release];
     [_listChooseController release];
+    [_firstResponder release];
     [super dealloc];
 }
 
@@ -117,6 +121,11 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];    
+    
+    UIMenuController *menuController = [UIMenuController sharedMenuController];
+    UIMenuItem *item = [[[UIMenuItem alloc] initWithTitle: @"Do Something"
+                                                   action: @selector(doSomething:)] autorelease];
+    [menuController setMenuItems: [NSArray arrayWithObject: item]];
     
 }
 
@@ -238,7 +247,9 @@
         
             cell.textField.alpha = 0.02;
             cell.detailTextLabel.frame = CGRectMake(80, 10, 240, 30);
-            cell.detailTextLabel.textAlignment = UITextAlignmentCenter;            
+            cell.detailTextLabel.textAlignment = UITextAlignmentCenter;    
+            
+            cell.textField.tag = TASK_DATE_FIELD_TAG;
         }
         
         self.dateField = cell.textField;
@@ -325,6 +336,8 @@
     [self.tableView beginUpdates];
     [self.tableView endUpdates];
     
+    self.firstResponder = textField;
+    
     if (textField == self.titleField) {
         if (textField.inputAccessoryView == nil) {
             
@@ -375,6 +388,8 @@
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
     // Title 编辑完成
+    
+    self.firstResponder = nil;
     if (textField.tag == TASK_TITLE_TEXT_FIELD_TAG) {
         self.tempTask.title = textField.text;
         self.task.title = textField.text;
@@ -392,6 +407,8 @@
 #pragma mark -
 #pragma mark UITextViewDelegate
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
+    
+    self.firstResponder = textView;
     
     if (textView.inputAccessoryView == nil) {
         
@@ -443,7 +460,7 @@
     self.textView.bounds = self.textView.superview.bounds;
 //    [self.tableView beginUpdates];
 //    [self.tableView endUpdates];
-    
+    self.firstResponder = nil;
 
     self.tempTask.notes = textView.text;
 
@@ -486,20 +503,13 @@
     [self.navigationItem setRightBarButtonItem:nil animated:YES];
 }
 
+
+// TODO, HOW TO HIDE UIMenuController 
 // Hide cut/copy/paste menu
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
-    
-    if (sender == self.dateField) {
-        UIMenuController *menuController = [UIMenuController sharedMenuController];
-        if (menuController) {
-            [UIMenuController sharedMenuController].menuVisible = NO;
-            
-        }
-        return NO;        
-    }
-    return YES;
-    
-}
+//- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+//
+//    return NO;
+//}
 
 
 #pragma mark -

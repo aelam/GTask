@@ -17,6 +17,9 @@
 + (GTaskEngine *)engine;
 
 
+@property (retain) NSMutableArray *localTaskLists;
+
+
 - (NSMutableArray *)sharedTaskLists;
 
 // Lists
@@ -41,5 +44,8 @@
 
 - (void)syncTasks;
 - (void)syncTasksForList:(TaskList *)aList;
+
+
+- (void)sync;
 
 @end

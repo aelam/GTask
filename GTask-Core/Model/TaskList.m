@@ -19,7 +19,7 @@
 @synthesize isDefault = _isDefault;
 @synthesize isDeleted = _isDeleted;
 @synthesize isCleared = _isCleared;
-@synthesize status = _status;
+//@synthesize status = _status;
 @synthesize sortType = _sortType;
 @synthesize lastestSyncTime = _lastestSyncTime;
 @synthesize serverModifyTime = _serverModifyTime;
@@ -48,6 +48,8 @@
 - (id)init {
     if (self = [super init]) {
         _tasks = [[NSMutableArray alloc] init];
+        _localListId = -1;
+        
     }
     return self;
 }
@@ -488,10 +490,7 @@
     
     [self updateListIdAndOrders];
     [toList updateListIdAndOrders];
-    
-    NIF_INFO(@"%@ count : %d", self,[_tasks count]);
-    NIF_INFO(@"%@ count : %d", toList,[toList.tasks count]);
-    
+
 }
 
 - (void)updateListIdAndOrders {
@@ -506,12 +505,7 @@
             NSError *error = nil;
 
             NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET display_order = %d,local_list_id = %d WHERE local_task_id = %d",e.displayOrder,e.list.localListId,e.localTaskId];
-            BOOL update = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
-            
-//            NIF_INFO(@"UPDATE task SUCCESS ? : %d", update);
-//            if (error) {
-//                NIF_INFO(@"%@", error);
-//            }
+            [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
         }
         [db close];
     }

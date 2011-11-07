@@ -2,14 +2,14 @@
 DROP TABLE IF EXISTS "task_lists";
 CREATE TABLE task_lists (
     local_list_id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    server_list_id          TEXT,
+    server_list_id          TEXT UNIQUE,
     kind                    TEXT,
     self_link               TEXT,
     title                   TEXT,
     is_default              INTEGER NOT NULL DEFAULT 0,	
     is_deleted              INTEGER NOT NULL DEFAULT 0,
     is_cleared              INTEGER NOT NULL DEFAULT 0,
-    status                  INTEGER NOT NULL DEFAULT 0,
+--    status                  INTEGER NOT NULL DEFAULT 0,
     sort_type               INTEGER NOT NULL DEFAULT 0,
     
     display_order           INTEGER,
@@ -44,5 +44,5 @@ CREATE TABLE tasks (
     server_modify_timestamp	INTEGER,
     local_modify_timestamp	INTEGER,
     
-    generation_level        INTEGER NOT NULL DEFAULT -1
+--    generation_level        INTEGER NOT NULL DEFAULT -1
 );

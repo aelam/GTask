@@ -33,6 +33,10 @@ typedef enum{
 @property (retain) UITextField  *dateField; //fake
 @property (retain) UILabel      *dateLabel;
 @property (retain) UIPlaceHolderTextView *textView;
+
+// First response
+@property (retain) UIResponder *firstResponder;
+
 @property (assign) float textViewHeight;
 
 @property (retain) IBOutlet UILabel *titleLabel;

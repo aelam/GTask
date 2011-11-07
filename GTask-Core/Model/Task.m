@@ -224,9 +224,7 @@
         NIF_INFO(@"UPDATE task SUCCESS ? : %d", update);
         [db close];
     }
-    
 }
-
     
 - (void)dealloc {
     [_list release];

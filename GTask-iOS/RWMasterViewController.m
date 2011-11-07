@@ -64,12 +64,18 @@
 }
 
 - (void)test {
+//    GTaskEngine *engine = [[[GTaskEngine alloc] init] autorelease];
+//    [engine fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *result) {
+//        self.taskLists = [engine sharedTaskLists];
+//        [self.tableView reloadData];
+//    }];
+
     GTaskEngine *engine = [[[GTaskEngine alloc] init] autorelease];
-    [engine fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *result) {
-//        self.taskLists = result;
-        self.taskLists = [engine sharedTaskLists];
-        [self.tableView reloadData];
-    }];
+//    [engine fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *result) {
+//        self.taskLists = [engine sharedTaskLists];
+//        [self.tableView reloadData];
+//    }];
+    [engine sync];
 
 }
 

@@ -31,7 +31,7 @@ typedef enum {
 @property (assign)  BOOL     isDefault;
 @property (assign)  BOOL     isDeleted;
 @property (assign)  BOOL    isCleared;
-@property (assign)  NSInteger status;
+//@property (assign)  NSInteger status;
 @property (assign)  NSInteger  sortType;
 @property (retain)  NSMutableArray *tasks;
 @property (assign)  NSInteger displayOrder;
