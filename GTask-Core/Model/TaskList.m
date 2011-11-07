@@ -9,6 +9,8 @@
 #import "TaskList.h"
 #import "FMDatabase.h"
 #import "Task.h"
+#import "GTaskEngine.h"
+#import "NSMutableURLRequest+Shorten.h"
 
 @implementation TaskList
 
@@ -97,6 +99,22 @@
     if (_tasks != tasks) {
         [_tasks release];
         _tasks = [tasks retain];
+    }
+}
+
+- (void)setServerModifyTime:(NSDate *)serverModifyTime updateDB:(BOOL)update {
+    if (update) {
+        FMDatabase *db = [FMDatabase database];
+        if (![db open]) {
+            NSLog(@"Could not open db.");
+        } else {
+            [db executeUpdate:@"UPDATE task_lists SET server_modify_time = ?",serverModifyTime];
+        }
+    }
+    
+    if (_serverModifyTime != serverModifyTime && [_serverModifyTime timeIntervalSinceDate:serverModifyTime] > 0) {
+        [_serverModifyTime release];
+        _serverModifyTime = [serverModifyTime retain];
     }
 }
 
@@ -509,6 +527,19 @@
         }
         [db close];
     }
+}
+
+////////////////////////////////////////////////////////////////////////////
+- (void)updateRemote:(void(^)(TaskList *list,id result))resultBlock  {
+    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists/%@",self.serverListId];
+    NSURL *url = [NSURL URLWithString:selfLink];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"PUT"];
+    NSDictionary *json = [NSDictionary dictionaryWithObjectsAndKeys:self.serverListId,@"id",self.kind,@"kind",selfLink,@"selfLink",self.title,@"title",nil];
+    [request attachJSONBody:json];
+    [[GTaskEngine engine] fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
+        resultBlock(self,result);
+    }];
 }
 
 

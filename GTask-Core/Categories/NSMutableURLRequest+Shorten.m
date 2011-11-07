@@ -23,4 +23,21 @@
     [self setHTTPMethod:@"POST"];
     [self setHTTPBody:body];
 }
+
+- (void)attachJSONBody:(NSDictionary *)json {
+    NSMutableArray *pairs = [NSMutableArray array];
+    for(NSString *key in [json allKeys]) {
+        NSString *value = [json objectForKey:key];
+        [pairs addObject:[NSString stringWithFormat:@"%@:\"%@\"",key,value]];
+    }
+    NSString *pairString = [pairs componentsJoinedByString:@","];
+    if (pairString) {
+        pairString = [NSString stringWithFormat:@"{%@}",pairString];
+    }
+    NSData *body = [pairString dataUsingEncoding:NSUTF8StringEncoding];
+
+    [self setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    [self setHTTPBody:body];
+}
+
 @end

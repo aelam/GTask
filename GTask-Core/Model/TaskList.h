@@ -44,6 +44,8 @@ typedef enum {
 - (NSMutableArray *)tasks;
 - (void)setTasks:(NSMutableArray *)tasks;
 
+- (void)setServerModifyTime:(NSDate *)serverModifyTime updateDB:(BOOL)update;
+
 ///////////////////////////////////////////////////////////////////////////////////////
 - (Task *)firstTask;
 - (Task *)lastTask;
@@ -84,6 +86,9 @@ typedef enum {
 
 // Private method, when move task from a list to another list
 - (void)updateListIdAndOrders;
+
+////////////////////////////////////////////////////////////////////////////
+- (void)updateRemote:(void(^)(TaskList *list,id result))resultBlock;
 
 
 @end

@@ -12,4 +12,6 @@
 
 - (void)attachPostParams:(NSDictionary *)params;
 
+- (void)attachJSONBody:(NSDictionary *)json;
+
 @end

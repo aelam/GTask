@@ -381,13 +381,13 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 
 - (void)sync {
+    
     // download all List
     // check the timestamp of changed List, update local List 
     // download tasks for every list 
     // check the timestamp of changed Task, update local Task 
     // update all changes to server
-    
-    
+        
     // List 重命名 、
         
     [self fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *lists) {
@@ -397,6 +397,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
+            // 下载比对
             for (NSDictionary *item in lists) {
                 NSString *_id = [item objectForKey:@"id"];
                 NSString *kind = [item objectForKey:@"kind"];
@@ -416,9 +417,20 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                         // List 一样 啥都不做                     
                     }
                 }
+            }
+            // 上传新加List
+            FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists server_modify_timestamp < local_modify_timestamp"];
+            if (![set next]) {
+                TaskList *list = [[[TaskList alloc] init] autorelease];
+                list.serverListId = [set stringForColumn:@"server_list_id"];
+                list.title = [set stringForColumn:@"title"];
+                list.link = [set stringForColumn:@"self_link"];
+                list.kind = [set stringForColumn:@"kind"];
+                [list updateRemote:^(TaskList *list, NSDictionary *result) {
+                    [list setServerModifyTime:[NSDate date] updateDB:YES];
+                }];
                 
             }
-                
         }        
         
 //        // if no list in local
