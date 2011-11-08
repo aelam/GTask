@@ -259,7 +259,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         } else {
             [_localTaskLists removeAllObjects];
             
-            FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists ORDER BY display_order"]];
+            FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 0 ORDER BY display_order "]];
             while ([rs next]) {
                 TaskList *list = [[TaskList alloc] init];
                 list.localListId = [rs intForColumn:@"local_list_id"];
@@ -389,26 +389,6 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     // update all changes to server
         
     // List 重命名 、
-//    TaskList *list = [[[TaskList alloc] init] autorelease];
-//    list.title = @"阿米托福";
-//    [list createWithRemoteHandler:^(TaskList *currentList, id result) {
-//        NIF_INFO(@"%@", result);
-//    }];
-//    return;
-    
-    // foreign Key test;
-//    FMDatabase *db = [FMDatabase database];
-//    [db open];
-//    [db setPragmaValue:1 forKey:@"foreign_keys"];
-//    NSError *error = nil;
-//    BOOL rs = [db executeUpdate:@"INSERT INTO tasks (title,local_parent_id,local_list_id) values(?,?,?)",@"Test",@"-1",@"1"];
-//    NIF_INFO(@"success ? : %d", rs);
-//    if (error) {
-//        NIF_INFO(@"%@", error);
-//    }
-//    [db close];
-//    return;
-    
     
     [self fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *lists) {
 
@@ -477,6 +457,98 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             }
         }        
     }];
+}
+
+
+- (void)syncWithSyncHandler:(SyncHandler)handler {
+    
+    // download all List
+    // check the timestamp of changed List, update local List 
+    // download tasks for every list 
+    // check the timestamp of changed Task, update local Task 
+    // update all changes to server
+    
+    // List 重命名 、
+    
+    [_localTaskLists removeAllObjects];
+    
+    [self fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *lists) {
+
+        handler(self,SyncStepListsDownloaded);
+
+        // 获取到服务器上lists
+        FMDatabase *db = [FMDatabase database];
+        if (![db open]) {
+            NSLog(@"Could not open db.");
+        } else {
+            [db setPragmaValue:1 forKey:@"foreign_keys"];
+            // 下载比对
+            for (NSDictionary *item in lists) {
+                NSString *_id = [item objectForKey:@"id"];
+                NSString *kind = [item objectForKey:@"kind"];
+                NSString *link = [item objectForKey:@"selfLink"];
+                NSString *title = [item objectForKey:@"title"];
+                
+                FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists WHERE server_list_id = ? AND server_modify_timestamp > local_modify_timestamp",_id];
+                if (![set next]) {
+                    // 本地没有这个list 则插入
+                    NSDate *now = [NSDate date];
+                    [db executeUpdate:@"INSERT INTO task_lists (server_list_id,kind,self_link,title,server_modify_timestamp,local_modify_timestamp) VALUES (?,?,?,?,?,?)",_id,kind,link,title,now,now];
+                } else {
+                    NSString *aTitle = [set stringForColumn:@"title"];
+                    if (![aTitle isEqualToString:title]) {
+                        // 本地有这个list 且title不一样 则更新title
+                        [db executeUpdate:@"UPDATE task_lists SET title = ?",aTitle];
+                    } else {
+                        // List 一样 啥都不做                     
+                    }
+                }
+            }
+
+            // 上传新加List
+            FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists server_modify_timestamp < local_modify_timestamp"];
+            if ([set next]) {
+                
+                TaskList *list = [[[TaskList alloc] init] autorelease];
+                list.serverListId = [set stringForColumn:@"server_list_id"];
+                list.title = [set stringForColumn:@"title"];
+                list.link = [set stringForColumn:@"self_link"];
+                list.kind = [set stringForColumn:@"kind"];
+                list.isDeleted = [set boolForColumn:@"is_deleted"];
+                
+                if (list.isDeleted) {
+                    if (list.serverListId == nil) {
+                        // 删除本地未同步的List
+                        // ... !TODO
+                        [list deleteLocal];
+                    } else {
+                        // 需要删除服务器List
+                        [list deleteWithRemoteHandler:^(TaskList *currentList, id result) {
+                            [list deleteLocal];
+                        }];
+                    }
+                } else {
+                    if (list.serverListId == nil) {
+                        [list createWithRemoteHandler:^(TaskList *currentList, NSDictionary *result) {
+                            // UPDATE LOCAL SERVER ID;
+                            // ... !TODO
+                            NIF_INFO(@"%@", result);
+                            NSString *aTitle = [result objectForKey:@"id"];
+                            [list setServerListId:aTitle updateDB:YES];
+                        }];                        
+                    } else {
+                        [list updateWithRemoteHandler:^(TaskList *currentList, NSDictionary *result) {
+                            [list setServerModifyTime:[NSDate date] updateDB:YES];
+                        }];
+                    }
+                }
+                
+            }
+            handler(self,SyncStepListsUpdated);
+        }        
+    }];
+    
+    
 }
 
 

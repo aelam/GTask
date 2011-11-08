@@ -54,7 +54,7 @@
 
     self.navigationController.toolbarHidden = NO;
     
-    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonItemStyleDone target:self action:@selector(test)];
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonItemStyleDone target:self action:@selector(sync)];
     UIBarButtonItem *item2 = [[UIBarButtonItem alloc] initWithTitle:@"Logout" style:UIBarButtonItemStyleDone target:[GDataEngine class] action:@selector(logout)];
     self.toolbarItems = [NSArray arrayWithObjects:item,item2,nil];
     [item release];
@@ -63,20 +63,15 @@
     [super awakeFromNib];
 }
 
-- (void)test {
-//    GTaskEngine *engine = [[[GTaskEngine alloc] init] autorelease];
-//    [engine fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *result) {
-//        self.taskLists = [engine sharedTaskLists];
-//        [self.tableView reloadData];
-//    }];
+- (void)sync {
 
-    GTaskEngine *engine = [[[GTaskEngine alloc] init] autorelease];
-//    [engine fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *result) {
-//        self.taskLists = [engine sharedTaskLists];
-//        [self.tableView reloadData];
-//    }];
-    [engine sync];
-
+    [[GTaskEngine sharedEngine] syncWithSyncHandler:^(GTaskEngine *currentEngine, SyncStep step) {
+        NIF_INFO(@"%d", step);
+        if (step == SyncStepListsUpdated) {
+            self.taskLists = [currentEngine localTaskLists];
+            [self.tableView reloadData];
+        }
+    }];
 }
 
 - (void)dealloc
@@ -124,7 +119,7 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.taskLists = [[GTaskEngine engine] sharedTaskLists];
+    self.taskLists = [[GTaskEngine sharedEngine] localTaskLists];
     [self.tableView reloadData];
 }
 

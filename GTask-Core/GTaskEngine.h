@@ -10,6 +10,17 @@
 
 @class TaskList;
 @class Task;
+@class GTaskEngine;
+
+typedef enum {
+    SyncStepListsDownloaded,
+    SyncStepListsUpdated,
+    SyncStepTasksDownloaded,
+    SyncStepTasksUpdated    
+}SyncStep;
+
+
+typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 
 @interface GTaskEngine : GDataEngine
 
@@ -47,5 +58,7 @@
 
 
 - (void)sync;
+- (void)syncWithSyncHandler:(SyncHandler)handler;
+
 
 @end

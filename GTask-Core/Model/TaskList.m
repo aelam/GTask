@@ -108,7 +108,7 @@
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
-            [db executeUpdate:@"UPDATE task_lists SET server_modify_time = ?",serverModifyTime];
+            [db executeUpdate:@"UPDATE task_lists SET server_modify_time = ? WHERE local_list_id = ?",serverModifyTime,self.localListId];
         }
     }
     
@@ -117,6 +117,20 @@
         _serverModifyTime = [serverModifyTime retain];
     }
 }
+
+- (void)setServerListId:(NSString *)serverListId updateDB:(BOOL)update {
+    if (update) {
+        FMDatabase *db = [FMDatabase database];
+        if (![db open]) {
+            NSLog(@"Could not open db.");
+        } else {
+            [db executeUpdate:@"UPDATE task_lists SET server_list_id = ?,server_modify_time = ? WHERE local_list_id = ?",serverListId,[NSDate date],self.localListId];
+        }
+    }
+    [_serverListId release];
+    _serverListId = [serverListId copy];    
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 - (Task *)firstTask {
@@ -526,6 +540,33 @@
             [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
         }
         [db close];
+    }
+}
+
+- (void)deleteLocal {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NIF_ERROR(@"Could not open db.");            
+    } else {
+        
+        for(int i = 0; i < [_tasks count];i++) {
+            Task *e = [_tasks objectAtIndex:i];
+            e.displayOrder = i;
+            NSError *error = nil;
+            
+            NSString *sql = [NSString stringWithFormat:@"DELETE FROM task_lists WHERE local_list_id = %d",self.localListId];
+            [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
+        }
+        [db close];
+    }
+}
+
+- (void)updateLocal {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NIF_ERROR(@"Could not open db.");            
+    } else {
+        [db executeUpdate:@"UPDATE task_lists SET local_list_id = ?,title = ?,"];
     }
 }
 
