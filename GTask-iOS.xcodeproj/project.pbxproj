@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		940AFFBD144000C5009F7F4A /* update_schema.sh in Resources */ = {isa = PBXBuildFile; fileRef = 940AFFBC144000C5009F7F4A /* update_schema.sh */; };
+		943398941469848300267715 /* GAddListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 943398931469848300267715 /* GAddListController.m */; };
 		944270DE142F98BC0071E363 /* NSDate+RFC3339.m in Sources */ = {isa = PBXBuildFile; fileRef = 944270DD142F98BC0071E363 /* NSDate+RFC3339.m */; };
 		9447F619142C862A002B32DF /* GTaskEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9447F618142C862A002B32DF /* GTaskEngine.m */; };
 		944CBAC91448A7FD002B332B /* NSObject+Runtime.m in Sources */ = {isa = PBXBuildFile; fileRef = 944CBAC81448A7FD002B332B /* NSObject+Runtime.m */; };
@@ -58,6 +59,8 @@
 
 /* Begin PBXFileReference section */
 		940AFFBC144000C5009F7F4A /* update_schema.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = update_schema.sh; sourceTree = "<group>"; };
+		943398921469848300267715 /* GAddListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAddListController.h; sourceTree = "<group>"; };
+		943398931469848300267715 /* GAddListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GAddListController.m; sourceTree = "<group>"; };
 		944270DC142F98BB0071E363 /* NSDate+RFC3339.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+RFC3339.h"; sourceTree = "<group>"; };
 		944270DD142F98BC0071E363 /* NSDate+RFC3339.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+RFC3339.m"; sourceTree = "<group>"; };
 		9447F617142C862A002B32DF /* GTaskEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTaskEngine.h; sourceTree = "<group>"; };
@@ -285,6 +288,8 @@
 				94FA4BCD1440B07700235F9A /* GEditViewController.m */,
 				94C1BEF8144FCA2300CF07FF /* GListChooseController.h */,
 				94C1BEF9144FCA2300CF07FF /* GListChooseController.m */,
+				943398921469848300267715 /* GAddListController.h */,
+				943398931469848300267715 /* GAddListController.m */,
 				94DC62E014273A5A00151B26 /* Supporting Files */,
 			);
 			path = "GTask-iOS";
@@ -439,6 +444,7 @@
 				94664328144EC4AE00E41345 /* UIImage+Categories.m in Sources */,
 				94C1BEFA144FCA2400CF07FF /* GListChooseController.m in Sources */,
 				947B9DB31461446C001AF70B /* InputViewLabel.m in Sources */,
+				943398941469848300267715 /* GAddListController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

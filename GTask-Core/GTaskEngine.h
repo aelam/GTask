@@ -35,7 +35,7 @@ typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 
 // Lists
 
-- (void)fetchServerTaskListsWithResultHander:(void(^)(GTaskEngine *,NSMutableArray *))resultHander;
+- (void)fetchServerTaskListsWithResultHander:(void(^)(GTaskEngine *,NSArray *))resultHander;
 
 - (NSMutableArray *)localTaskLists;
 - (NSMutableArray *)localTaskListsWithSortType:(NSInteger)sortType;

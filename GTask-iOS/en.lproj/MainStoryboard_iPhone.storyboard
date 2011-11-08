@@ -36,12 +36,37 @@
             </objects>
             <point key="canvasLocation" x="12" y="666"/>
         </scene>
+        <scene sceneID="fVv-YS-Sov">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="cRo-ne-X8Y" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <viewController storyboardIdentifier="GAddListController" id="wVW-52-jyc" customClass="GAddListController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="wKB-sY-ptY">
+                        <rect key="frame" x="0.0" y="64" width="320" height="416"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="New List" minimumFontSize="17" id="S7h-7T-ZYj">
+                                <rect key="frame" x="25" y="26" width="267" height="31"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="Edit List" id="HKB-aD-jF3"/>
+                    <connections>
+                        <outlet property="listField" destination="S7h-7T-ZYj" id="BjZ-fE-EHm"/>
+                    </connections>
+                </viewController>
+            </objects>
+            <point key="canvasLocation" x="857" y="672"/>
+        </scene>
         <scene sceneID="18">
             <objects>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="17" sceneMemberID="firstResponder"/>
                 <tableViewController storyboardIdentifier="" title="Master" id="12" customClass="RWMasterViewController" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="singleLineEtched" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="13">
-                        <rect key="frame" x="0.0" y="64" width="320" height="416"/>
+                        <rect key="frame" x="0.0" y="64" width="320" height="372"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <sections/>
@@ -51,6 +76,7 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Lists" id="35"/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </tableViewController>
             </objects>
             <point key="canvasLocation" x="455" y="64"/>
@@ -147,13 +173,33 @@
                     </tableView>
                 </tableViewController>
             </objects>
-            <point key="canvasLocation" x="1265" y="91"/>
+            <point key="canvasLocation" x="1273" y="64"/>
+        </scene>
+        <scene sceneID="b4b-ow-eQ1">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="He4-St-TKe" sceneMemberID="firstResponder"/>
+                <navigationController storyboardIdentifier="GAddListNavigator" id="iKq-hh-T8p" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="JjX-XA-19x">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="wVW-52-jyc" kind="relationship" relationship="rootViewController" id="77b-PU-onF"/>
+                    </connections>
+                </navigationController>
+            </objects>
+            <point key="canvasLocation" x="427" y="672"/>
         </scene>
     </scenes>
     <resources>
         <image name="checkbox_not_selected@2x.png" width="53" height="53"/>
     </resources>
     <classes>
+        <class className="GAddListController" superclassName="UIViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/GAddListController.h"/>
+            <relationships>
+                <relationship kind="outlet" name="listField" candidateClass="UITextField"/>
+            </relationships>
+        </class>
         <class className="GEditViewController" superclassName="UITableViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/GEditViewController.h"/>
             <relationships>
@@ -175,6 +221,9 @@
         </class>
         <class className="RWMasterViewController" superclassName="UITableViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/RWMasterViewController.h"/>
+            <relationships>
+                <relationship kind="action" name="addNewList:"/>
+            </relationships>
         </class>
     </classes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">

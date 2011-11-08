@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @class RWDetailViewController;
+@class GAddListController;
 
 @interface RWMasterViewController : UITableViewController
 
@@ -16,5 +17,10 @@
 @property (strong, nonatomic) NSMutableArray *taskLists;
 
 @property (strong, nonatomic) NSMutableArray *customCategories;
+
+- (IBAction)addNewList:(id)sender;
+
+- (void)addListCancelled:(GAddListController *)addListController;
+- (void)addListFinished:(GAddListController *)addListController;
 
 @end

@@ -82,7 +82,6 @@
                 task.due = [rs dateForColumn:@"due"];
                 task.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
                 task.displayOrder = [rs intForColumn:@"display_order"];
-//                task.generationLevel = [rs intForColumn:@"generation_level"];
                 
                 task.list = self;
                 [_tasks addObject:task];
@@ -109,6 +108,7 @@
             NSLog(@"Could not open db.");
         } else {
             [db executeUpdate:@"UPDATE task_lists SET server_modify_time = ? WHERE local_list_id = ?",serverModifyTime,self.localListId];
+            [db close];
         }
     }
     
@@ -125,10 +125,27 @@
             NSLog(@"Could not open db.");
         } else {
             [db executeUpdate:@"UPDATE task_lists SET server_list_id = ?,server_modify_time = ? WHERE local_list_id = ?",serverListId,[NSDate date],self.localListId];
+            [db close];
         }
     }
     [_serverListId release];
     _serverListId = [serverListId copy];    
+}
+
+- (void)setTitle:(NSString *)title updateDB:(BOOL)update {
+    if (update) {
+        FMDatabase *db = [FMDatabase database];
+        if (![db open]) {
+            NSLog(@"Could not open db.");
+        } else {
+            [db executeUpdate:@"UPDATE task_lists SET title = ? WHERE local_list_id = ?",title,self.localListId];
+            [db close];
+        }
+    }
+    
+    [title release];
+    _title = [title copy];    
+    
 }
 
 

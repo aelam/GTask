@@ -10,6 +10,7 @@
 #import "RWDetailViewController.h"
 #import "TaskList.h"
 #import "GTaskEngine.h"
+#import "GAddListController.h"
 
 
 //MARK        TODO: add more such conditions to search tasks 
@@ -138,6 +139,33 @@
 	[super viewDidDisappear:animated];
 }
 
+- (void)setEditing:(BOOL)editing animated:(BOOL)animated {
+    [super setEditing:editing animated:animated];
+ 
+    if (editing) {
+        UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonItemStyleDone target:self action:@selector(sync)];
+        UIBarButtonItem *item2 = [[UIBarButtonItem alloc] initWithTitle:@"Logout" style:UIBarButtonItemStyleDone target:[GDataEngine class] action:@selector(logout)];
+        UIBarButtonItem *addNewListItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"New List", @"New List") style:UIBarButtonItemStyleBordered target:self action:@selector(addNewList:)];
+        
+        self.toolbarItems = [NSArray arrayWithObjects:item,item2,addNewListItem,nil];
+
+        [item release];
+        [item2 release];
+        [addNewListItem release];
+    } else {
+        UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonItemStyleDone target:self action:@selector(sync)];
+        UIBarButtonItem *item2 = [[UIBarButtonItem alloc] initWithTitle:@"Logout" style:UIBarButtonItemStyleDone target:[GDataEngine class] action:@selector(logout)];
+        
+        self.toolbarItems = [NSArray arrayWithObjects:item,item2,nil];
+        
+        [item release];
+        [item2 release];
+        
+    }
+    
+    
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
@@ -239,6 +267,24 @@
 {
     // Return NO if you do not want the item to be re-orderable.
     return YES;
+}
+
+- (IBAction)addNewList:(id)sender {
+//    GAddListController *addListController = [[GAddListController alloc] init];
+    UINavigationController *navigator = [self.storyboard instantiateViewControllerWithIdentifier:@"GAddListNavigator"];
+    GAddListController *addListController = (GAddListController *)navigator.topViewController;
+    addListController.actionViewController = self;
+    [self presentModalViewController:navigator animated:YES];
+    
+}
+
+- (void)addListCancelled:(GAddListController *)addListController {
+    [addListController.navigationController dismissModalViewControllerAnimated:YES];
+}
+
+- (void)addListFinished:(GAddListController *)addListController {
+    
+    [addListController.navigationController dismissModalViewControllerAnimated:YES];
 }
 
 

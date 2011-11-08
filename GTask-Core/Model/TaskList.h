@@ -48,6 +48,8 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 
 - (void)setServerModifyTime:(NSDate *)serverModifyTime updateDB:(BOOL)update;
 - (void)setServerListId:(NSString *)serverListId updateDB:(BOOL)update;
+- (void)setTitle:(NSString *)title updateDB:(BOOL)update;
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 - (Task *)firstTask;
