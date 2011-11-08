@@ -64,6 +64,76 @@
     return [NSString stringWithFormat:@"%s", sqlite3_libversion()];
 }
 
+- (int)userVersion {
+    static sqlite3_stmt *stmt_version;
+    int databaseVersion;
+    
+    if(sqlite3_prepare_v2(db, "PRAGMA user_version;", -1, &stmt_version, NULL) == SQLITE_OK) {
+        while(sqlite3_step(stmt_version) == SQLITE_ROW) {
+            databaseVersion = sqlite3_column_int(stmt_version, 0);
+            NSLog(@"%s: version %d", __FUNCTION__, databaseVersion);
+        }
+        NSLog(@"%s: the databaseVersion is: %d", __FUNCTION__, databaseVersion);
+    } else {
+        NSLog(@"%s: ERROR Preparing: , %s", __FUNCTION__, sqlite3_errmsg(db) );
+    }
+    sqlite3_finalize(stmt_version);
+    
+    return databaseVersion;
+}
+
+- (void)setUserVersion:(int)version {
+    static sqlite3_stmt *stmt_version;
+    NSString *sql = [NSString stringWithFormat:@"PRAGMA user_version=%d;",version];
+    
+    if(sqlite3_prepare_v2(db, [sql UTF8String], -1, &stmt_version, NULL) == SQLITE_OK) {
+        while(sqlite3_step(stmt_version) == SQLITE_ROW) {
+            sqlite3_column_int(stmt_version, 0);
+            
+        }
+    } else {
+        NSLog(@"%s: ERROR Preparing: , %s", __FUNCTION__, sqlite3_errmsg(db) );
+    }
+    sqlite3_finalize(stmt_version);
+}
+
+- (int)pragmaValueForKey:(NSString *)key {
+    static sqlite3_stmt *stmt_version;
+    int value;
+    
+    NSString *sql = [NSString stringWithFormat:@"PRAGMA %@;",key];
+    
+    if(sqlite3_prepare_v2(db, [sql UTF8String], -1, &stmt_version, NULL) == SQLITE_OK) {
+        while(sqlite3_step(stmt_version) == SQLITE_ROW) {
+            value = sqlite3_column_int(stmt_version, 0);
+            NSLog(@"%s: value %d", __FUNCTION__, value);
+        }
+        NSLog(@"%s: the value is: %d", __FUNCTION__, value);
+    } else {
+        NSLog(@"%s: ERROR Preparing: , %s", __FUNCTION__, sqlite3_errmsg(db) );
+    }
+    sqlite3_finalize(stmt_version);
+    
+    return value;
+
+}
+
+- (void)setPragmaValue:(int)value forKey:(NSString *)key {
+    static sqlite3_stmt *stmt_version;
+    NSString *sql = [NSString stringWithFormat:@"PRAGMA %@=%d;",key,value];
+    
+    if(sqlite3_prepare_v2(db, [sql UTF8String], -1, &stmt_version, NULL) == SQLITE_OK) {
+        while(sqlite3_step(stmt_version) == SQLITE_ROW) {
+            sqlite3_column_int(stmt_version, 0);
+            
+        }
+    } else {
+        NSLog(@"%s: ERROR Preparing: , %s", __FUNCTION__, sqlite3_errmsg(db) );
+    }
+    sqlite3_finalize(stmt_version);
+
+}
+
 - (NSString *)databasePath {
     return databasePath;
 }

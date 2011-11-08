@@ -1,3 +1,4 @@
+PRAGMA foreign_keys = ON;
 
 DROP TABLE IF EXISTS "task_lists";
 CREATE TABLE task_lists (
@@ -9,7 +10,6 @@ CREATE TABLE task_lists (
     is_default              INTEGER NOT NULL DEFAULT 0,	
     is_deleted              INTEGER NOT NULL DEFAULT 0,
     is_cleared              INTEGER NOT NULL DEFAULT 0,
---    status                  INTEGER NOT NULL DEFAULT 0,
     sort_type               INTEGER NOT NULL DEFAULT 0,
     
     display_order           INTEGER,
@@ -24,8 +24,8 @@ CREATE TABLE tasks (
     local_task_id       INTEGER PRIMARY KEY AUTOINCREMENT,
     server_task_id      TEXT,
 
-    local_list_id       INTEGER,    --LOCAL??
-    local_parent_id     INTEGER NOT NULL,--??
+    local_list_id       INTEGER NOT NULL,
+    local_parent_id     INTEGER NOT NULL,
     display_order       INTEGER,
     removed             INTEGER DEFAULT 0,
     
@@ -44,5 +44,5 @@ CREATE TABLE tasks (
     server_modify_timestamp	INTEGER,
     local_modify_timestamp	INTEGER,
     
---    generation_level        INTEGER NOT NULL DEFAULT -1
+    FOREIGN KEY(local_list_id) REFERENCES task_lists(local_list_id) ON UPDATE CASCADE ON DELETE CASCADE
 );

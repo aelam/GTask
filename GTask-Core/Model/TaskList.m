@@ -530,7 +530,21 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////
-- (void)updateRemote:(void(^)(TaskList *list,id result))resultBlock  {
+// Remote Update
+
+- (void)createWithRemoteHandler:(RemoteHandler)handler {
+    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
+    NSURL *url = [NSURL URLWithString:selfLink];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"POST"];
+    NSDictionary *json = [NSDictionary dictionaryWithObjectsAndKeys:self.title,@"title",nil];
+    [request attachJSONBody:json];
+    [[GTaskEngine engine] fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
+        handler(self,result);
+    }];
+}
+
+- (void)updateWithRemoteHandler:(RemoteHandler)handler {
     NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists/%@",self.serverListId];
     NSURL *url = [NSURL URLWithString:selfLink];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
@@ -538,9 +552,18 @@
     NSDictionary *json = [NSDictionary dictionaryWithObjectsAndKeys:self.serverListId,@"id",self.kind,@"kind",selfLink,@"selfLink",self.title,@"title",nil];
     [request attachJSONBody:json];
     [[GTaskEngine engine] fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
-        resultBlock(self,result);
+        handler(self,result);
     }];
 }
 
+- (void)deleteWithRemoteHandler:(RemoteHandler)handler {
+    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists/%@",self.serverListId];
+    NSURL *url = [NSURL URLWithString:selfLink];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"DELETE"];
+    [[GTaskEngine engine] fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
+        handler(self,result);
+    }]; 
+}
 
 @end

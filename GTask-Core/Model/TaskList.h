@@ -7,6 +7,7 @@
 //
 
 @class Task;
+@class TaskList;
 
 typedef enum {
     TaskUpgradeLevelUpLevel     = 1,
@@ -19,6 +20,7 @@ typedef enum {
     TaskOrderTypeByAlphabetical     // 字母排序
 }TaskOrderType;
 
+typedef void(^RemoteHandler)(TaskList *currentList, id result);
 
 @interface TaskList : NSObject
 
@@ -30,7 +32,7 @@ typedef enum {
 @property (copy)  NSString *link;
 @property (assign)  BOOL     isDefault;
 @property (assign)  BOOL     isDeleted;
-@property (assign)  BOOL    isCleared;
+@property (assign)  BOOL     isCleared;
 //@property (assign)  NSInteger status;
 @property (assign)  NSInteger  sortType;
 @property (retain)  NSMutableArray *tasks;
@@ -75,6 +77,7 @@ typedef enum {
 - (NSArray *)allDescendantsOfTask:(Task *)task;
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Local Update
 - (BOOL)insertTask:(Task *)aTask;
 - (BOOL)deleteTask:(Task *)aTask;
 - (BOOL)deleteTaskAtIndex:(NSInteger)index;
@@ -87,8 +90,14 @@ typedef enum {
 // Private method, when move task from a list to another list
 - (void)updateListIdAndOrders;
 
-////////////////////////////////////////////////////////////////////////////
-- (void)updateRemote:(void(^)(TaskList *list,id result))resultBlock;
+//////////////////////////////////////////////////////////////////////////////////////////
+// Remote Update
+//- (void)updateRemote:(void(^)(TaskList *currentList,id result))resultBlock;
+//- (void)deleteRemote:(void(^)(TaskList *currentList,id result))resultBlock;
+
+- (void)createWithRemoteHandler:(RemoteHandler)handler;
+- (void)updateWithRemoteHandler:(RemoteHandler)handler;
+- (void)deleteWithRemoteHandler:(RemoteHandler)handler;
 
 
 @end

@@ -389,7 +389,27 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     // update all changes to server
         
     // List 重命名 、
-        
+//    TaskList *list = [[[TaskList alloc] init] autorelease];
+//    list.title = @"阿米托福";
+//    [list createWithRemoteHandler:^(TaskList *currentList, id result) {
+//        NIF_INFO(@"%@", result);
+//    }];
+//    return;
+    
+    // foreign Key test;
+//    FMDatabase *db = [FMDatabase database];
+//    [db open];
+//    [db setPragmaValue:1 forKey:@"foreign_keys"];
+//    NSError *error = nil;
+//    BOOL rs = [db executeUpdate:@"INSERT INTO tasks (title,local_parent_id,local_list_id) values(?,?,?)",@"Test",@"-1",@"1"];
+//    NIF_INFO(@"success ? : %d", rs);
+//    if (error) {
+//        NIF_INFO(@"%@", error);
+//    }
+//    [db close];
+//    return;
+    
+    
     [self fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSMutableArray *lists) {
 
         // 获取到服务器上lists
@@ -397,6 +417,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
+            [db setPragmaValue:1 forKey:@"foreign_keys"];
             // 下载比对
             for (NSDictionary *item in lists) {
                 NSString *_id = [item objectForKey:@"id"];
@@ -404,10 +425,11 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                 NSString *link = [item objectForKey:@"selfLink"];
                 NSString *title = [item objectForKey:@"title"];
              
-                FMResultSet *set = [db executeQuery:@"SELECT title FROM task_lists WHERE server_list_id = ? AND server_modify_timestamp > local_modify_timestamp",_id];
+                FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists WHERE server_list_id = ? AND server_modify_timestamp > local_modify_timestamp",_id];
                 if (![set next]) {
                     // 本地没有这个list 则插入
-                    [db executeUpdate:@"INSERT INTO task_lists (server_list_id,kind,self_link,title) VALUES (?,?,?,?,?)",_id,kind,link,title];
+                    NSDate *now = [NSDate date];
+                    [db executeUpdate:@"INSERT INTO task_lists (server_list_id,kind,self_link,title,server_modify_timestamp,local_modify_timestamp) VALUES (?,?,?,?,?,?)",_id,kind,link,title,now,now];
                 } else {
                     NSString *aTitle = [set stringForColumn:@"title"];
                     if (![aTitle isEqualToString:title]) {
@@ -420,47 +442,40 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             }
             // 上传新加List
             FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists server_modify_timestamp < local_modify_timestamp"];
-            if (![set next]) {
+            if ([set next]) {
+                
                 TaskList *list = [[[TaskList alloc] init] autorelease];
                 list.serverListId = [set stringForColumn:@"server_list_id"];
                 list.title = [set stringForColumn:@"title"];
                 list.link = [set stringForColumn:@"self_link"];
                 list.kind = [set stringForColumn:@"kind"];
-                [list updateRemote:^(TaskList *list, NSDictionary *result) {
-                    [list setServerModifyTime:[NSDate date] updateDB:YES];
-                }];
+                list.isDeleted = [set boolForColumn:@"is_deleted"];
+                
+                if (list.isDeleted) {
+                    if (list.serverListId == nil) {
+                        // 删除本地未同步的List
+                        // ... !TODO
+                    } else {
+                        // 需要删除服务器List
+                        [list deleteWithRemoteHandler:^(TaskList *currentList, id result) {
+                            
+                        }];
+                    }
+                } else {
+                    if (list.serverListId == nil) {
+                        [list createWithRemoteHandler:^(TaskList *currentList, id result) {
+                            // UPDATE LOCAL SERVER ID;
+                            // ... !TODO
+                        }];                        
+                    } else {
+                        [list updateWithRemoteHandler:^(TaskList *currentList, NSDictionary *result) {
+                            [list setServerModifyTime:[NSDate date] updateDB:YES];
+                        }];
+                    }
+                }
                 
             }
         }        
-        
-//        // if no list in local
-//        if (localTaskLists == nil || [localTaskLists count] == 0) {
-//            FMDatabase *db = [FMDatabase database];
-//            if (![db open]) {
-//                NSLog(@"Could not open db.");
-//            } else {
-//                for (NSDictionary*item in lists) {
-//                    NSString *_id = [item objectForKey:@"id"];
-//                    NSString *kind = [item objectForKey:@"kind"];
-//                    NSString *link = [item objectForKey:@"selfLink"];
-//                    NSString *title = [item objectForKey:@"title"];
-//                    
-//                    double timeStamp = [[NSDate date] timeIntervalSince1970];
-//                    NIF_TRACE(@"timeStamp : %0.0f", timeStamp);
-//
-//                    NSString *sql = [NSString stringWithFormat:@"INSERT INTO task_lists (server_list_id,kind,self_link,title,latest_sync_timestamp) VALUES ('%@','%@','%@','%@',%0.0f)",_id,kind,link,title,timeStamp];
-//                    NIF_INFO(@"save to DB sql : %@", sql);
-//                    BOOL rs = [db executeUpdate:sql];
-//                }
-//            }
-//        }
-//        
-//        
-//        for (TaskList *list in localTaskLists) {
-////            list.localModifyTime
-//        }
-        
-        
     }];
 }
 
@@ -473,8 +488,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             NIF_ERROR(@"--- %d", [(NSError *)result code]);
             NIF_ERROR(@"--- %@", [(NSError *)result localizedDescription]);
         } else if ([result isKindOfClass:[NSDictionary class]]) {
-            NSMutableArray *taskLists = [self _parseServerTaskListsFromJSON:result];
-            resultHander(self,taskLists);
+            resultHander(self,[result objectForKey:@"items"]);
         }
     }];
 }

@@ -91,6 +91,12 @@
 
 + (NSString*)sqliteLibVersion;
 
+- (int)userVersion;
+- (void)setUserVersion:(int)version;
+
+- (int)pragmaValueForKey:(NSString *)key;
+- (void)setPragmaValue:(int)value forKey:(NSString *)key;
+
 - (int)changes;
 
 @end
