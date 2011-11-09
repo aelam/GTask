@@ -12,7 +12,9 @@
 
 int main(int argc, char *argv[])
 {
-    @autoreleasepool {
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+//    @autoreleasepool {
         return UIApplicationMain(argc, argv, nil, NSStringFromClass([RWAppDelegate class]));
-    }
+//    }
+    [pool drain];
 }

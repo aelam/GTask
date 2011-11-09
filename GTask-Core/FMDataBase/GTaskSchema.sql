@@ -15,8 +15,8 @@ CREATE TABLE task_lists (
     display_order           INTEGER,
 
     latest_sync_timestamp   INTEGER,
-    server_modify_timestamp INTEGER,
-    local_modify_timestamp  INTEGER
+    server_modify_timestamp INTEGER DEFAULT 0,
+    local_modify_timestamp  INTEGER DEFAULT 0
 );
 
 DROP TABLE IF EXISTS "tasks";
@@ -41,8 +41,8 @@ CREATE TABLE tasks (
     is_deleted          INTEGER NOT NULL DEFAULT 0,
     is_cleared          INTEGER NOT NULL DEFAULT 0,
 
-    server_modify_timestamp	INTEGER,
-    local_modify_timestamp	INTEGER,
+    server_modify_timestamp	INTEGER DEFAULT 0,
+    local_modify_timestamp	INTEGER DEFAULT 0,
     
     FOREIGN KEY(local_list_id) REFERENCES task_lists(local_list_id) ON UPDATE CASCADE ON DELETE CASCADE
 );

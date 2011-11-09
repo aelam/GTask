@@ -43,9 +43,9 @@
     [super dealloc];
 }
 
-- (NSString *)description {
-    return [NSString stringWithFormat:@"List: %@ LocalListId : %d ServerListId : %@",_title,_localListId,_serverListId];
-}
+//- (NSString *)description {
+//    return [NSString stringWithFormat:@"List: %@ LocalListId : %d ServerListId : %@ server:%@ local:%@",_title,_localListId,_serverListId,self.serverModifyTime,self.localModifyTime];
+//}
 
 - (id)init {
     if (self = [super init]) {
@@ -124,7 +124,7 @@
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
-            [db executeUpdate:@"UPDATE task_lists SET server_list_id = ?,server_modify_time = ? WHERE local_list_id = ?",serverListId,[NSDate date],self.localListId];
+            [db executeUpdate:@"UPDATE task_lists SET server_list_id = ?,server_modify_time = ? WHERE local_list_id = ?",serverListId,[NSDate date],[NSNumber numberWithInt:self.localListId]];
             [db close];
         }
     }
@@ -138,12 +138,12 @@
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
-            [db executeUpdate:@"UPDATE task_lists SET title = ? WHERE local_list_id = ?",title,self.localListId];
+            [db executeUpdate:@"UPDATE task_lists SET title = ? WHERE local_list_id = ?",title,[NSNumber numberWithInt:self.localListId]];
             [db close];
         }
     }
     
-    [title release];
+    [_title release];
     _title = [title copy];    
     
 }

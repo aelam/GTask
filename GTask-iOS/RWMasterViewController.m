@@ -270,7 +270,6 @@
 }
 
 - (IBAction)addNewList:(id)sender {
-//    GAddListController *addListController = [[GAddListController alloc] init];
     UINavigationController *navigator = [self.storyboard instantiateViewControllerWithIdentifier:@"GAddListNavigator"];
     GAddListController *addListController = (GAddListController *)navigator.topViewController;
     addListController.actionViewController = self;
@@ -283,6 +282,14 @@
 }
 
 - (void)addListFinished:(GAddListController *)addListController {
+    NSString *text = addListController.listField.text;
+    if (text == nil || text.length == 0) {
+        return;
+    }
+    TaskList *newList = [[TaskList alloc] init];
+    newList.title = text;
+    [[GTaskEngine sharedEngine] insertList:newList updateDB:YES];
+    [newList release];
     
     [addListController.navigationController dismissModalViewControllerAnimated:YES];
 }
