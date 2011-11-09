@@ -261,6 +261,14 @@
 
 }
 
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView beginUpdates];
+    [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationRight];
+    TaskList *list = [self.taskLists objectAtIndex:indexPath.row];
+    [[GTaskEngine sharedEngine] deleteLocalList:list];
+    [tableView endUpdates];
+}
+
 
 // Override to support conditional rearranging of the table view.
 - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
@@ -288,6 +296,8 @@
     }
     TaskList *newList = [[TaskList alloc] init];
     newList.title = text;
+    newList.localModifyTime = [NSDate date];
+    newList.serverModifyTime = [NSDate dateWithTimeIntervalSince1970:0];
     [[GTaskEngine sharedEngine] insertList:newList updateDB:YES];
     [newList release];
     

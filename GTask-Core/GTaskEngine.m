@@ -129,7 +129,24 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         [db close];
         
         [_localTaskLists removeObject:aList];
+        [_deletedTaskLists removeObject:aList];
     }    
+}
+
+- (void)clearDeletedLists {
+
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NIF_ERROR(@"Could not open db.");            
+    } else {
+        [db setPragmaValue:1 forKey:@"foreign_keys"];
+        for(TaskList *aList in _deletedTaskLists) {
+            [db executeUpdate:@"DELETE FROM task_lists WHERE local_list_id = ?",[NSNumber numberWithInt:aList.localListId]];            
+        }
+        [db close];        
+    }    
+    [_deletedTaskLists removeAllObjects];
+    
 }
 
 - (void)updateLocalList:(TaskList *)aList {
@@ -419,7 +436,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         NSMutableArray *deletedLists = [NSMutableArray array];
         for(TaskList *item in _localTaskLists) {
             if (item.serverListId) {
-                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"serverListId == %@",item.serverListId];
+                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"serverListId = %@",item.serverListId];
                 NSArray *filteredLists = [lists filteredArrayUsingPredicate:predicate];
                 if(!filteredLists || [filteredLists count] == 0) {
                     [deletedLists addObject:item];
@@ -427,6 +444,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             }
         }
         
+        NIF_INFO(@"被服务器删除Lists:%@", deletedLists);
         for (TaskList *item in deletedLists) {
             [self clearDeletedList:item];
         }
@@ -436,13 +454,14 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         for (TaskList *item in lists) {
             // 查找没有本地更改的List
                          
-//            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"serverListId == %@ AND serverModifyTime >= localModifyTime",item.serverListId];
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"serverListId == %@",item.serverListId];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"serverListId = %@",item.serverListId];
             NSArray *filteredLists = [_localTaskLists filteredArrayUsingPredicate:predicate];
-            if(!filteredLists || [filteredLists count] == 0) {
+            NSArray *filteredLists2 = [_deletedTaskLists filteredArrayUsingPredicate:predicate];
+
+            if(!filteredLists || [filteredLists count] == 0 || !filteredLists2 || [filteredLists2 count] == 0) {
                 // 本地没有这个list 则插入
                 [self addNewLocalList:item];
-            } else {
+            } else if([filteredLists count] > 0){
                 // 本地有这个list 比较Title是否一样，不一样的话 更新本地
                 TaskList *runtimeList = [filteredLists objectAtIndex:0];
                 if (![runtimeList.title isEqualToString:item.title]) {
@@ -464,6 +483,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                     [self uploadList:list remoteHandler:^(TaskList *currentList, id result) {
                         NSString *_id = [result objectForKey:@"id"];
                         [list setServerListId:_id updateDB:YES];
+                        [list setServerModifyTime:[NSDate date] updateDB:YES];
                     }];
                 } else {
                     [self updateList:list remoteHandler:^(TaskList *currentList, id result) {
@@ -476,16 +496,16 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         
         for(TaskList *list in _deletedTaskLists) {
             if (list.serverListId == nil) {
-                [self clearDeletedList:list];
+                NIF_INFO(@"删除本地List成功:%@", list.title);
             } else {
                 [self removeList:list remoteHandler:^(TaskList *currentList, id result) {
-                    [self clearDeletedList:list];
                 }];
             }
         }
+        [self clearDeletedLists];
         
-
         handler(self,SyncStepListsUpdated);
+
         
         /*
         // 获取到服务器上lists

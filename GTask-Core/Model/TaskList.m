@@ -43,9 +43,9 @@
     [super dealloc];
 }
 
-//- (NSString *)description {
-//    return [NSString stringWithFormat:@"List: %@ LocalListId : %d ServerListId : %@ server:%@ local:%@",_title,_localListId,_serverListId,self.serverModifyTime,self.localModifyTime];
-//}
+- (NSString *)description {
+    return [NSString stringWithFormat:@"List: %@ LocalListId : %d ServerListId : %@ server:%@ local:%@",_title,_localListId,_serverListId,self.serverModifyTime,self.localModifyTime];
+}
 
 - (id)init {
     if (self = [super init]) {
@@ -112,7 +112,7 @@
         }
     }
     
-    if (_serverModifyTime != serverModifyTime && [_serverModifyTime timeIntervalSinceDate:serverModifyTime] > 0) {
+    if (_serverModifyTime != serverModifyTime) {
         [_serverModifyTime release];
         _serverModifyTime = [serverModifyTime retain];
     }

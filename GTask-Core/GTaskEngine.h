@@ -43,13 +43,18 @@ typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 - (void)syncTaskLists;
 
 
-- (void)addTaskList:(TaskList *)alist;
-- (void)deleteTaskList:(TaskList *)aList;
-- (void)modifyTaskList:(TaskList *)aList;
+//- (void)addTaskList:(TaskList *)alist;
+//- (void)deleteTaskList:(TaskList *)aList;
+//- (void)modifyTaskList:(TaskList *)aList;
+
+- (void)deleteLocalList:(TaskList *)aList;
 
 - (void)updateTaskList:(TaskList *)aList;
 
 - (void)insertList:(TaskList *)taskList updateDB:(BOOL)update;
+
+
+- (void)clearDeletedLists;
 
 
 // Tasks

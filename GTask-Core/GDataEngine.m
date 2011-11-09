@@ -87,6 +87,7 @@ static int kJsonError = 0x11;
 }
 
 + (void)logout {
+    return;
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:USER_DEFAULTS_EXPIRATION_TIMESTAMP];
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:USER_DEFAULTS_ACCESS_TOKEN];
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:USER_DEFAULTS_REFRESH_TOKEN];
