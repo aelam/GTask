@@ -227,17 +227,13 @@ static int kJsonError = 0x11;
 }
 
 - (void)_fetchWithRequest:(NSMutableURLRequest *)request resultBlock:(void(^)(GDataEngine *,id))resultBlock {
-    NSURL *url = [request URL];
-    NSString *urlString = [url description];
-    NSString *query = [url query];
-    if (query || [query length]) {
-        urlString = [urlString stringByAppendingFormat:@"&oauth_token=%@",self.accessToken];
-    }else{
-        urlString = [urlString stringByAppendingFormat:@"?oauth_token=%@",self.accessToken];        
-    }
-    NIF_INFO(@"real_URL:%@", urlString);
-    [request setURL:[NSURL URLWithString:urlString]];
+//    NSURL *url = [request URL];
+//    NSString *urlString = [url description];
     
+//    NIF_INFO(@"real_URL:%@", urlString);
+//    [request setURL:[NSURL URLWithString:urlString]];
+    [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
+
     RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:request];
     [connection startWithBlocksStart:^(RSimpleConnection *connection) {
         

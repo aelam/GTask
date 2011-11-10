@@ -8,6 +8,29 @@
 
 #import "NSDate+RFC3339.h"
 
+//1985-04-12T23:20:50.52Z
+//
+//This represents 20 minutes and 50.52 seconds after the 23rd hour of
+//April 12th, 1985 in UTC.
+//
+//1996-12-19T16:39:57-08:00
+//
+//This represents 39 minutes and 57 seconds after the 16th hour of
+//December 19th, 1996 with an offset of -08:00 from UTC (Pacific
+//                                                       Standard Time).  Note that this is equivalent to 1996-12-20T00:39:57Z
+//in UTC.
+//
+//1990-12-31T23:59:60Z
+//
+//This represents the leap second inserted at the end of 1990.
+//
+//1990-12-31T15:59:60-08:00
+//
+//This represents the same leap second in Pacific Standard Time, 8
+//hours behind UTC.
+//
+//1937-01-01T12:00:27.87+00:20
+
 @implementation NSDate (RFC3339)
 
 //NSDate *getDateObject(NSString *rfc3339)
@@ -99,5 +122,20 @@
         
 }
 
+- (NSString *)RFC3339String {
+    //2011-11-10T10:41:01.000Z
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setTimeZone:[NSTimeZone timeZoneWithName:@"GMT"]];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd"];
+    NSString *date = [dateFormatter stringFromDate:self];
+    [dateFormatter setDateFormat:@"HH:mm:ss"];
+    NSString *time = [dateFormatter stringFromDate:self];
+    
+    NSString *dateString = [NSString stringWithFormat:@"%@T%@.000Z",date,time];
+        
+    [dateFormatter release];
+    
+    return dateString;
+}
 
 @end

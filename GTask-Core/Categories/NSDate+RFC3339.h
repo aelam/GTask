@@ -15,5 +15,6 @@
 - (NSString *)locateTimeDescription;
 - (NSString *)locateTimeDescriptionWithFormatter:(NSString *)formatter;
 
+- (NSString *)RFC3339String;
 
 @end

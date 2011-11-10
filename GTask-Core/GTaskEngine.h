@@ -35,6 +35,10 @@ typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 
 - (NSMutableArray *)sharedTaskLists;
 
+- (void)reloadLocalLists;
+- (void)reloadDeletedLists;
+
+
 // Lists
 
 - (void)fetchServerTaskListsWithResultHander:(void(^)(GTaskEngine *,NSArray *))resultHander;

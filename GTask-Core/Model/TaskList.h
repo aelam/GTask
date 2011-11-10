@@ -44,6 +44,8 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 
 - (id)initWithLocalListId:(NSInteger)anId;
 
+- (void)reloadLocalTasks;
+
 
 - (NSMutableArray *)tasks;
 - (void)setTasks:(NSMutableArray *)tasks;

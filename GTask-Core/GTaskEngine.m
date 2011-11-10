@@ -60,17 +60,12 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 - (id)init {
     if (self = [super init]) {
         _localTaskLists = [[NSMutableArray alloc] init];
-        
-        NSArray *tempLists = [self _readListsFromDB];
-        if (tempLists && [tempLists count]) {
-            [_localTaskLists addObjectsFromArray:tempLists];
-        }
+
+        [self reloadLocalLists];
         
         _deletedTaskLists =[[NSMutableArray alloc] init];
-        NSArray *tempDeletedLists = [self _readDeletedListsFromDB];
-        if (tempDeletedLists && [tempDeletedLists count]) {
-            [_deletedTaskLists addObjectsFromArray:tempDeletedLists];
-        }
+        [self reloadDeletedLists];
+        
     }
     return self;
 }
@@ -330,13 +325,13 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     }
 }
 
-- (NSArray *)_readListsFromDB {
+- (void)reloadLocalLists {
     FMDatabase *db = [FMDatabase database];
     if (![db open]) {
         NSLog(@"Could not open db.");
-        return nil;
     } else {
-        NSMutableArray *tempLists = [NSMutableArray array];
+        [_localTaskLists removeAllObjects];
+        
         FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 0 ORDER BY display_order "]];
         while ([rs next]) {
 
@@ -354,21 +349,19 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             list.localModifyTime = [rs dateForColumn:@"local_modify_timestamp"];
             list.displayOrder = [rs intForColumn:@"display_order"];
             
-            [tempLists addObject:list];
+            [_localTaskLists addObject:list];
             [list release];
         }
         [db close];  
-        return tempLists;
     }
 }
 
-- (NSArray *)_readDeletedListsFromDB {
+- (void)reloadDeletedLists {
     FMDatabase *db = [FMDatabase database];
     if (![db open]) {
         NSLog(@"Could not open db.");
-        return nil;
     } else {
-        NSMutableArray *tempLists = [NSMutableArray array];
+        [_deletedTaskLists removeAllObjects];
         FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 1"]];
         while ([rs next]) {
             TaskList *list = [[TaskList alloc] initWithLocalListId:[rs intForColumn:@"local_list_id"]];
@@ -385,11 +378,10 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             list.localModifyTime = [rs dateForColumn:@"local_modify_timestamp"];
             list.displayOrder = [rs intForColumn:@"display_order"];
             
-            [tempLists addObject:list];
+            [_deletedTaskLists addObject:list];
             [list release];
         }
         [db close];  
-        return tempLists;
     }
 }
 
@@ -510,7 +502,20 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         
         handler(self,SyncStepListsUpdated);
 
-        
+        // Fetch tasks in List in LastSyncTime
+        for (TaskList *list in _localTaskLists) {
+            //
+            NSString *dateString = [list.lastestSyncTime RFC3339String];
+            NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:dateString,@"updatedMin",nil];
+            NSString *query = [NSString queryStringFromParams:params];
+            NSString *listsLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
+            NSString *tasksLink = [listsLink stringByAppendingFormat:@"/%@/tasks",list.serverListId];//?%@",list.serverListId,query];
+            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:tasksLink]];
+            [[GTaskEngine sharedEngine] fetchWithRequest:request resultBlock:^(GDataEngine *anEngine, NSDictionary *result) {
+                NIF_INFO(@"--\n--\n %@ --\n--\n", result);
+            }];
+
+        }
         
         
     }];

@@ -14,7 +14,7 @@ CREATE TABLE task_lists (
     
     display_order           INTEGER,
 
-    latest_sync_timestamp   INTEGER,
+    latest_sync_timestamp   INTEGER DEFAULT 0,
     server_modify_timestamp INTEGER DEFAULT 0,
     local_modify_timestamp  INTEGER DEFAULT 0
 );
