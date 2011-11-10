@@ -42,6 +42,8 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 @property (retain)  NSDate *serverModifyTime;
 @property (retain)  NSDate *localModifyTime;
 
+- (id)initWithLocalListId:(NSInteger)anId;
+
 
 - (NSMutableArray *)tasks;
 - (void)setTasks:(NSMutableArray *)tasks;
@@ -93,17 +95,16 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 // Private method, when move task from a list to another list
 - (void)updateListIdAndOrders;
 
-- (void)deleteLocal;
+//- (void)deleteLocal;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Remote Update
 //- (void)updateRemote:(void(^)(TaskList *currentList,id result))resultBlock;
 //- (void)deleteRemote:(void(^)(TaskList *currentList,id result))resultBlock;
-
-- (void)createWithRemoteHandler:(RemoteHandler)handler;
-- (void)updateWithRemoteHandler:(RemoteHandler)handler;
-- (void)deleteWithRemoteHandler:(RemoteHandler)handler;
+//- (void)createWithRemoteHandler:(RemoteHandler)handler;
+//- (void)updateWithRemoteHandler:(RemoteHandler)handler;
+//- (void)deleteWithRemoteHandler:(RemoteHandler)handler;
 
 
 @end

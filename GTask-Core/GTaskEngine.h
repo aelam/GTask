@@ -7,6 +7,7 @@
 //
 
 #import "GDataEngine.h"
+#import "TaskList.h"
 
 @class TaskList;
 @class Task;
@@ -43,14 +44,8 @@ typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 - (void)syncTaskLists;
 
 
-//- (void)addTaskList:(TaskList *)alist;
-//- (void)deleteTaskList:(TaskList *)aList;
-//- (void)modifyTaskList:(TaskList *)aList;
-
 - (void)deleteLocalList:(TaskList *)aList;
-
 - (void)updateTaskList:(TaskList *)aList;
-
 - (void)insertList:(TaskList *)taskList updateDB:(BOOL)update;
 
 
@@ -66,9 +61,10 @@ typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 - (void)syncTasks;
 - (void)syncTasksForList:(TaskList *)aList;
 
-
-- (void)sync;
 - (void)syncWithSyncHandler:(SyncHandler)handler;
 
+- (void)uploadList:(TaskList *)aList remoteHandler:(RemoteHandler)handler;
+- (void)updateList:(TaskList *)aList remoteHandler:(RemoteHandler)handler;
+- (void)removeList:(TaskList *)aList remoteHandler:(RemoteHandler)handler;
 
 @end

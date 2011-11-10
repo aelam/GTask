@@ -21,7 +21,6 @@
 @synthesize isDefault = _isDefault;
 @synthesize isDeleted = _isDeleted;
 @synthesize isCleared = _isCleared;
-//@synthesize status = _status;
 @synthesize sortType = _sortType;
 @synthesize lastestSyncTime = _lastestSyncTime;
 @synthesize serverModifyTime = _serverModifyTime;
@@ -48,58 +47,60 @@
 }
 
 - (id)init {
+    return [self initWithLocalListId:-1];
+}
+
+- (id)initWithLocalListId:(NSInteger)anId {
     if (self = [super init]) {
         _tasks = [[NSMutableArray alloc] init];
-        _localListId = -1;
-        
+        _localListId = anId;
+        if (_localListId != -1) {
+            NSMutableArray *tempTasks = [self _loadLocalTasks];
+            if (tempTasks && [tempTasks count]) {
+                [_tasks addObjectsFromArray:tempTasks];
+            }            
+        }
     }
     return self;
 }
 
-- (NSMutableArray *)tasks {
-    if (_tasks == nil || [_tasks count] == 0) {
-        FMDatabase *db = [FMDatabase database];
-        if (![db open]) {
-            NSLog(@"Could not open db.");
-//            _tasks = nil;
-        } else {
-            [_tasks removeAllObjects];
-            FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d AND is_deleted = 0 ORDER BY display_order",_localListId]];
-            while ([rs next]) {
-                Task *task = [[Task alloc] init];
-                task.localTaskId = [rs intForColumn:@"local_task_id"];
-                task.serverTaskId = [rs stringForColumn:@"server_task_id"];
-                task.localParentId = [rs intForColumn:@"local_parent_id"];
-                task.title = [rs stringForColumn:@"title"];
-                task.notes = [rs stringForColumn:@"notes"];
-                task.isUpdated = [rs boolForColumn:@"is_updated"];
-                task.isCompleted = [rs boolForColumn:@"is_completed"];
-                task.isHidden = [rs boolForColumn:@"is_hidden"];
-                task.isDeleted = [rs boolForColumn:@"is_deleted"];
-                task.isCleared = [rs boolForColumn:@"is_cleared"];
-                task.completedDate = [rs dateForColumn:@"completed_timestamp"];
-                task.reminderDate = [rs dateForColumn:@"reminder_timestamp"];
-                task.due = [rs dateForColumn:@"due"];
-                task.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
-                task.displayOrder = [rs intForColumn:@"display_order"];
-                
-                task.list = self;
-                [_tasks addObject:task];
-                [task release];
-            }
-            [db close]; 
-        }        
-    }
-    return _tasks;
+- (NSMutableArray *)_loadLocalTasks {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NSLog(@"Could not open db.");
+        return nil;
+    } else {
+        NSMutableArray *tempTasks = [NSMutableArray array];
+        
+        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d AND is_deleted = 0 ORDER BY display_order",_localListId]];
+        while ([rs next]) {
+            Task *task = [[Task alloc] init];
+            task.localTaskId = [rs intForColumn:@"local_task_id"];
+            task.serverTaskId = [rs stringForColumn:@"server_task_id"];
+            task.localParentId = [rs intForColumn:@"local_parent_id"];
+            task.title = [rs stringForColumn:@"title"];
+            task.notes = [rs stringForColumn:@"notes"];
+            task.isUpdated = [rs boolForColumn:@"is_updated"];
+            task.isCompleted = [rs boolForColumn:@"is_completed"];
+            task.isHidden = [rs boolForColumn:@"is_hidden"];
+            task.isDeleted = [rs boolForColumn:@"is_deleted"];
+            task.isCleared = [rs boolForColumn:@"is_cleared"];
+            task.completedDate = [rs dateForColumn:@"completed_timestamp"];
+            task.reminderDate = [rs dateForColumn:@"reminder_timestamp"];
+            task.due = [rs dateForColumn:@"due"];
+            task.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
+            task.displayOrder = [rs intForColumn:@"display_order"];
+            
+            task.list = self;
+            [tempTasks addObject:task];
+            [task release];
+        }
+        [db close]; 
+        return tempTasks;
+    }        
+
 }
 
-
-- (void)setTasks:(NSMutableArray *)tasks {
-    if (_tasks != tasks) {
-        [_tasks release];
-        _tasks = [tasks retain];
-    }
-}
 
 - (void)setServerModifyTime:(NSDate *)serverModifyTime updateDB:(BOOL)update {
     if (update) {
@@ -589,39 +590,67 @@
 
 ////////////////////////////////////////////////////////////////////////////
 // Remote Update
-
-- (void)createWithRemoteHandler:(RemoteHandler)handler {
-    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
-    NSURL *url = [NSURL URLWithString:selfLink];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    [request setHTTPMethod:@"POST"];
-    NSDictionary *json = [NSDictionary dictionaryWithObjectsAndKeys:self.title,@"title",nil];
-    [request attachJSONBody:json];
-    [[GTaskEngine engine] fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
+- (void)fetchServerTasksWithResultHander:(RemoteHandler)handler {
+    NSAssert(self.serverListId,@"self.serverListId != nil");
+    NSString *listsLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
+    NSString *tasksLink = [listsLink stringByAppendingFormat:@"/%@/tasks",self.serverListId];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:tasksLink]];
+    [[GTaskEngine sharedEngine] fetchWithRequest:request resultBlock:^(GDataEngine *anEngine, NSDictionary *result) {
         handler(self,result);
     }];
+    
 }
 
-- (void)updateWithRemoteHandler:(RemoteHandler)handler {
-    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists/%@",self.serverListId];
-    NSURL *url = [NSURL URLWithString:selfLink];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    [request setHTTPMethod:@"PUT"];
-    NSDictionary *json = [NSDictionary dictionaryWithObjectsAndKeys:self.serverListId,@"id",self.kind,@"kind",selfLink,@"selfLink",self.title,@"title",nil];
-    [request attachJSONBody:json];
-    [[GTaskEngine engine] fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
+- (void)fetchTasksWithSearchParams:(NSDictionary *)params resultHander:(RemoteHandler)handler {
+    NSAssert(self.serverListId,@"self.serverListId != nil");
+    NSString *query = nil;
+    if (params) {
+        query = [NSString queryStringFromParams:params];
+    }
+    
+    NSString *listsLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
+    NSString *tasksLink = [listsLink stringByAppendingFormat:@"/%@/tasks%@",self.serverListId,query?[NSString stringWithFormat:@"?%@",query]:@""];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:tasksLink]];
+    [[GTaskEngine sharedEngine] fetchWithRequest:request resultBlock:^(GDataEngine *anEngine, NSDictionary *result) {
         handler(self,result);
     }];
+    
 }
 
-- (void)deleteWithRemoteHandler:(RemoteHandler)handler {
-    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists/%@",self.serverListId];
-    NSURL *url = [NSURL URLWithString:selfLink];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    [request setHTTPMethod:@"DELETE"];
-    [[GTaskEngine engine] fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
-        handler(self,result);
-    }]; 
-}
+
+
+//- (void)createWithRemoteHandler:(RemoteHandler)handler {
+//    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
+//    NSURL *url = [NSURL URLWithString:selfLink];
+//    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+//    [request setHTTPMethod:@"POST"];
+//    NSDictionary *json = [NSDictionary dictionaryWithObjectsAndKeys:self.title,@"title",nil];
+//    [request attachJSONBody:json];
+//    [[GTaskEngine engine] fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
+//        handler(self,result);
+//    }];
+//}
+//
+//- (void)updateWithRemoteHandler:(RemoteHandler)handler {
+//    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists/%@",self.serverListId];
+//    NSURL *url = [NSURL URLWithString:selfLink];
+//    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+//    [request setHTTPMethod:@"PUT"];
+//    NSDictionary *json = [NSDictionary dictionaryWithObjectsAndKeys:self.serverListId,@"id",self.kind,@"kind",selfLink,@"selfLink",self.title,@"title",nil];
+//    [request attachJSONBody:json];
+//    [[GTaskEngine engine] fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
+//        handler(self,result);
+//    }];
+//}
+//
+//- (void)deleteWithRemoteHandler:(RemoteHandler)handler {
+//    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists/%@",self.serverListId];
+//    NSURL *url = [NSURL URLWithString:selfLink];
+//    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+//    [request setHTTPMethod:@"DELETE"];
+//    [[GTaskEngine engine] fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
+//        handler(self,result);
+//    }]; 
+//}
 
 @end

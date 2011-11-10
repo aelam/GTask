@@ -339,8 +339,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         NSMutableArray *tempLists = [NSMutableArray array];
         FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 0 ORDER BY display_order "]];
         while ([rs next]) {
-            TaskList *list = [[TaskList alloc] init];
-            list.localListId = [rs intForColumn:@"local_list_id"];
+
+            TaskList *list = [[TaskList alloc] initWithLocalListId:[rs intForColumn:@"local_list_id"]];
+
             list.serverListId = [rs stringForColumn:@"server_list_id"];
             list.kind = [rs stringForColumn:@"kind"];
             list.link = [rs stringForColumn:@"self_link"];
@@ -370,7 +371,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         NSMutableArray *tempLists = [NSMutableArray array];
         FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 1"]];
         while ([rs next]) {
-            TaskList *list = [[TaskList alloc] init];
+            TaskList *list = [[TaskList alloc] initWithLocalListId:[rs intForColumn:@"local_list_id"]];
             list.localListId = [rs intForColumn:@"local_list_id"];
             list.serverListId = [rs stringForColumn:@"server_list_id"];
             list.kind = [rs stringForColumn:@"kind"];
@@ -458,7 +459,10 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             NSArray *filteredLists = [_localTaskLists filteredArrayUsingPredicate:predicate];
             NSArray *filteredLists2 = [_deletedTaskLists filteredArrayUsingPredicate:predicate];
 
-            if(!filteredLists || [filteredLists count] == 0 || !filteredLists2 || [filteredLists2 count] == 0) {
+            // 如果找到 说明服务器上面的List已经倍删掉
+            if (filteredLists2 && [filteredLists2 count]) {
+                
+            } else if(!filteredLists || [filteredLists count] == 0) {
                 // 本地没有这个list 则插入
                 [self addNewLocalList:item];
             } else if([filteredLists count] > 0){
@@ -507,77 +511,8 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         handler(self,SyncStepListsUpdated);
 
         
-        /*
-        // 获取到服务器上lists
-        FMDatabase *db = [FMDatabase database];
-        if (![db open]) {
-            NSLog(@"Could not open db.");
-        } else {
-            [db setPragmaValue:1 forKey:@"foreign_keys"];
-            // 下载比对
-            for (TaskList *item in lists) {
-
-                FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists WHERE server_list_id = ? AND server_modify_timestamp >= local_modify_timestamp",item.serverListId];
-                if (![set next]) {
-                    // 本地没有这个list 则插入
-                    NSDate *now = [NSDate date];
-                    item.serverModifyTime = now;
-                    item.localModifyTime = now;
-                    
-                    [self insertList:item updateDB:YES];
-                    
-                } else {
-                    NSString *aTitle = [set stringForColumn:@"title"];
-                    if (![aTitle isEqualToString:item.title]) {
-                        // 本地有这个list 且title不一样 则更新title
-                        [item setTitle:aTitle updateDB:YES];
-                    } else {
-                        // List 一样 啥都不做                     
-                    }
-                }
-            }
-
-            // 上传新加List
-            FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists server_modify_timestamp < local_modify_timestamp"];
-            if ([set next]) {
-                
-                TaskList *list = [[[TaskList alloc] init] autorelease];
-                list.serverListId = [set stringForColumn:@"server_list_id"];
-                list.title = [set stringForColumn:@"title"];
-                list.link = [set stringForColumn:@"self_link"];
-                list.kind = [set stringForColumn:@"kind"];
-                list.isDeleted = [set boolForColumn:@"is_deleted"];
-                
-                if (list.isDeleted) {
-                    if (list.serverListId == nil) {
-                        // 删除本地未同步的List
-                        // ... !TODO
-//                        [list deleteLocal];
-                    } else {
-                        // 需要删除服务器List
-                        [list deleteWithRemoteHandler:^(TaskList *currentList, id result) {
-                            [list deleteLocal];
-                        }];
-                    }
-                } else {
-                    if (list.serverListId == nil) {
-                        [list createWithRemoteHandler:^(TaskList *currentList, NSDictionary *result) {
-                            // UPDATE LOCAL SERVER ID;
-                            // ... !TODO
-                            NIF_INFO(@"%@", result);
-                            NSString *_id = [result objectForKey:@"id"];
-                            [list setServerListId:_id updateDB:YES];
-                        }];                        
-                    } else {
-                        [list updateWithRemoteHandler:^(TaskList *currentList, NSDictionary *result) {
-                            [list setServerModifyTime:[NSDate date] updateDB:YES];
-                        }];
-                    }
-                }
-                
-            }
-            handler(self,SyncStepListsUpdated);
-        }   */     
+        
+        
     }];
 }
 
