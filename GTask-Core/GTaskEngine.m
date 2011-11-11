@@ -24,8 +24,11 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 // 
 - (NSArray *)_parseServerTaskListsFromJSON:(NSDictionary *)json;
 
-- (NSArray *)_readListsFromDB;
-- (NSArray *)_readDeletedListsFromDB;
+//- (NSArray *)_readListsFromDB;
+//- (NSArray *)_readDeletedListsFromDB;
+
+- (NSArray *)_deletingLists;
+- (NSArray *)_addingLists;
 
 
 @end
@@ -35,12 +38,12 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 
 @synthesize localTaskLists = _localTaskLists;
-@synthesize deletedTaskLists = _deletedTaskLists;
+//@synthesize deletedTaskLists = _deletedTaskLists;
 
 - (void)dealloc {
     
     [_localTaskLists release];
-    [_deletedTaskLists release];
+//    [_deletedTaskLists release];
     [super dealloc];
 }
 
@@ -63,8 +66,8 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
         [self reloadLocalLists];
         
-        _deletedTaskLists =[[NSMutableArray alloc] init];
-        [self reloadDeletedLists];
+//        _deletedTaskLists =[[NSMutableArray alloc] init];
+//        [self reloadDeletedLists];
         
     }
     return self;
@@ -109,7 +112,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         [db executeUpdate:@"UPDATE task_lists SET is_deleted = 1 WHERE local_list_id = ?",[NSNumber numberWithInt:aList.localListId]];
         [db close];
     }    
-    [_deletedTaskLists addObject:aList];
+//    [_deletedTaskLists addObject:aList];
     [_localTaskLists removeObject:aList];
 }
 
@@ -124,7 +127,6 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         [db close];
         
         [_localTaskLists removeObject:aList];
-        [_deletedTaskLists removeObject:aList];
     }    
 }
 
@@ -135,13 +137,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         NIF_ERROR(@"Could not open db.");            
     } else {
         [db setPragmaValue:1 forKey:@"foreign_keys"];
-        for(TaskList *aList in _deletedTaskLists) {
-            [db executeUpdate:@"DELETE FROM task_lists WHERE local_list_id = ?",[NSNumber numberWithInt:aList.localListId]];            
-        }
+        [db executeUpdate:@"DELETE FROM task_lists WHERE is_deleted = 1"];            
         [db close];        
-    }    
-    [_deletedTaskLists removeAllObjects];
-    
+    }        
 }
 
 - (void)updateLocalList:(TaskList *)aList {
@@ -361,7 +359,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     if (![db open]) {
         NSLog(@"Could not open db.");
     } else {
-        [_deletedTaskLists removeAllObjects];
+//        [_deletedTaskLists removeAllObjects];
         FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 1"]];
         while ([rs next]) {
             TaskList *list = [[TaskList alloc] initWithLocalListId:[rs intForColumn:@"local_list_id"]];
@@ -378,12 +376,75 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             list.localModifyTime = [rs dateForColumn:@"local_modify_timestamp"];
             list.displayOrder = [rs intForColumn:@"display_order"];
             
-            [_deletedTaskLists addObject:list];
+//            [_deletedTaskLists addObject:list];
             [list release];
         }
         [db close];  
     }
 }
+
+- (NSArray *)_deletingLists {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NSLog(@"Could not open db.");
+        return nil;
+    } else {
+        NSMutableArray *tempLists = [NSMutableArray array];
+        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 1"]];
+        while ([rs next]) {
+            TaskList *list = [[TaskList alloc] initWithLocalListId:[rs intForColumn:@"local_list_id"]];
+            list.localListId = [rs intForColumn:@"local_list_id"];
+            list.serverListId = [rs stringForColumn:@"server_list_id"];
+            list.kind = [rs stringForColumn:@"kind"];
+            list.link = [rs stringForColumn:@"self_link"];
+            list.title = [rs stringForColumn:@"title"];
+            list.isDefault = [rs boolForColumn:@"is_default"];
+            list.isDeleted = [rs boolForColumn:@"is_deleted"];
+            list.isCleared = [rs boolForColumn:@"is_cleared"];
+            list.lastestSyncTime = [rs dateForColumn:@"latest_sync_timestamp"];
+            list.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
+            list.localModifyTime = [rs dateForColumn:@"local_modify_timestamp"];
+            list.displayOrder = [rs intForColumn:@"display_order"];
+            
+            [tempLists addObject:list];
+            [list release];
+        }
+        [db close];  
+        return tempLists;
+    }
+}
+
+- (NSArray *)_addingLists {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NSLog(@"Could not open db.");
+        return nil;
+    } else {
+        NSMutableArray *tempLists = [NSMutableArray array];
+        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 0 AND server_list_id = null"]];
+        while ([rs next]) {
+            TaskList *list = [[TaskList alloc] initWithLocalListId:[rs intForColumn:@"local_list_id"]];
+            list.localListId = [rs intForColumn:@"local_list_id"];
+            list.serverListId = [rs stringForColumn:@"server_list_id"];
+            list.kind = [rs stringForColumn:@"kind"];
+            list.link = [rs stringForColumn:@"self_link"];
+            list.title = [rs stringForColumn:@"title"];
+            list.isDefault = [rs boolForColumn:@"is_default"];
+            list.isDeleted = [rs boolForColumn:@"is_deleted"];
+            list.isCleared = [rs boolForColumn:@"is_cleared"];
+            list.lastestSyncTime = [rs dateForColumn:@"latest_sync_timestamp"];
+            list.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
+            list.localModifyTime = [rs dateForColumn:@"local_modify_timestamp"];
+            list.displayOrder = [rs intForColumn:@"display_order"];
+            
+            [tempLists addObject:list];
+            [list release];
+        }
+        [db close];  
+        return tempLists;
+    }
+}
+
 
 /**
  *
@@ -412,6 +473,11 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 - (void)syncWithSyncHandler:(SyncHandler)handler {
     
+    //Check Network
+    
+    // Delete list
+    // add new list
+    
     // download all List
     // check the timestamp of changed List, update local List 
     // download tasks for every list 
@@ -419,7 +485,40 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     // update all changes to server
     
     // List 重命名 、
+    
+    // 
+    NSArray *deletingLists = [self _deletingLists];
+    for(TaskList *list in deletingLists) {
+        if (list.isDeleted) {
+            if(!list.serverListId) {
+                // List 未上传到服务器就删除了 没有ServerId
+                [self clearDeletedList:list];
+            } else {
+                // 从服务器上删除
+                [self removeList:list remoteHandler:^(TaskList *currentList, id result) {
+                    [self clearDeletedList:list];                   
+                }];
+            }
+        }
+    }
         
+    NSArray *addingLists = [self _addingLists]; //serverId = nil AND isDeleted = 0;
+    for(TaskList *list in addingLists) {
+        [self uploadList:list remoteHandler:^(TaskList *currentList, id result) {
+            NSString *_id = [result objectForKey:@"id"];
+            [list setServerListId:_id updateDB:YES];
+            [list setServerModifyTime:[NSDate date] updateDB:YES];
+            
+            // 上传List
+//            list.tasks
+            
+        }];
+    }
+    
+    return;
+    
+    
+    
     [self fetchServerTaskListsWithResultHander:^(GTaskEngine *engine, NSArray *lists) {
 
         handler(self,SyncStepListsDownloaded);
@@ -444,78 +543,80 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         
         
         // Server lists 
-        for (TaskList *item in lists) {
-            // 查找没有本地更改的List
-                         
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"serverListId = %@",item.serverListId];
-            NSArray *filteredLists = [_localTaskLists filteredArrayUsingPredicate:predicate];
-            NSArray *filteredLists2 = [_deletedTaskLists filteredArrayUsingPredicate:predicate];
+//        for (TaskList *item in lists) {
+//            // 查找没有本地更改的List
+//                         
+//            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"serverListId = %@",item.serverListId];
+//            NSArray *filteredLists = [_localTaskLists filteredArrayUsingPredicate:predicate];
+//            NSArray *filteredLists2 = [_deletedTaskLists filteredArrayUsingPredicate:predicate];
 
             // 如果找到 说明服务器上面的List已经倍删掉
-            if (filteredLists2 && [filteredLists2 count]) {
-                
-            } else if(!filteredLists || [filteredLists count] == 0) {
-                // 本地没有这个list 则插入
-                [self addNewLocalList:item];
-            } else if([filteredLists count] > 0){
-                // 本地有这个list 比较Title是否一样，不一样的话 更新本地
-                TaskList *runtimeList = [filteredLists objectAtIndex:0];
-                if (![runtimeList.title isEqualToString:item.title]) {
-                    [runtimeList setTitle:item.title updateDB:YES];
-                } else {
-                    
-                }
-            }
-        }
-                        
-        //查找本地修改过的List
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"serverModifyTime < localModifyTime"];
-        NSArray *filteredLists = [_localTaskLists filteredArrayUsingPredicate:predicate];
-        if(!filteredLists || [filteredLists count] == 0) {
-            
-        } else {
-            for(TaskList *list in filteredLists) {
-                if (list.serverListId == nil) {
-                    [self uploadList:list remoteHandler:^(TaskList *currentList, id result) {
-                        NSString *_id = [result objectForKey:@"id"];
-                        [list setServerListId:_id updateDB:YES];
-                        [list setServerModifyTime:[NSDate date] updateDB:YES];
-                    }];
-                } else {
-                    [self updateList:list remoteHandler:^(TaskList *currentList, id result) {
-                        [list setServerModifyTime:[NSDate date] updateDB:YES];
-                    }];
-                }
-            }
-        }
+//            if (filteredLists2 && [filteredLists2 count]) {
+//                
+//            } else if(!filteredLists || [filteredLists count] == 0) {
+//                // 本地没有这个list 则插入
+//                [self addNewLocalList:item];
+//            } else if([filteredLists count] > 0){
+//                // 本地有这个list 比较Title是否一样，不一样的话 更新本地
+//                TaskList *runtimeList = [filteredLists objectAtIndex:0];
+//                if (![runtimeList.title isEqualToString:item.title]) {
+//                    [runtimeList setTitle:item.title updateDB:YES];
+//                } else {
+//                    
+//                }
+//            }
+//        }
+//                        
+//        //查找本地修改过的List
+//        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"serverModifyTime < localModifyTime"];
+//        NSArray *filteredLists = [_localTaskLists filteredArrayUsingPredicate:predicate];
+//        if(!filteredLists || [filteredLists count] == 0) {
+//            
+//        } else {
+//            for(TaskList *list in filteredLists) {
+//                if (list.serverListId == nil) {
+//                    [self uploadList:list remoteHandler:^(TaskList *currentList, id result) {
+//                        NSString *_id = [result objectForKey:@"id"];
+//                        [list setServerListId:_id updateDB:YES];
+//                        [list setServerModifyTime:[NSDate date] updateDB:YES];
+//                    }];
+//                } else {
+//                    [self updateList:list remoteHandler:^(TaskList *currentList, id result) {
+//                        [list setServerModifyTime:[NSDate date] updateDB:YES];
+//                    }];
+//                }
+//            }
+//        }
         
         
-        for(TaskList *list in _deletedTaskLists) {
-            if (list.serverListId == nil) {
-                NIF_INFO(@"删除本地List成功:%@", list.title);
-            } else {
-                [self removeList:list remoteHandler:^(TaskList *currentList, id result) {
-                }];
-            }
-        }
-        [self clearDeletedLists];
+//        for(TaskList *list in _deletedTaskLists) {
+//            if (list.serverListId == nil) {
+//                NIF_INFO(@"删除本地List成功:%@", list.title);
+//            } else {
+//                [self removeList:list remoteHandler:^(TaskList *currentList, id result) {
+//                }];
+//            }
+//        }
+//        [self clearDeletedLists];
         
         handler(self,SyncStepListsUpdated);
 
         // Fetch tasks in List in LastSyncTime
         for (TaskList *list in _localTaskLists) {
-            //
-            NSString *dateString = [list.lastestSyncTime RFC3339String];
-            NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:dateString,@"updatedMin",nil];
-            NSString *query = [NSString queryStringFromParams:params];
-            NSString *listsLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
-            NSString *tasksLink = [listsLink stringByAppendingFormat:@"/%@/tasks",list.serverListId];//?%@",list.serverListId,query];
-            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:tasksLink]];
-            [[GTaskEngine sharedEngine] fetchWithRequest:request resultBlock:^(GDataEngine *anEngine, NSDictionary *result) {
-                NIF_INFO(@"--\n--\n %@ --\n--\n", result);
-            }];
-
+            NSString *dateString = list.lastestSyncTime?[list.lastestSyncTime RFC3339String]:[NSDate RFC3339Of1970];
+            NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:
+                                    dateString,@"updatedMin",
+                                    @"true",@"showDeleted",
+                                    nil];
+            [list fetchServerTasksWithCondition:params resultHander:^(TaskList *currentList, NSArray *result) {
+                NIF_INFO(@"%@", result);
+                NSArray *localLists = [[GTaskEngine sharedEngine] localTaskLists];
+                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"serverListId = %@",list.serverListId];
+                NSArray *filteredLists = [lists filteredArrayUsingPredicate:predicate];
+                
+            }];            
         }
+
         
         
     }];

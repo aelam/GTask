@@ -22,7 +22,7 @@ CREATE TABLE task_lists (
 DROP TABLE IF EXISTS "tasks";
 CREATE TABLE tasks (
     local_task_id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    server_task_id      TEXT,
+    server_task_id      TEXT UNIQUE,
 
     local_list_id       INTEGER NOT NULL,
     local_parent_id     INTEGER NOT NULL,

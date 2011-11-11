@@ -10,6 +10,7 @@
 
 @interface NSDate (RFC3339)
 
++ (NSString *)RFC3339Of1970;
 + (NSDate *)dateFromRFC3339:(NSString *)rfc3339;
 
 - (NSString *)locateTimeDescription;

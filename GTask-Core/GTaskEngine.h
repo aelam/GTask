@@ -30,13 +30,13 @@ typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 
 
 @property (retain) NSMutableArray *localTaskLists;
-@property (retain) NSMutableArray *deletedTaskLists;
+//@property (retain) NSMutableArray *deletedTaskLists;
 
 
 - (NSMutableArray *)sharedTaskLists;
 
 - (void)reloadLocalLists;
-- (void)reloadDeletedLists;
+//- (void)reloadDeletedLists;
 
 
 // Lists
@@ -45,7 +45,7 @@ typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 
 - (NSMutableArray *)localTaskLists;
 - (NSMutableArray *)localTaskListsWithSortType:(NSInteger)sortType;
-- (void)syncTaskLists;
+//- (void)syncTaskLists;
 
 
 - (void)deleteLocalList:(TaskList *)aList;

@@ -54,6 +54,7 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 - (void)setServerListId:(NSString *)serverListId updateDB:(BOOL)update;
 - (void)setTitle:(NSString *)title updateDB:(BOOL)update;
 
+- (void)updateLastestSyncTime:(NSDate *)date;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 - (Task *)firstTask;
@@ -99,6 +100,7 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 
 //- (void)deleteLocal;
 
+- (void)fetchServerTasksWithCondition:(NSDictionary *)conditions resultHander:(RemoteHandler)handler;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Remote Update

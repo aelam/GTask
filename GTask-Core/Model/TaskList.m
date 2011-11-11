@@ -11,6 +11,13 @@
 #import "Task.h"
 #import "GTaskEngine.h"
 #import "NSMutableURLRequest+Shorten.h"
+#import "NSDate+RFC3339.h"
+
+@interface TaskList (Private)
+
+- (NSArray *)_parseServerTasksFromJSON:(NSDictionary *)json;
+
+@end
 
 @implementation TaskList
 
@@ -140,6 +147,17 @@
     [_title release];
     _title = [title copy];    
     
+}
+
+- (void)updateLastestSyncTime:(NSDate *)date {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NSLog(@"Could not open db.");
+    } else {
+        [db executeUpdate:@"UPDATE task_lists SET latest_sync_timestamp = ? WHERE local_list_id = ?",date,[NSNumber numberWithInt:self.localListId]];
+        [db close];
+    }
+    self.lastestSyncTime = date;
 }
 
 
@@ -583,15 +601,38 @@
 
 ////////////////////////////////////////////////////////////////////////////
 // Remote Update
-- (void)fetchServerTasksWithResultHander:(RemoteHandler)handler {
-    NSAssert(self.serverListId,@"self.serverListId != nil");
-    NSString *listsLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
-    NSString *tasksLink = [listsLink stringByAppendingFormat:@"/%@/tasks",self.serverListId];
+- (void)fetchServerTasksWithCondition:(NSDictionary *)conditions resultHander:(RemoteHandler)handler {
+
+    NSString *query = [NSString queryStringFromParams:conditions];
+    NSString *listsLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/lists"];
+    NSString *tasksLink = [listsLink stringByAppendingFormat:@"/%@/tasks%@",self.serverListId,query?[NSString stringWithFormat:@"?%@",query]:@""];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:tasksLink]];
     [[GTaskEngine sharedEngine] fetchWithRequest:request resultBlock:^(GDataEngine *anEngine, NSDictionary *result) {
-        handler(self,result);
+
+        NSArray *tasks = [self _parseServerTasksFromJSON:result];
+        handler(self,tasks);
     }];
     
 }
+
+- (NSArray *)_parseServerTasksFromJSON:(NSDictionary *)json {
+    NSMutableArray *tempTasks = [NSMutableArray array];
+    
+    NSArray *items = [json objectForKey:@"items"];
+    
+    for (NSDictionary*item in items) {
+        Task *aTask = [[Task alloc] init];
+        
+        aTask.serverTaskId = [item objectForKey:@"id"];
+        aTask.link = [item objectForKey:@"selfLink"];
+        aTask.title = [item objectForKey:@"title"];
+        aTask.isDeleted = [[item objectForKey:@"deleted"] boolValue];
+        [tempTasks addObject:aTask];
+        [aTask release];
+    }
+    return tempTasks;
+}
+
+
 
 @end

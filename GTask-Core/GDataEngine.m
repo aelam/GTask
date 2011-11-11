@@ -227,11 +227,8 @@ static int kJsonError = 0x11;
 }
 
 - (void)_fetchWithRequest:(NSMutableURLRequest *)request resultBlock:(void(^)(GDataEngine *,id))resultBlock {
-//    NSURL *url = [request URL];
-//    NSString *urlString = [url description];
-    
-//    NIF_INFO(@"real_URL:%@", urlString);
-//    [request setURL:[NSURL URLWithString:urlString]];
+
+    // SET OAuth Header
     [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
 
     RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:request];

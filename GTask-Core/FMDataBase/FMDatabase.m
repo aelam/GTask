@@ -144,6 +144,7 @@
 
 - (BOOL)open {
 	if (db) {
+        [self setPragmaValue:1 forKey:@"foreign_keys"];
 		return YES;
 	}
 	
