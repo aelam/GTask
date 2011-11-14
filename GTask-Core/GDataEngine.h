@@ -16,6 +16,7 @@
 @property (nonatomic, copy)    NSString    *accessToken;
 @property (nonatomic, copy)    NSString    *refreshToken;
 @property (nonatomic, assign)  NSInteger   expirationTimeStamp;      // TIMESTAMP SINECE 1970
+@property (nonatomic, retain)  NSOperationQueue  *operationQueue;   
 
 + (BOOL)isFirstLogIn;
 + (BOOL)isSessionValid;

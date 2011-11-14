@@ -43,7 +43,7 @@ static int kJsonError = 0x11;
 @synthesize accessToken = _accessToken;
 @synthesize refreshToken = _refreshToken;
 @synthesize expirationTimeStamp = _expirationTimeStamp;
-
+@synthesize operationQueue = _operationQueue;
 
 + (BOOL)isFirstLogIn {
     NSString *accessToken = [[NSUserDefaults standardUserDefaults] objectForKey:USER_DEFAULTS_ACCESS_TOKEN];
@@ -83,6 +83,8 @@ static int kJsonError = 0x11;
         self.accessToken = [[NSUserDefaults standardUserDefaults] objectForKey:USER_DEFAULTS_ACCESS_TOKEN];
         self.refreshToken = [[NSUserDefaults standardUserDefaults] objectForKey:USER_DEFAULTS_REFRESH_TOKEN];
         self.expirationTimeStamp = [[NSUserDefaults standardUserDefaults] doubleForKey :USER_DEFAULTS_EXPIRATION_TIMESTAMP];
+        
+        _operationQueue = [[NSOperationQueue alloc] init];
     }
     return self;
 }
@@ -133,7 +135,7 @@ static int kJsonError = 0x11;
                                 nil];
         [_request attachPostParams:params];
         
-        [RSimpleConnection sendAsynchronousRequest:_request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *respone, NSData *responsingData, NSError *error) {
+        [RSimpleConnection sendAsynchronousRequest:_request queue:_operationQueue completionHandler:^(NSURLResponse *respone, NSData *responsingData, NSError *error) {
             if (error) {
                 resultBlock(self,error);
             } else {
@@ -200,7 +202,7 @@ static int kJsonError = 0x11;
                                         nil];
                 [_request attachPostParams:params];
                 
-                [RSimpleConnection sendAsynchronousRequest:_request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *respone, NSData *responsingData, NSError *error) {
+                [RSimpleConnection sendAsynchronousRequest:_request queue:_operationQueue completionHandler:^(NSURLResponse *respone, NSData *responsingData, NSError *error) {
                     if (error) {
                         resultBlock(self,error);
                     } else {
@@ -234,7 +236,7 @@ static int kJsonError = 0x11;
     // SET OAuth Header
     [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
     
-    [RSimpleConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *respone, NSData *responsingData, NSError *error) {
+    [RSimpleConnection sendAsynchronousRequest:request queue:_operationQueue completionHandler:^(NSURLResponse *respone, NSData *responsingData, NSError *error) {
         if (error) {
             resultBlock(self,error);
         } else {
@@ -277,6 +279,7 @@ static int kJsonError = 0x11;
 - (void)dealloc {
     [_accessToken release];  _accessToken = nil;
     [_refreshToken release]; _refreshToken = nil;
+    [_operationQueue release];
     [super dealloc];
 }
 

@@ -8,6 +8,7 @@
 
 #import "GDataEngine.h"
 #import "TaskList.h"
+#import "NSMutableURLRequest+Operations.h"
 
 @class TaskList;
 @class Task;

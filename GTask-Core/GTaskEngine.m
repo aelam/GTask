@@ -179,10 +179,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (void)removeList:(TaskList *)aList remoteHandler:(RemoteHandler)handler {
-    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists/%@",aList.serverListId];
-    NSURL *url = [NSURL URLWithString:selfLink];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    [request setHTTPMethod:@"DELETE"];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithRemovingList:aList];
     [self fetchWithRequest:request resultBlock:^(GDataEngine *engine, NSDictionary *result) {
         handler(aList,result);
     }]; 
@@ -359,7 +356,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     if (![db open]) {
         NSLog(@"Could not open db.");
     } else {
-//        [_deletedTaskLists removeAllObjects];
+
         FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 1"]];
         while ([rs next]) {
             TaskList *list = [[TaskList alloc] initWithLocalListId:[rs intForColumn:@"local_list_id"]];
@@ -375,8 +372,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             list.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
             list.localModifyTime = [rs dateForColumn:@"local_modify_timestamp"];
             list.displayOrder = [rs intForColumn:@"display_order"];
-            
-//            [_deletedTaskLists addObject:list];
+
             [list release];
         }
         [db close];  
@@ -487,7 +483,44 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     // List 重命名 、
     
     // 
+    
+    
     NSArray *deletingLists = [self _deletingLists];
+    
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async(queue, ^{
+       
+        if ([GDataEngine isSessionValid]) {
+            
+        }
+        
+        for(TaskList *list in deletingLists) {
+            if (list.isDeleted) {
+                if(!list.serverListId) {
+                    // List 未上传到服务器就删除了 没有ServerId
+                    [self clearDeletedList:list];
+                } else {
+                    // 从服务器上删除
+//                    [self removeList:list remoteHandler:^(TaskList *currentList, id result) {
+//                        [self clearDeletedList:list];                   
+//                    }];                
+//                    [self fetchWithRequest:nil resultBlock:^(GDataEngine *, id) {
+//                        
+//                    }];
+                }
+            }
+        }
+
+        
+        
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            
+
+
+        });
+    });
+                   
+                   
     for(TaskList *list in deletingLists) {
         if (list.isDeleted) {
             if(!list.serverListId) {
@@ -497,7 +530,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                 // 从服务器上删除
                 [self removeList:list remoteHandler:^(TaskList *currentList, id result) {
                     [self clearDeletedList:list];                   
-                }];
+                }];                
             }
         }
     }

@@ -59,7 +59,9 @@ typedef enum {
 */
 @interface RSimpleConnection : NSURLConnection
 
-+ (void)sendAsynchronousRequest:(NSURLRequest *)request queue:(NSOperationQueue *)queue completionHandler:(void (^)(NSURLResponse*, NSData*, NSError*))handler;
+typedef void (^CompletionHandler)(NSURLResponse*, NSData*, NSError*);
+
++ (void)sendAsynchronousRequest:(NSURLRequest *)request queue:(NSOperationQueue *)queue completionHandler:(CompletionHandler)handler NS_AVAILABLE(10_7, 4_0);
 
 @end
 

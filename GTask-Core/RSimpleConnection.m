@@ -131,7 +131,7 @@
 */
 @implementation RSimpleConnection
 
-+ (void)sendAsynchronousRequest:(NSURLRequest *)request queue:(NSOperationQueue *)queue completionHandler:(void (^)(NSURLResponse*response, NSData*responseData, NSError*error))handler {
++ (void)sendAsynchronousRequest:(NSURLRequest *)request queue:(NSOperationQueue *)queue completionHandler:(CompletionHandler)handler {
     
     if (!queue) {
         queue = [NSOperationQueue mainQueue];
