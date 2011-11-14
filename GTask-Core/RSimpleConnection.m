@@ -9,6 +9,7 @@
 #import "RSimpleConnection.h"
 #import <YAJL/YAJL.h>
 
+/*
 @interface RSimpleConnection()
 
 @property (nonatomic, retain)  NSURLRequest     *request;
@@ -126,3 +127,24 @@
 }
 
 @end
+
+*/
+@implementation RSimpleConnection
+
++ (void)sendAsynchronousRequest:(NSURLRequest *)request queue:(NSOperationQueue *)queue completionHandler:(void (^)(NSURLResponse*response, NSData*responseData, NSError*error))handler {
+    
+    if (!queue) {
+        queue = [NSOperationQueue mainQueue];
+    }
+    NSBlockOperation *operation  = [NSBlockOperation blockOperationWithBlock:^{
+        NSError *anError = nil;
+        NSURLResponse *aResponse = nil;
+        NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&aResponse error:&anError];
+        handler(aResponse,responsingData,anError);
+    }];
+    [queue addOperation:operation];
+}
+
+@end
+
+

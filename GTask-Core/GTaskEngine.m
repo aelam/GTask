@@ -421,7 +421,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         return nil;
     } else {
         NSMutableArray *tempLists = [NSMutableArray array];
-        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 0 AND server_list_id = null"]];
+        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE is_deleted = 0 AND server_list_id is null"]];
         while ([rs next]) {
             TaskList *list = [[TaskList alloc] initWithLocalListId:[rs intForColumn:@"local_list_id"]];
             list.localListId = [rs intForColumn:@"local_list_id"];

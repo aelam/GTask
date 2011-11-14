@@ -11,6 +11,7 @@
 #import "NSMutableURLRequest+Shorten.h"
 #import "RSimpleConnection.h"
 #import <QuartzCore/QuartzCore.h>
+#import <YAJL/YAJL.h>
 
 #define USER_DEFAULTS_ACCESS_TOKEN              @"USER_DEFAULTS_ACCESS_TOKEN"
 #define USER_DEFAULTS_EXPIRATION_TIMESTAMP      @"USER_DEFAULTS_EXPIRATION_TIMESTAMP"
@@ -87,7 +88,7 @@ static int kJsonError = 0x11;
 }
 
 + (void)logout {
-    return;
+//    return;
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:USER_DEFAULTS_EXPIRATION_TIMESTAMP];
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:USER_DEFAULTS_ACCESS_TOKEN];
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:USER_DEFAULTS_REFRESH_TOKEN];
@@ -131,26 +132,26 @@ static int kJsonError = 0x11;
                                 @"refresh_token",@"grant_type",
                                 nil];
         [_request attachPostParams:params];
-        RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:_request tag:RSimpleConnectionTagFirst];
-        [connection startWithBlocksStart:^(RSimpleConnection *connection) {
-            
-        } finish:^(RSimpleConnection *connection, NSDictionary *json) {
-            BOOL rs = [self _saveTokensInUserDefaultsWithJson:json];
-            if (!rs) {
-                NSError *error = [[[NSError alloc] initWithDomain:@"!!SAVE TOKEN ERROR" code:kJsonError userInfo:nil] autorelease];
-                                resultBlock(self,error);
+        
+        [RSimpleConnection sendAsynchronousRequest:_request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *respone, NSData *responsingData, NSError *error) {
+            if (error) {
+                resultBlock(self,error);
             } else {
-                if (request == nil) {
-                                        resultBlock(self,@"已经登陆");
-                } else { 
-                    [self _fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
-                                                resultBlock(self,result);
-                    }];
-                }
+                NSDictionary *json = [responsingData yajl_JSON];
+                BOOL rs = [self _saveTokensInUserDefaultsWithJson:json];
+                if (!rs) {
+                    NSError *error = [[[NSError alloc] initWithDomain:@"!!SAVE TOKEN ERROR" code:kJsonError userInfo:nil] autorelease];
+                    resultBlock(self,error);
+                } else {
+                    if (request == nil) {
+                        resultBlock(self,@"已经登陆");
+                    } else { 
+                        [self _fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
+                            resultBlock(self,result);
+                        }];
+                    }
+                }                
             }
-        } fail:^(RSimpleConnection *connection, NSError *error) {
-            NIF_TRACE(@"%@ %@",connection,error);
-            resultBlock(self,error);
         }];
     }
     else if ([GDataEngine isFirstLogIn]) {
@@ -198,28 +199,30 @@ static int kJsonError = 0x11;
                                         @"authorization_code",@"grant_type",
                                         nil];
                 [_request attachPostParams:params];
-                RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:_request tag:RSimpleConnectionTagFirst];
-                [connection startWithBlocksStart:^(RSimpleConnection *connection) {
-                    
-                } finish:^(RSimpleConnection *connection, NSDictionary *json) {
-                    BOOL rs = [self _saveTokensInUserDefaultsWithJson:json];
-                    if (!rs) {
-                        NSError *error = [[[NSError alloc] initWithDomain:@"JSON PARSE ERROR 1" code:kJsonError userInfo:nil] autorelease];
-                                                resultBlock(self,error);
+                
+                [RSimpleConnection sendAsynchronousRequest:_request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *respone, NSData *responsingData, NSError *error) {
+                    if (error) {
+                        resultBlock(self,error);
                     } else {
-                        if (request == nil) {
-                            resultBlock(self,@"已经登陆");
-                        } else { 
-                            [self _fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
-                                resultBlock(self,result);
-                            }];
-                        }
+                        NSDictionary *json = [responsingData yajl_JSON];
+                        BOOL rs = [self _saveTokensInUserDefaultsWithJson:json];
+                        if (!rs) {
+                            NSError *error = [[[NSError alloc] initWithDomain:@"!!SAVE TOKEN ERROR" code:kJsonError userInfo:nil] autorelease];
+                            resultBlock(self,error);
+                        } else {
+                            if (request == nil) {
+                                resultBlock(self,@"已经登陆");
+                            } else { 
+                                [self _fetchWithRequest:request resultBlock:^(GDataEngine *engine, id result) {
+                                    resultBlock(self,result);
+                                }];
+                            }
+                        }                
                     }
-                } fail:^(RSimpleConnection *connection, NSError *error) {
-                    
-                    resultBlock(self,error);
-                }];                
+                }];
+
             }
+        
         } fail:^(UIWebView *webView, NSError *error) {
                         resultBlock(self,error);
         }];
@@ -230,21 +233,25 @@ static int kJsonError = 0x11;
 
     // SET OAuth Header
     [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
-
-    RSimpleConnection *connection = [RSimpleConnection connectionWithRequest:request];
-    [connection startWithBlocksStart:^(RSimpleConnection *connection) {
-        
-    } finish:^(RSimpleConnection *connection, NSDictionary *json) {
-        if (json) {
-            resultBlock(self,json);
-        } else{
-            NSError *error = [[[NSError alloc] initWithDomain:@"JSON PARSE ERROR 2" code:kJsonError userInfo:nil] autorelease];
+    
+    [RSimpleConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *respone, NSData *responsingData, NSError *error) {
+        if (error) {
             resultBlock(self,error);
+        } else {
+            NSDictionary *json = [responsingData yajl_JSON];
+            if (![json isKindOfClass:[NSDictionary class]]) {
+                NSError *error = [[[NSError alloc] initWithDomain:@"!!JSON PARSE ERROR 2" code:kJsonError userInfo:nil] autorelease];
+                resultBlock(self,error);
+            } else {
+                if (request == nil) {
+
+                } else { 
+                    resultBlock(self,json);
+                }
+            }                
         }
-        
-    } fail:^(RSimpleConnection *connection, NSError *error) {
-        resultBlock(self,error);
     }];
+
 }
 
 

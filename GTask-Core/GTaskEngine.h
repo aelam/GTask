@@ -62,8 +62,8 @@ typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 - (NSMutableArray *)localAllTasks;
 - (NSMutableArray *)localTasksForList:(TaskList *)aList;
 
-- (void)syncTasks;
-- (void)syncTasksForList:(TaskList *)aList;
+//- (void)syncTasks;
+//- (void)syncTasksForList:(TaskList *)aList;
 
 - (void)syncWithSyncHandler:(SyncHandler)handler;
 

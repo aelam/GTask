@@ -6,7 +6,7 @@
 //  Copyright (c) 2011年 __MyCompanyName__. All rights reserved.
 //
 
-
+/*
 @protocol RSimpleConnectionDelegate;
 
 typedef enum {
@@ -19,6 +19,7 @@ typedef enum {
 } RSimpleConnectionTag;
 
 
+//typedef void(^ConnectionHandler)(GTaskEngine *currentEngine, SyncStep step);
 
 @interface RSimpleConnection : NSObject {
     
@@ -54,3 +55,11 @@ typedef enum {
 - (void)connection:(RSimpleConnection *)connection didFailWithError:(NSError *)error;
 
 @end
+
+*/
+@interface RSimpleConnection : NSURLConnection
+
++ (void)sendAsynchronousRequest:(NSURLRequest *)request queue:(NSOperationQueue *)queue completionHandler:(void (^)(NSURLResponse*, NSData*, NSError*))handler;
+
+@end
+
