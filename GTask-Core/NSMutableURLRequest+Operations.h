@@ -12,5 +12,7 @@
 @interface NSMutableURLRequest (Operations)
 
 + (NSMutableURLRequest *)requestWithRemovingList:(TaskList *)aList;
++ (NSMutableURLRequest *)requestWithAddingList:(TaskList *)aList;
+
 
 @end

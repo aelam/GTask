@@ -32,7 +32,7 @@ typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 
 @property (retain) NSMutableArray *localTaskLists;
 //@property (retain) NSMutableArray *deletedTaskLists;
-
+@property (assign) BOOL isSyncing;
 
 - (NSMutableArray *)sharedTaskLists;
 

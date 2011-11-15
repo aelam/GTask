@@ -7,6 +7,7 @@
 //
 
 #import "NSMutableURLRequest+Operations.h"
+#import "NSMutableURLRequest+Shorten.h"
 
 @implementation NSMutableURLRequest (Operations)
 
@@ -16,6 +17,16 @@
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     [request setHTTPMethod:@"DELETE"];
 
+    return request;
+}
+
++ (NSMutableURLRequest *)requestWithAddingList:(TaskList *)aList {
+    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
+    NSURL *url = [NSURL URLWithString:selfLink];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"POST"];
+    NSDictionary *json = [NSDictionary dictionaryWithObjectsAndKeys:aList.title,@"title",nil];
+    [request attachJSONBody:json];
     return request;
 }
 

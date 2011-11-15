@@ -56,6 +56,8 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 
 - (void)updateLastestSyncTime:(NSDate *)date;
 
+- (void)localUpdate;
+
 ///////////////////////////////////////////////////////////////////////////////////////
 - (Task *)firstTask;
 - (Task *)lastTask;

@@ -125,7 +125,7 @@
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
-            [db executeUpdate:@"UPDATE task_lists SET server_list_id = ?,server_modify_time = ? WHERE local_list_id = ?",serverListId,[NSDate date],[NSNumber numberWithInt:self.localListId]];
+            [db executeUpdate:@"UPDATE task_lists SET server_list_id = ?,server_modify_timestamp = ? WHERE local_list_id = ?",serverListId,[NSDate date],[NSNumber numberWithInt:self.localListId]];
             [db close];
         }
     }
@@ -159,6 +159,23 @@
     }
     self.lastestSyncTime = date;
 }
+
+- (void)localUpdate {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NSLog(@"Could not open db.");
+    } else {
+        BOOL rs = [db executeUpdate:@"UPDATE task_lists SET server_list_id = ?,server_modify_timestamp = ?,self_link = ?,kind = ? WHERE local_list_id = ?",_serverListId,[NSDate date],_link,_kind,[NSNumber numberWithInt:self.localListId]];
+        NSError *error = nil;
+        if(error) {
+            NIF_INFO(@"%@", error);
+        }
+        NIF_INFO(@"update success?:%d", rs);
+
+        [db close];
+    }
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
