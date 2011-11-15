@@ -69,6 +69,7 @@
     [[GTaskEngine sharedEngine] syncWithSyncHandler:^(GTaskEngine *currentEngine, SyncStep step) {
         NIF_INFO(@"%d", step);
         if (step == SyncStepListsUpdated) {
+            [currentEngine reloadLocalLists];
             self.taskLists = [currentEngine localTaskLists];
             [self.tableView reloadData];
         }
