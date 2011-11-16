@@ -519,21 +519,43 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         dispatch_async(queue, ^{
             // 删除
-            NSArray *deletingLists = [self _deletingLists];
-            for(TaskList *list in deletingLists) {
-                if (list.isDeleted) {
-                    if(!list.serverListId) {
-                        // List 未上传到服务器就删除了 没有ServerId
-                        [self clearDeletedList:list];
-                    } else {
-                        [self removeList:list remoteHandler:^(TaskList *currentList, id result) {
-                            [self clearDeletedList:list];                   
-                        }];
-                    }
-                }
-            }
+//            NSArray *deletingLists = [self _deletingLists];
+//            for(TaskList *list in deletingLists) {
+//                if (list.isDeleted) {
+//                    if(!list.serverListId) {
+//                        // List 未上传到服务器就删除了 没有ServerId
+//                        [self clearDeletedList:list];
+//                    } else {
+//                        [self removeList:list remoteHandler:^(TaskList *currentList, id result) {
+//                            [self clearDeletedList:list];                   
+//                        }];
+//                    }
+//                }
+//            }
             
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//            // 添加
+//            NSArray *addingLists = [self _addingLists];
+//            
+//            for(TaskList *list in addingLists) {
+//                NSMutableURLRequest *request = [NSMutableURLRequest requestWithAddingList:list];
+//                [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
+//                NSError *error = nil;
+//                NSURLResponse *response = nil;
+//                NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+//                if (error) {
+//                    
+//                } else {
+//                    NSDictionary *json = [responsingData yajl_JSON];
+//                    list.serverListId = [json objectForKey:@"id"];
+//                    list.kind = [json objectForKey:@"kind"];
+//                    list.link = [json objectForKey:@"selfLink"];
+//                    [list localUpdate];
+//                }
+//            }
+//            NIF_INFO(@"upload lists success!"); 
+
+            
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //// 删除
             FMDatabase *db = [FMDatabase database];
             if (![db open]) {
@@ -541,8 +563,12 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                 //return nil;
             } else {
                 // clean 
+                // 删除不要的List
                 [db executeUpdate:@"DELETE FROM task_lists WHERE is_deleted = 1 AND server_list_id is null"];
-                
+                // 删除不要的task
+                [db executeUpdate:@"DELETE FROM tasks WHERE is_deleted = 1 AND server_task_id is null"];
+
+                // 查询需要对服务器进行删除操作的List
                 FMResultSet *rs = [db executeQuery:@"SELECT server_list_id FROM task_lists WHERE is_deleted = 1 AND server_list_id is not null"];
                 while ([rs next]) {
                     NSString *server_list_id = [rs objectForColumnName:@"server_list_id"];
@@ -560,121 +586,190 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                     } else {
                         
                     }
+                }
+                
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                // 查询本地添加的List 然后上传到服务器
+                FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists WHERE is_deleted = 0 AND server_list_id is null"];
+                while ([set next]) {
+                    NSInteger localListId = [set intForColumn:@"local_list_id"];
+                    NSString *title = [set stringForColumn:@"title"];
+                    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists"];
+                    NSURL *url = [NSURL URLWithString:selfLink];
+                    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+                    [request setHTTPMethod:@"POST"];
+                    NSDictionary *json = [NSDictionary dictionaryWithObjectsAndKeys:title,@"title",nil];
+                    [request attachJSONBody:json];
+                    [request setValue:[GDataEngine authorizationHeader] forHTTPHeaderField:@"Authorization"];
                     
-                }
-                
-            }
-            
-            // 添加
-            NSArray *addingLists = [self _addingLists];
-            
-            for(TaskList *list in addingLists) {
-                NSMutableURLRequest *request = [NSMutableURLRequest requestWithAddingList:list];
-                [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
-                NSError *error = nil;
-                NSURLResponse *response = nil;
-                NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-                if (error) {
-                    
-                } else {
-                    NSDictionary *json = [responsingData yajl_JSON];
-                    list.serverListId = [json objectForKey:@"id"];
-                    list.kind = [json objectForKey:@"kind"];
-                    list.link = [json objectForKey:@"selfLink"];
-                    [list localUpdate];
-                }
-            }
-            NIF_INFO(@"upload lists success!"); 
-            
-            
-            // Download ServerList
-            NSError *error = nil;
-            NSArray *serverLists =  [self fetchServerListsWithError:&error];
-            if (error) {
-                NIF_INFO(@"%@", error);
-            } else {
-                
-                // 对比服务器与本地的List 如果服务器不存在 而本地存在 则说明被服务器删掉 此时需要清理本地list
-                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SUBQUERY(%@, $list, SELF.serverListId == $list.serverListId ).@count == 0", serverLists];
-                NSArray *deletedByServerLists = [_localTaskLists filteredArrayUsingPredicate:predicate];
-                
-                for (TaskList *item in deletedByServerLists) {
-                    [self clearDeletedList:item];
-                }
-                
-                // 如果本地 服务器都存在 则比较title有木有变化
-                NSPredicate *predicate3 = [NSPredicate predicateWithFormat:@"SUBQUERY(%@, $list, SELF.serverListId == $list.serverListId AND SELF.title != $list.title).@count > 0", serverLists];
-                NSArray *mayModifiedLists = [_localTaskLists filteredArrayUsingPredicate:predicate3];
-                for(TaskList *list in mayModifiedLists) {
-                    if ([list.localModifyTime timeIntervalSinceDate:list.serverModifyTime] > 0) {
-                        // 取本地名字为最新
-                        NSMutableURLRequest *request = [NSMutableURLRequest requestWithUpdateList:list];
-                        [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
-                        NSError *error = nil;
-                        NSURLResponse *response = nil;
-                        NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-                        if (error) {
-                            NIF_INFO(@"%@", error);
-                        } else {
-                            NSDictionary *json = [responsingData yajl_JSON];                            
-                            NIF_INFO(@"%@", json);
-                        }
+                    NSError *error = nil;
+                    NSURLResponse *response = nil;
+                    NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+                    if (error) {
+                        
                     } else {
-                        // 更新数据库list title即可
-                        NSPredicate *predicate4 = [NSPredicate predicateWithFormat:@"serverListId = %@", list.serverListId];
-                        NSArray *filterArray = [serverLists filteredArrayUsingPredicate:predicate4];
-                        if (filterArray && [filterArray count]) {
-                            TaskList *serverList = [filterArray objectAtIndex:0];
-                            [list setTitle:serverList.title updateDB:YES];
-                        }
+                        NSDictionary *json = [responsingData yajl_JSON];
+                        NSString *serverListId = [json objectForKey:@"id"];
+                        // 更新List 的ServerListId
+                        [db executeUpdate:@"UPDATE task_lists SET server_list_id = ? WHERE local_list_id = ?",serverListId,[NSNumber numberWithInt:localListId]];
                     }
                 }
-                
-                // 如果本地不存在这个list 则添加
-                NSPredicate *predicate2 = [NSPredicate predicateWithFormat:@"SUBQUERY(%@, $list, SELF.serverListId == $list.serverListId ).@count == 0", _localTaskLists];
-                NSArray *notAddedLists = [serverLists filteredArrayUsingPredicate:predicate2];
-                [self insertLists:notAddedLists updateDB:YES];
-                
-                
-                // update tasks 
 
-                NSHTTPURLResponse *response = nil;
+                
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                // Download ServerList
                 NSError *error = nil;
+                NSArray *serverLists =  [self fetchServerListsWithError:&error];        // JSON
+                NSMutableArray *serverListIds = [NSMutableArray array];
+                for(NSDictionary *item in serverLists) {
+                    NSString *serverListId = [item objectForKey:@"id"];
+                    NSString *serverTitle = [item objectForKey:@"title"];
+                    
+                    [serverListIds addObject:serverListId];
+                    
+                    FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists WHERE server_list_id = %@",serverListId];
+                    if ([set next]) {
+                        NSDate *localModifyDate = [set dateForColumn:@"local_modify_timestamp"];
+                        NSDate *serverModifyDate = [set dateForColumn:@"server_modify_timestamp"];
+                        NSString *localTitle = [set stringForColumn:@"title"];
+                        if ([localModifyDate timeIntervalSinceDate:serverModifyDate] > 0) {
+                            // 取本地Title update 服务器端title
+                            NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists/%@",serverListId];
+                            NSURL *url = [NSURL URLWithString:selfLink];
+                            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+                            [request setHTTPMethod:@"PUT"];
+                            NSDictionary *json = [NSDictionary dictionaryWithObjectsAndKeys:serverListId,@"id",/*aList.kind,@"kind",selfLink,@"selfLink",*/localTitle,@"title",nil];
+                            [request attachJSONBody:json];
 
-                TaskList *aList = [[TaskList alloc] init];
-                aList.serverListId = @"MTI4MTA3OTcwNjkxODkyNzIyNDQ6NjI3MDQyMzc0OjA";
-
-                BOOL clearSuccess = [aList clearServerCompletedTasks];
-                NIF_INFO(@"%d", clearSuccess);
-                    
-                for (TaskList *list in _localTaskLists) {
-
-//                    NSURLResponse *response = nil;
-//                    NSError *error = nil;
-//                    [list clearServerCompletedTasksWithResponse:&response error:&error];
-                    
-                    
-                    
-//                    NSError *error = nil;
-//                    NSString *lastSyncTimeString = [list.lastestSyncTime RFC3339String];
-//                    NSDictionary *filters = [NSDictionary dictionaryWithObjectsAndKeys:
-//                                            lastSyncTimeString?lastSyncTimeString:@"",@"updatedMin",
-//                                             @"True",@"showDeleted",
-//                                            nil];
-//                    NSArray *serverTasks = [list fetchServerTasksSynchronouslyWithFilters:filters error:&error];
-//                    
-//                    for (Task *aTask in serverLists) {
-//
-//                    }
-                    
-                    
-                    
-                    
-                    [list updateLastestSyncTime:[NSDate date]];
-                    
+                            [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
+                            NSError *error = nil;
+                            NSURLResponse *response = nil;
+                            NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+                            if (error) {
+                                NIF_INFO(@"%@", error);
+                            } else {
+                                NSDictionary *json = [responsingData yajl_JSON];                            
+                                NIF_INFO(@"%@", json);
+                                [db executeUpdate:@"UPDATE task_lists SET server_modify_timestamp = ?",[NSDate date]];
+                            }
+                        } else {
+                            [db executeUpdate:@"UPDATE task_lists SET title = ?",serverTitle];
+                        }                        
+                    } else { 
+                        // 本地不存在 则insert 这条记录
+                        [db executeUpdate:@"INSERT INTO task_lists (server_list_id,title,server_modify_timestamp,local_modify_timestamp) VALUES (?,?,?,?)",serverListId,serverTitle,[NSDate date],[NSDate dateWithTimeIntervalSince1970:0]];
+                    }
                 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // 查找本地存在而服务器上已经不存在的list， 这个时候需要删除本地的List 
+                if (serverListIds && [serverListIds count]) {
+                    NSString *notInCondition = [serverListIds componentsJoinedByString:@"\",\""];
+                    NSString *sql = [NSString stringWithFormat:@"DELETE FROM task_lists WHERE server_list_id NOT IN (\"%@\")",notInCondition];
+                    [db executeUpdate:sql];
+                }
+
                 
             }
+            [db close];
+     
+            
+            
+                
+//            return;
+//            
+//            // Download ServerList
+//            NSError *error = nil;
+//            NSArray *serverLists =  [self fetchServerListsWithError:&error];
+//            if (error) {
+//                NIF_INFO(@"%@", error);
+//            } else {
+//                
+//                // 对比服务器与本地的List 如果服务器不存在 而本地存在 则说明被服务器删掉 此时需要清理本地list
+//                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SUBQUERY(%@, $list, SELF.serverListId == $list.serverListId ).@count == 0", serverLists];
+//                NSArray *deletedByServerLists = [_localTaskLists filteredArrayUsingPredicate:predicate];
+//                
+//                for (TaskList *item in deletedByServerLists) {
+//                    [self clearDeletedList:item];
+//                }
+//                
+//                // 如果本地 服务器都存在 则比较title有木有变化
+//                NSPredicate *predicate3 = [NSPredicate predicateWithFormat:@"SUBQUERY(%@, $list, SELF.serverListId == $list.serverListId AND SELF.title != $list.title).@count > 0", serverLists];
+//                NSArray *mayModifiedLists = [_localTaskLists filteredArrayUsingPredicate:predicate3];
+//                for(TaskList *list in mayModifiedLists) {
+//                    if ([list.localModifyTime timeIntervalSinceDate:list.serverModifyTime] > 0) {
+//                        // 取本地名字为最新
+//                        NSMutableURLRequest *request = [NSMutableURLRequest requestWithUpdateList:list];
+//                        [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
+//                        NSError *error = nil;
+//                        NSURLResponse *response = nil;
+//                        NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+//                        if (error) {
+//                            NIF_INFO(@"%@", error);
+//                        } else {
+//                            NSDictionary *json = [responsingData yajl_JSON];                            
+//                            NIF_INFO(@"%@", json);
+//                        }
+//                    } else {
+//                        // 更新数据库list title即可
+//                        NSPredicate *predicate4 = [NSPredicate predicateWithFormat:@"serverListId = %@", list.serverListId];
+//                        NSArray *filterArray = [serverLists filteredArrayUsingPredicate:predicate4];
+//                        if (filterArray && [filterArray count]) {
+//                            TaskList *serverList = [filterArray objectAtIndex:0];
+//                            [list setTitle:serverList.title updateDB:YES];
+//                        }
+//                    }
+//                }
+//                
+//                // 如果本地不存在这个list 则添加
+//                NSPredicate *predicate2 = [NSPredicate predicateWithFormat:@"SUBQUERY(%@, $list, SELF.serverListId == $list.serverListId ).@count == 0", _localTaskLists];
+//                NSArray *notAddedLists = [serverLists filteredArrayUsingPredicate:predicate2];
+//                [self insertLists:notAddedLists updateDB:YES];
+//                
+//                
+//                // update tasks 
+//
+//                NSHTTPURLResponse *response = nil;
+//                NSError *error = nil;
+//
+//                TaskList *aList = [[TaskList alloc] init];
+//                aList.serverListId = @"MTI4MTA3OTcwNjkxODkyNzIyNDQ6NjI3MDQyMzc0OjA";
+//
+//                BOOL clearSuccess = [aList clearServerCompletedTasks];
+//                NIF_INFO(@"%d", clearSuccess);
+//                    
+//                for (TaskList *list in _localTaskLists) {
+//
+////                    NSURLResponse *response = nil;
+////                    NSError *error = nil;
+////                    [list clearServerCompletedTasksWithResponse:&response error:&error];
+//                    
+//                    
+//                    
+////                    NSError *error = nil;
+////                    NSString *lastSyncTimeString = [list.lastestSyncTime RFC3339String];
+////                    NSDictionary *filters = [NSDictionary dictionaryWithObjectsAndKeys:
+////                                            lastSyncTimeString?lastSyncTimeString:@"",@"updatedMin",
+////                                             @"True",@"showDeleted",
+////                                            nil];
+////                    NSArray *serverTasks = [list fetchServerTasksSynchronouslyWithFilters:filters error:&error];
+////                    
+////                    for (Task *aTask in serverLists) {
+////
+////                    }
+//                    
+//                    
+//                    
+//                    
+//                    [list updateLastestSyncTime:[NSDate date]];
+//                    
+//                }
+                
+//            }
             dispatch_async(dispatch_get_main_queue(), ^{
                 handler(self,SyncStepListsUpdated);                
             });
@@ -702,6 +797,35 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 // #同步方法# 获取serverlists 
+//- (NSArray *)fetchServerListsWithError:(NSError **)error {
+//    
+//    NSString *nextPageToken = nil;
+//    NSMutableArray *serverLists = [NSMutableArray array];
+//    
+//    do {
+//        
+//        NSString *urlString = nextPageToken?[NSString stringWithFormat:@"%@?pageToken=%@",kTaskListsURL,nextPageToken]:kTaskListsURL;
+//        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
+//        [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
+//        NSURLResponse *response = nil;
+//        NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:error];
+//        if (*error) {
+//            
+//        } else {
+//            NSDictionary *json = [responsingData yajl_JSON];
+//            
+//            nextPageToken = [json objectForKey:@"nextPageToken"];
+//            NSArray *tempServerLists = [self _parseServerTaskListsFromJSON:json];
+//            
+//            if (tempServerLists && [tempServerLists count]) {
+//                [serverLists addObjectsFromArray:tempServerLists];
+//            }            
+//        }        
+//    } while (nextPageToken && !(*error));
+//    
+//    return serverLists;
+//}
+
 - (NSArray *)fetchServerListsWithError:(NSError **)error {
     
     NSString *nextPageToken = nil;
@@ -720,7 +844,8 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             NSDictionary *json = [responsingData yajl_JSON];
             
             nextPageToken = [json objectForKey:@"nextPageToken"];
-            NSArray *tempServerLists = [self _parseServerTaskListsFromJSON:json];
+//            NSArray *tempServerLists = [self _parseServerTaskListsFromJSON:json];
+            NSArray *tempServerLists = [json objectForKey:@"items"];
             
             if (tempServerLists && [tempServerLists count]) {
                 [serverLists addObjectsFromArray:tempServerLists];
@@ -730,6 +855,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     
     return serverLists;
 }
+
+
+
 
 - (void)clearServerTasksDeletedByLocalWithError:(NSError **)error {
     FMDatabase *db = [FMDatabase database];
