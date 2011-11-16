@@ -56,6 +56,8 @@ typedef void(^SyncHandler)(GTaskEngine *currentEngine, SyncStep step);
 
 - (void)clearDeletedLists;
 
+- (void)clearServerTasksDeletedByLocalWithError:(NSError **)error;
+
 
 // Tasks
 - (void)fetchServerTasksForList:(TaskList *)aList resultHander:(void(^)(GTaskEngine *,NSMutableArray *))resultHander;

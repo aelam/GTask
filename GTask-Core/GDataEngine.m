@@ -78,6 +78,18 @@ static int kJsonError = 0x11;
     return _scopesInfo;
 }
 
++ (NSString *)authorizationHeader {
+    if (![GDataEngine isSessionValid]) {
+        return nil;
+    }
+    
+    NSString *accessToken = [[NSUserDefaults standardUserDefaults] objectForKey:USER_DEFAULTS_ACCESS_TOKEN];
+    if (!accessToken) {
+        return nil;
+    }
+    return [NSString stringWithFormat:@"OAuth %@",accessToken];
+}
+
 - (id)init {
     if (self = [super init]) {
         self.accessToken = [[NSUserDefaults standardUserDefaults] objectForKey:USER_DEFAULTS_ACCESS_TOKEN];

@@ -9,10 +9,19 @@
 
 #import "TaskList.h"
 
+typedef enum{
+    RequestMethodGET,
+    RequestMethodPOST,
+    RequestMethodPUT,
+    RequestMethodDELETE    
+}RequestMethod;
+
 @interface NSMutableURLRequest (Operations)
 
 + (NSMutableURLRequest *)requestWithRemovingList:(TaskList *)aList;
 + (NSMutableURLRequest *)requestWithAddingList:(TaskList *)aList;
++ (NSMutableURLRequest *)requestWithUpdateList:(TaskList *)aList;
 
++ (NSMutableURLRequest *)requestOfGettingServerTasksOfList:(TaskList *)aList withParams:(NSDictionary *)params;
 
 @end

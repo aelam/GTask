@@ -12,6 +12,8 @@
 
 @interface Task : NSObject
 
+@property (assign) NSInteger localListId;
+
 @property (retain) TaskList *list;
 @property (assign) NSInteger localTaskId;
 @property (assign) NSInteger localParentId;

@@ -92,6 +92,9 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 - (BOOL)deleteTask:(Task *)aTask;
 - (BOOL)deleteTaskAtIndex:(NSInteger)index;
 
+- (void)clearLocalCompletedTasks;
+- (BOOL)clearServerCompletedTasks;
+
 - (void)moveTaskAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
 - (BOOL)upgradeTaskLevel:(TaskUpgradeLevel)level atIndex:(NSInteger)index;
 
@@ -100,17 +103,11 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 // Private method, when move task from a list to another list
 - (void)updateListIdAndOrders;
 
-//- (void)deleteLocal;
 
 - (void)fetchServerTasksWithCondition:(NSDictionary *)conditions resultHander:(RemoteHandler)handler;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Remote Update
-//- (void)updateRemote:(void(^)(TaskList *currentList,id result))resultBlock;
-//- (void)deleteRemote:(void(^)(TaskList *currentList,id result))resultBlock;
-//- (void)createWithRemoteHandler:(RemoteHandler)handler;
-//- (void)updateWithRemoteHandler:(RemoteHandler)handler;
-//- (void)deleteWithRemoteHandler:(RemoteHandler)handler;
+- (NSArray *)fetchServerTasksSynchronouslyWithFilters:(NSDictionary *)filters error:(NSError**)error;
+
 
 
 @end

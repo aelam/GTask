@@ -12,6 +12,7 @@
 #import "GTaskEngine.h"
 #import "NSMutableURLRequest+Shorten.h"
 #import "NSDate+RFC3339.h"
+#import <YAJL/YAJL.h>
 
 @interface TaskList (Private)
 
@@ -401,6 +402,10 @@
     }
 }
 
+- (void)deleteTaskFromServer:(Task *)task {
+    
+}
+
 - (BOOL)deleteTaskAtIndex:(NSInteger)index {
     return [self deleteTask:[_tasks objectAtIndex:index]];
 }
@@ -632,6 +637,66 @@
     
 }
 
+- (NSArray *)fetchServerTasksSynchronouslyWithFilters:(NSDictionary *)filters error:(NSError**)error {
+
+    NSString *nextPageToken = nil;
+    NSMutableArray *tasks_ = [NSMutableArray array];
+    NSMutableDictionary *_filters = [NSMutableDictionary dictionaryWithDictionary:filters];
+    
+    do {
+        NSMutableURLRequest *request = [NSMutableURLRequest requestOfGettingServerTasksOfList:self withParams:_filters];
+        [request setValue:[GDataEngine authorizationHeader] forHTTPHeaderField:@"Authorization"];
+
+        NSURLResponse *response = nil;
+        NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:error];
+        if (*error) {
+            
+        } else {
+            
+            NSDictionary *json = [responsingData yajl_JSON];
+            nextPageToken = [json objectForKey:@"nextPageToken"];
+            if (nextPageToken) {
+                [_filters setValue:nextPageToken forKey:@"nextPageToken"];
+            } else {
+
+            }
+            
+            NSArray *tempTasks = [self _parseServerTasksFromJSON:json];
+            if (tempTasks && [tempTasks count]) {
+                [tasks_ addObjectsFromArray:tempTasks];
+            }
+            
+        }        
+    } while (nextPageToken && !(*error));
+    
+    return tasks_;
+
+}
+
+- (BOOL)clearServerCompletedTasks{
+    NSString *url = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/lists/%@/clear",self.serverListId];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:[GDataEngine authorizationHeader] forHTTPHeaderField:@"Authorization"];
+    
+    NSHTTPURLResponse *response = nil;
+    NSError *error = nil;
+    
+    NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    if (error) {
+        return NO;
+    }
+    
+    if (response) {
+        if ([response statusCode] == 200 || [response statusCode] == 204) {
+            return YES;
+        } else {
+            return NO;
+        }
+    }
+    return NO;
+}
+
 - (NSArray *)_parseServerTasksFromJSON:(NSDictionary *)json {
     NSMutableArray *tempTasks = [NSMutableArray array];
     
@@ -644,6 +709,8 @@
         aTask.link = [item objectForKey:@"selfLink"];
         aTask.title = [item objectForKey:@"title"];
         aTask.isDeleted = [[item objectForKey:@"deleted"] boolValue];
+        aTask.completedDate = [NSDate dateFromRFC3339:[item objectForKey:@"completed"]];
+        
         [tempTasks addObject:aTask];
         [aTask release];
     }

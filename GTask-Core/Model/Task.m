@@ -14,6 +14,7 @@
 
 @implementation Task
 
+@synthesize localListId = _localListId;
 @synthesize list = _list;
 @synthesize localTaskId = _localTaskId;
 @synthesize localParentId = _localParentId;

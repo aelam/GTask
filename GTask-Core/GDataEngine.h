@@ -23,6 +23,7 @@
 + (void)logout;
 
 + (NSArray *)scopesInfo;
++ (NSString *)authorizationHeader;
 
 - (id)init;
 
