@@ -533,6 +533,38 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                 }
             }
             
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //// 删除
+            FMDatabase *db = [FMDatabase database];
+            if (![db open]) {
+                NSLog(@"Could not open db.");
+                //return nil;
+            } else {
+                // clean 
+                [db executeUpdate:@"DELETE FROM task_lists WHERE is_deleted = 1 AND server_list_id is null"];
+                
+                FMResultSet *rs = [db executeQuery:@"SELECT server_list_id FROM task_lists WHERE is_deleted = 1 AND server_list_id is not null"];
+                while ([rs next]) {
+                    NSString *server_list_id = [rs objectForColumnName:@"server_list_id"];
+                    
+                    NSString *selfLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/users/@me/lists/%@",server_list_id];
+                    NSURL *url = [NSURL URLWithString:selfLink];
+                    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+                    [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
+                    [request setHTTPMethod:@"DELETE"];
+                    NSError *error = nil;
+                    NSURLResponse *response = nil;
+                    NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+                    if (error) {
+                        
+                    } else {
+                        
+                    }
+                    
+                }
+                
+            }
+            
             // 添加
             NSArray *addingLists = [self _addingLists];
             
