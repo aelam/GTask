@@ -266,7 +266,9 @@
                 if (task.notes) {
                     [postParameters setValue:task.notes forKey:@"notes"];
                 }
-
+                
+                [postParameters setValue:task.serverTaskId forKey:@"id"];
+                [postParameters setValue:task.isCompleted?@"completed":@"needsAction" forKey:@"status"];                
                 
                 NSString *url = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/lists/%@/tasks/%@",self.serverListId,task.serverTaskId];
                 NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
@@ -279,12 +281,16 @@
                 NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
                 if (response) {
                     NIF_INFO(@"[response statusCode] =  %d", [response statusCode]); 
+                    NSInteger statusCode = [response statusCode];
+                    if (statusCode == 200 || statusCode == 204) {
+                        [db executeUpdate:@"UPDATE tasks SET server_modify_timestamp = ? WHERE local_task_id = ?",[NSDate date],[NSNumber numberWithInt:task.localTaskId]];
+                    }
                 }
                 
                 if (error) {
                     
                 } else {
-                    
+                    NIF_INFO(@"%@", [responsingData yajl_JSON]);
                 }
             }
             

@@ -181,7 +181,8 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
-            BOOL update = [db executeUpdate:@"UPDATE tasks SET is_completed = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:isCompleted],[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
+            self.completedDate = [NSDate date];
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET is_completed = ?,completed_timestamp = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:isCompleted],self.completedDate,[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
             NIF_INFO(@"UPDATE is_complete SUCCESS ? : %d", update);
             [db close];
         }
@@ -224,7 +225,7 @@
     if (![db open]) {
         NIF_ERROR(@"Could not open db.");            
     } else {
-        BOOL update = [db executeUpdate:@"UPDATE tasks SET server_task_id = ?,local_parent_id = ?,title = ?,notes = ?,is_updated = ?,is_completed = ?,is_hidden = ?,is_deleted = ?,is_cleared = ?,completed_timestamp = ?,reminder_timestamp = ?,due = ?,server_modify_timestamp = ?,display_order = ? WHERE local_task_id = ?",
+        BOOL update = [db executeUpdate:@"UPDATE tasks SET server_task_id = ?,local_parent_id = ?,title = ?,notes = ?,is_updated = ?,is_completed = ?,is_hidden = ?,is_deleted = ?,is_cleared = ?,completed_timestamp = ?,reminder_timestamp = ?,due = ?,local_modify_timestamp = ?,display_order = ? WHERE local_task_id = ?",
                        self.serverTaskId,
                        [NSNumber numberWithInt:self.localParentId],
                        self.title,
@@ -237,7 +238,7 @@
                        self.completedDate,
                        self.reminderDate,
                        self.due,
-                       self.serverModifyTime,
+                       [NSDate date],
                        [NSNumber numberWithInt:self.displayOrder],
                        [NSNumber numberWithInt:self.localTaskId]
                        ];                           
