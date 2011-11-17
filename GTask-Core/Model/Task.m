@@ -19,6 +19,7 @@
 @synthesize localTaskId = _localTaskId;
 @synthesize localParentId = _localParentId;
 @synthesize serverTaskId = _serverTaskId;
+@synthesize serverParentId = _serverParentId;
 @synthesize title = _title;
 @synthesize notes = _notes;
 @synthesize isUpdated = _isUpdated;
@@ -26,6 +27,8 @@
 @synthesize isCompleted = _isCompleted;
 @synthesize isCleared = _isCleared;
 @synthesize isHidden = _isHidden;
+@synthesize isMoved = _Moved;
+
 @synthesize link = _link;
 @synthesize displayOrder = _displayOrder;
 
@@ -131,7 +134,7 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
-            BOOL update = [db executeUpdate:@"UPDATE tasks SET display_order = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:order],[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET moved = 1,display_order = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:order],[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
             NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
             [db close];
         }        
@@ -140,6 +143,22 @@
     self.displayOrder = order;
 
 }
+
+- (void)setIsMoved:(BOOL)isMoved updateDB:(BOOL)update {
+    self.isMoved = isMoved;
+    if (update) {
+        FMDatabase *db = [FMDatabase database];
+        if (![db open]) {
+            NIF_ERROR(@"Could not open db.");
+        } else {
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET moved = 1 WHERE local_task_id = ?",[NSNumber numberWithInt:self.localTaskId]];
+            NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
+            [db close];
+        }        
+
+    }
+}
+
 
 - (void)setLocalParentId:(NSInteger)aParentId updateDB:(BOOL)update {
     if (update) {
@@ -237,6 +256,7 @@
     [_due release];
     [_serverModifyTime release];
     [_localModifyTime release];
+    [_serverParentId release];
     [super dealloc];
 }
 

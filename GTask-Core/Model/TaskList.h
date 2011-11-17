@@ -42,9 +42,15 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 @property (retain)  NSDate *serverModifyTime;
 @property (retain)  NSDate *localModifyTime;
 
+- (void)sync;
+
++ (TaskList *)taskListWithLocalListId:(NSInteger)anId;
+
 - (id)initWithLocalListId:(NSInteger)anId;
 
 - (void)reloadLocalTasks;
+
+- (NSMutableArray *)localTasks;
 
 
 - (NSMutableArray *)tasks;
@@ -108,6 +114,7 @@ typedef void(^RemoteHandler)(TaskList *currentList, id result);
 
 - (NSArray *)fetchServerTasksSynchronouslyWithFilters:(NSDictionary *)filters error:(NSError**)error;
 
++ (NSArray *)fetchServerTasksSynchronouslyForServerListId:(NSString *)serverListId filters:(NSDictionary *)filters error:(NSError**)error;
 
 
 @end

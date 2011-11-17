@@ -143,7 +143,8 @@
 {
  //   NSArray *tasks = self.taskList.tasks;
 //    if (tasks && [tasks count]) {
-        self.tasks = self.taskList.tasks;
+    [self.taskList reloadLocalTasks];
+    self.tasks = self.taskList.tasks;
 
 //    }
 //    else {

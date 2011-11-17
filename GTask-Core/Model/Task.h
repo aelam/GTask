@@ -17,6 +17,7 @@
 @property (retain) TaskList *list;
 @property (assign) NSInteger localTaskId;
 @property (assign) NSInteger localParentId;
+@property (copy)  NSString *serverParentId;
 @property (copy)  NSString *serverTaskId;
 @property (copy)  NSString *title;
 @property (copy)  NSString *notes;
@@ -26,6 +27,7 @@
 @property (assign)  BOOL     isCompleted;
 @property (assign)  BOOL     isCleared;
 @property (assign)  BOOL     isHidden;
+@property (assign)  BOOL     isMoved;
 
 @property (retain)  NSDate  *completedDate;
 @property (retain)  NSDate  *reminderDate;
@@ -46,6 +48,7 @@
 
 - (void)setList:(TaskList *)aList updateDB:(BOOL)update;
 
+- (void)setIsMoved:(BOOL)isMoved updateDB:(BOOL)update;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 

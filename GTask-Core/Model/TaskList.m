@@ -16,7 +16,7 @@
 
 @interface TaskList (Private)
 
-- (NSArray *)_parseServerTasksFromJSON:(NSDictionary *)json;
++ (NSArray *)_parseServerTasksFromJSON:(NSDictionary *)json;
 
 @end
 
@@ -53,6 +53,11 @@
 - (NSString *)description {
     return [NSString stringWithFormat:@"List: %@ LocalListId : %d ServerListId : %@ server:%@ local:%@",_title,_localListId,_serverListId,self.serverModifyTime,self.localModifyTime];
 }
+
++ (TaskList *)taskListWithLocalListId:(NSInteger)anId {
+    return [[[self alloc] initWithLocalListId:anId] autorelease];
+}
+
 
 - (id)init {
     return [self initWithLocalListId:-1];
@@ -93,6 +98,7 @@
             task.reminderDate = [rs dateForColumn:@"reminder_timestamp"];
             task.due = [rs dateForColumn:@"due"];
             task.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
+            task.localModifyTime = [rs dateForColumn:@"local_modify_timestamp"];
             task.displayOrder = [rs intForColumn:@"display_order"];
             
             task.list = self;
@@ -102,6 +108,248 @@
         [db close]; 
     }            
 }
+
+- (NSMutableArray *)localTasks {
+    FMDatabase *db = [FMDatabase database];
+    if (![db open]) {
+        NSLog(@"Could not open db.");
+        return nil;
+    } else {
+        NSMutableArray *localTasks = [NSMutableArray array];
+        [_tasks removeAllObjects];
+        
+        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d AND is_deleted = 0 ORDER BY display_order",_localListId]];
+        while ([rs next]) {
+            Task *task = [[Task alloc] init];
+            task.localTaskId = [rs intForColumn:@"local_task_id"];
+            task.serverTaskId = [rs stringForColumn:@"server_task_id"];
+            task.localParentId = [rs intForColumn:@"local_parent_id"];
+            task.title = [rs stringForColumn:@"title"];
+            task.notes = [rs stringForColumn:@"notes"];
+            task.isUpdated = [rs boolForColumn:@"is_updated"];
+            task.isCompleted = [rs boolForColumn:@"is_completed"];
+            task.isHidden = [rs boolForColumn:@"is_hidden"];
+            task.isDeleted = [rs boolForColumn:@"is_deleted"];
+            task.isCleared = [rs boolForColumn:@"is_cleared"];
+            task.completedDate = [rs dateForColumn:@"completed_timestamp"];
+            task.reminderDate = [rs dateForColumn:@"reminder_timestamp"];
+            task.due = [rs dateForColumn:@"due"];
+            task.serverModifyTime = [rs dateForColumn:@"server_modify_timestamp"];
+            task.displayOrder = [rs intForColumn:@"display_order"];
+            
+            task.list = self;
+            [localTasks addObject:task];
+            [task release];
+        }
+        [db close]; 
+        return localTasks;
+    }            
+}
+
+// 同步方法
+- (void)sync {
+    
+    FMDatabase *db = [FMDatabase database];
+    [db open];
+    
+    NSString *updatedMin = self.lastestSyncTime?[self.lastestSyncTime RFC3339String]:[NSDate RFC3339Of1970];
+    
+    NSMutableDictionary *filters = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"items(completed,deleted,due,hidden,id,notes,parent,position,status,title,updated)",@"fields",updatedMin,@"updatedMin",@"true",@"showDeleted",nil];
+    NSError *error = nil;
+    NSArray *serverTasks = [TaskList fetchServerTasksSynchronouslyForServerListId:self.serverListId filters:filters error:&error];
+    int displayOrder = 0;
+    for(Task *task in serverTasks) {
+        FMResultSet *set = [db executeQuery:@"SELECT * FROM tasks WHERE server_task_id = ?",task.serverTaskId];
+        if (![set next]) {
+            FMResultSet *localParentIdSet = [db executeQuery:@"SELECT * FROM tasks WHERE server_task_id = ?",task.serverParentId];
+            int localParentId = 0;
+            if ([localParentIdSet next]) {
+                localParentId = [localParentIdSet intForColumn:@"local_task_id"];                
+            }
+            
+            FMResultSet *localListIdSet = [db executeQuery:@"SELECT local_list_id FROM task_lists WHERE server_list_id = ?",self.serverListId];
+            int localListId_ = 0;
+            if ([localListIdSet next]) {
+                localListId_ = [localListIdSet intForColumn:@"local_list_id"];
+            }
+            
+            [db executeUpdate:@"INSERT INTO tasks \
+             (local_list_id,server_task_id,local_parent_id, notes, title, due, server_modify_timestamp, \
+             local_modify_timestamp, is_completed, completed_timestamp,is_deleted) VALUES(?,?,?,?,?,?,?,?,?,?,?)",[NSNumber numberWithInt:localListId_],task.serverTaskId,[NSNumber numberWithInt:localParentId],task.notes,task.title,task.due,[NSDate date],[NSDate dateWithTimeIntervalSince1970:0],[NSNumber numberWithBool:task.isCompleted],task.completedDate,[NSNumber numberWithBool:task.isDeleted]];
+            
+        } else {
+            if (task.isDeleted) {
+                [db executeUpdate:@"DELETE FROM tasks WHERE server_list_id = ?",task.serverTaskId];
+            } else {
+                [db executeUpdate:@"UPDATE tasks SET title = ?,due = ?,notes = ?,is_completed, completed_timestamp WHERE server_list_id = ? AND local_modify_timestamp < server_modify_timestamp",task.title,task.due,task.notes,[NSNumber numberWithBool:task.isCompleted],task.completedDate,task.serverTaskId];
+            }
+        }
+        [db executeUpdate:@"UPDATE tasks SET display_order = ? WHERE server_list_id = ?",[NSNumber numberWithInt:displayOrder],task.serverTaskId];
+    }
+    
+    
+    for(Task *task in _tasks) {
+        if (!task.serverTaskId) {
+            //!!! 上传task
+            Task * parent = [self parentOfTask:task];
+            Task * prevSibling = [self prevSiblingOfTask:task];
+            
+            NSMutableDictionary *queries = [NSMutableDictionary dictionary];
+            NSString *query = nil;
+            
+            if (parent) {
+                [queries setObject:parent.serverTaskId forKey:@"parent"];
+            }
+            if (prevSibling) {
+                [queries setObject:prevSibling.serverTaskId forKey:@"previous"];
+            }
+            if ([queries count]) {
+                query = [NSString queryStringFromParams:queries];                
+            }
+            
+            NSMutableDictionary *postParameters = [NSMutableDictionary dictionary];
+            
+            [postParameters setValue:task.title forKey:@"title"];
+            
+            if (task.due) {
+                NSString *dueString = task.due?[task.due RFC3339String]:[NSDate RFC3339Of1970];
+                [postParameters setValue:dueString forKey:@"due"];
+            }
+            
+            if (task.completedDate) {
+                NSString *completedDateString = task.completedDate?[task.completedDate RFC3339String]:[NSDate RFC3339Of1970];
+                [postParameters setValue:completedDateString forKey:@"completed"];
+                [postParameters setValue:@"completed" forKey:@"status"];
+            }
+
+            if (task.notes) {
+                [postParameters setValue:task.notes forKey:@"notes"];
+            }
+            
+            NSString *url = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/lists/%@/tasks%@",self.serverListId,query?[NSString stringWithFormat:@"?%@",query]:@""];
+            
+            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
+            [request setValue:[GDataEngine authorizationHeader] forHTTPHeaderField:@"Authorization"];
+            [request setHTTPMethod:@"POST"];
+            [request attachJSONBody:postParameters];
+            
+            NSHTTPURLResponse *response = nil;
+            NSError *error = nil;
+            NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+            if (response) {
+                NIF_INFO(@"[response statusCode] =  %d", [response statusCode]); 
+            }
+
+            if (error) {
+                
+            } else {
+                
+            }
+        } else {
+            if ([task.localModifyTime timeIntervalSinceDate:task.serverModifyTime] > 0) {
+                // Update Task 
+                
+                NSMutableDictionary *postParameters = [NSMutableDictionary dictionary];
+                [postParameters setValue:task.title forKey:@"title"];
+                
+                if (task.due) {
+                    NSString *dueString = task.due?[task.due RFC3339String]:[NSDate RFC3339Of1970];
+                    [postParameters setValue:dueString forKey:@"due"];
+                }
+                
+                if (task.completedDate) {
+                    NSString *completedDateString = task.completedDate?[task.completedDate RFC3339String]:[NSDate RFC3339Of1970];
+                    [postParameters setValue:completedDateString forKey:@"completed"];
+                    [postParameters setValue:@"completed" forKey:@"status"];
+                }
+                
+                if (task.notes) {
+                    [postParameters setValue:task.notes forKey:@"notes"];
+                }
+
+                
+                NSString *url = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/lists/%@/tasks/%@",self.serverListId,task.serverTaskId];
+                NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
+                [request setValue:[GDataEngine authorizationHeader] forHTTPHeaderField:@"Authorization"];
+                [request attachJSONBody:postParameters];
+                [request setHTTPMethod:@"PUT"];
+                
+                NSHTTPURLResponse *response = nil;
+                NSError *error = nil;
+                NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+                if (response) {
+                    NIF_INFO(@"[response statusCode] =  %d", [response statusCode]); 
+                }
+                
+                if (error) {
+                    
+                } else {
+                    
+                }
+            }
+            
+            if (task.isMoved) {
+                Task * parent = [self parentOfTask:task];
+                Task * prevSibling = [self prevSiblingOfTask:task];
+                
+                NSMutableDictionary *queries = [NSMutableDictionary dictionary];
+                NSString *query = nil;
+                
+                if (parent) {
+                    [queries setObject:parent.serverTaskId forKey:@"parent"];
+                }
+                if (prevSibling) {
+                    [queries setObject:prevSibling.serverTaskId forKey:@"previous"];
+                }
+                if ([queries count]) {
+                    query = [NSString queryStringFromParams:queries];                
+                }
+                
+                NSMutableDictionary *postParameters = [NSMutableDictionary dictionary];
+                
+                [postParameters setValue:task.title forKey:@"title"];
+                
+                if (task.due) {
+                    NSString *dueString = task.due?[task.due RFC3339String]:[NSDate RFC3339Of1970];
+                    [postParameters setValue:dueString forKey:@"due"];
+                }
+                
+                if (task.completedDate) {
+                    NSString *completedDateString = task.completedDate?[task.completedDate RFC3339String]:[NSDate RFC3339Of1970];
+                    [postParameters setValue:completedDateString forKey:@"completed"];
+                    [postParameters setValue:@"completed" forKey:@"status"];
+                }
+                
+                if (task.notes) {
+                    [postParameters setValue:task.notes forKey:@"notes"];
+                }
+                
+                NSString *url = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/lists/%@/tasks/%@/move?%@",self.serverListId,task.serverTaskId,query?[NSString stringWithFormat:@"?%@",query]:@""];
+                
+                NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
+                [request setValue:[GDataEngine authorizationHeader] forHTTPHeaderField:@"Authorization"];
+                [request setHTTPMethod:@"POST"];
+                [request attachJSONBody:postParameters];
+                
+                NSHTTPURLResponse *response = nil;
+                NSError *error = nil;
+                NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+                if (response) {
+                    NIF_INFO(@"[response statusCode] =  %d", [response statusCode]); 
+                }
+                
+                if (error) {
+                    
+                } else {
+                    
+                }
+            }
+        }
+    }
+    
+    [db close];
+}
+
 
 - (void)setServerModifyTime:(NSDate *)serverModifyTime updateDB:(BOOL)update {
     if (update) {
@@ -520,6 +768,7 @@
             return NO;
         } else {
             [task setLocalParentId:prevSiblingTask.localTaskId updateDB:YES];
+            [task setIsMoved:YES updateDB:YES];
             return YES;
         }
         
@@ -533,9 +782,11 @@
 
             for(Task *sibling in youngerSiblings) {
                 [sibling setLocalParentId:task.localTaskId updateDB:YES];
+                [task setIsMoved:YES updateDB:YES];
             }
             
             [task setLocalParentId:parent.localParentId updateDB:YES];
+            [task setIsMoved:YES updateDB:YES];
             return YES;
         }
         
@@ -587,7 +838,7 @@
             e.displayOrder = i;
             NSError *error = nil;
 
-            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET display_order = %d,local_list_id = %d WHERE local_task_id = %d",e.displayOrder,e.list.localListId,e.localTaskId];
+            NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET is_moved = 1,display_order = %d,local_list_id = %d WHERE local_task_id = %d",e.displayOrder,e.list.localListId,e.localTaskId];
             [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
         }
         [db close];
@@ -623,19 +874,6 @@
 
 ////////////////////////////////////////////////////////////////////////////
 // Remote Update
-- (void)fetchServerTasksWithCondition:(NSDictionary *)conditions resultHander:(RemoteHandler)handler {
-
-    NSString *query = [NSString queryStringFromParams:conditions];
-    NSString *listsLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/lists"];
-    NSString *tasksLink = [listsLink stringByAppendingFormat:@"/%@/tasks%@",self.serverListId,query?[NSString stringWithFormat:@"?%@",query]:@""];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:tasksLink]];
-    [[GTaskEngine sharedEngine] fetchWithRequest:request resultBlock:^(GDataEngine *anEngine, NSDictionary *result) {
-
-        NSArray *tasks = [self _parseServerTasksFromJSON:result];
-        handler(self,tasks);
-    }];
-    
-}
 
 - (NSArray *)fetchServerTasksSynchronouslyWithFilters:(NSDictionary *)filters error:(NSError**)error {
 
@@ -661,7 +899,7 @@
 
             }
             
-            NSArray *tempTasks = [self _parseServerTasksFromJSON:json];
+            NSArray *tempTasks = [TaskList _parseServerTasksFromJSON:json];
             if (tempTasks && [tempTasks count]) {
                 [tasks_ addObjectsFromArray:tempTasks];
             }
@@ -697,7 +935,49 @@
     return NO;
 }
 
-- (NSArray *)_parseServerTasksFromJSON:(NSDictionary *)json {
+
++ (NSArray *)fetchServerTasksSynchronouslyForServerListId:(NSString *)serverListId filters:(NSDictionary *)filters error:(NSError**)error {
+    
+    NSString *nextPageToken = nil;
+    NSMutableArray *tasks_ = [NSMutableArray array];
+    NSMutableDictionary *_filters = [NSMutableDictionary dictionaryWithDictionary:filters];
+    
+    do {
+        NSString *query = [NSString queryStringFromParams:filters];
+        NSString *listsLink = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/lists"];
+        NSString *tasksLink = [listsLink stringByAppendingFormat:@"/%@/tasks%@",serverListId,query?[NSString stringWithFormat:@"?%@",query]:@""];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:tasksLink]];
+        
+        [request setValue:[GDataEngine authorizationHeader] forHTTPHeaderField:@"Authorization"];
+        
+        NSURLResponse *response = nil;
+        NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:error];
+        if (*error) {
+            
+        } else {
+            
+            NSDictionary *json = [responsingData yajl_JSON];
+            nextPageToken = [json objectForKey:@"nextPageToken"];
+            if (nextPageToken) {
+                [_filters setValue:nextPageToken forKey:@"nextPageToken"];
+            } else {
+                
+            }
+            
+            NSArray *tempTasks = [self _parseServerTasksFromJSON:json];
+            if (tempTasks && [tempTasks count]) {
+                [tasks_ addObjectsFromArray:tempTasks];
+            }
+            
+        }        
+    } while (nextPageToken && !(*error));
+    
+    return tasks_;
+    
+}
+
+
++ (NSArray *)_parseServerTasksFromJSON:(NSDictionary *)json {
     NSMutableArray *tempTasks = [NSMutableArray array];
     
     NSArray *items = [json objectForKey:@"items"];
@@ -710,12 +990,18 @@
         aTask.title = [item objectForKey:@"title"];
         aTask.isDeleted = [[item objectForKey:@"deleted"] boolValue];
         aTask.completedDate = [NSDate dateFromRFC3339:[item objectForKey:@"completed"]];
-        
+        if ([[item objectForKey:@"status"] isEqualToString:@"needsAction"]) {
+            aTask.isCompleted = NO;
+        } else {
+            aTask.isCompleted = YES;
+        }
+        aTask.serverParentId = [item objectForKey:@"parent"];
         [tempTasks addObject:aTask];
         [aTask release];
     }
     return tempTasks;
 }
+
 
 - (void)uploadTasks {
     

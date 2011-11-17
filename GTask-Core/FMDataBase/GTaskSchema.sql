@@ -27,7 +27,7 @@ CREATE TABLE tasks (
     local_list_id       INTEGER NOT NULL,
     local_parent_id     INTEGER NOT NULL,
     display_order       INTEGER,
-    removed             INTEGER DEFAULT 0,
+    is_moved             INTEGER DEFAULT 0,
     
     self_link           TEXT,
     title               TEXT,
