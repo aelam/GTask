@@ -60,7 +60,9 @@
             list            : %@\
             parent          : %d\
             updated         : %@\
-            displayOrder    : %d",self.localTaskId,self.title,self.list.title,self.localParentId,self.serverModifyTime,self.displayOrder];
+            displayOrder    : %d\
+            isDeleted       : %d\
+            notes           : %@",self.localTaskId,self.title,self.list.title,self.localParentId,self.serverModifyTime,self.displayOrder,self.isDeleted,self.notes];
 #elif DESCRIPTION_LEVEL == 2
     return [NSString stringWithFormat:
             @"localTaskId: %d title : %@ parent: %d\
@@ -181,7 +183,7 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
-            self.completedDate = [NSDate date];
+            self.completedDate = isCompleted?[NSDate date]:nil;
             BOOL update = [db executeUpdate:@"UPDATE tasks SET is_completed = ?,completed_timestamp = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:isCompleted],self.completedDate,[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
             NIF_INFO(@"UPDATE is_complete SUCCESS ? : %d", update);
             [db close];

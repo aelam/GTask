@@ -68,7 +68,7 @@
         _tasks = [[NSMutableArray alloc] init];
         _localListId = anId;
         if (_localListId != -1) {
-            [self reloadLocalTasks];
+//            [self reloadLocalTasks];
         }
     }
     return self;
@@ -173,18 +173,25 @@
                 localListId_ = [localListIdSet intForColumn:@"local_list_id"];
             }
             
-            [db executeUpdate:@"INSERT INTO tasks \
-             (local_list_id,server_task_id,local_parent_id, notes, title, due, server_modify_timestamp, \
-             local_modify_timestamp, is_completed, completed_timestamp,is_deleted) VALUES(?,?,?,?,?,?,?,?,?,?,?)",[NSNumber numberWithInt:localListId_],task.serverTaskId,[NSNumber numberWithInt:localParentId],task.notes,task.title,task.due,[NSDate date],[NSDate dateWithTimeIntervalSince1970:0],[NSNumber numberWithBool:task.isCompleted],task.completedDate,[NSNumber numberWithBool:task.isDeleted]];
+            if (!task.isDeleted) {
+                [db executeUpdate:@"INSERT INTO tasks \
+                 (local_list_id,server_task_id,local_parent_id, notes, title, due, server_modify_timestamp, \
+                 local_modify_timestamp, is_completed, completed_timestamp,is_deleted,display_order) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",[NSNumber numberWithInt:localListId_],task.serverTaskId,[NSNumber numberWithInt:localParentId],task.notes,task.title,task.due,[NSDate date],[NSDate dateWithTimeIntervalSince1970:0],[NSNumber numberWithBool:task.isCompleted],task.completedDate,[NSNumber numberWithBool:task.isDeleted],[NSNumber numberWithInt:displayOrder]];   
+                displayOrder++;
+            }
             
         } else {
             if (task.isDeleted) {
                 [db executeUpdate:@"DELETE FROM tasks WHERE server_list_id = ?",task.serverTaskId];
             } else {
-                [db executeUpdate:@"UPDATE tasks SET title = ?,due = ?,notes = ?,is_completed, completed_timestamp WHERE server_list_id = ? AND local_modify_timestamp < server_modify_timestamp",task.title,task.due,task.notes,[NSNumber numberWithBool:task.isCompleted],task.completedDate,task.serverTaskId];
+                BOOL updateTask = [db executeUpdate:@"UPDATE tasks SET title = ?,due = ?,notes = ?,is_completed = ?, completed_timestamp = ? WHERE server_task_id = ? AND local_modify_timestamp < server_modify_timestamp",task.title,task.due,task.notes,[NSNumber numberWithBool:task.isCompleted],task.completedDate,task.serverTaskId];
+                NIF_INFO(@"updateTask success?:%d", updateTask);
+                
+                if([[task serverTaskId] isEqualToString:@"MTI4MTA3OTcwNjkxODkyNzIyNDQ6NjI3MDQyMzc0OjE1ODk2MDgyNDY"]) {
+                    NIF_INFO(@"---------------------------------------------");
+                }
             }
         }
-        [db executeUpdate:@"UPDATE tasks SET display_order = ? WHERE server_list_id = ?",[NSNumber numberWithInt:displayOrder],task.serverTaskId];
     }
     
     
