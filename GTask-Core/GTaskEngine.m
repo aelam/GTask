@@ -40,13 +40,11 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 
 @synthesize localTaskLists = _localTaskLists;
-//@synthesize deletedTaskLists = _deletedTaskLists;
 @synthesize isSyncing = _isSyncing;
 
 - (void)dealloc {
     
     [_localTaskLists release];
-//    [_deletedTaskLists release];
     [super dealloc];
 }
 
@@ -132,7 +130,6 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
         [db executeUpdate:@"UPDATE task_lists SET is_deleted = 1 WHERE local_list_id = ?",[NSNumber numberWithInt:aList.localListId]];
         [db close];
     }    
-//    [_deletedTaskLists addObject:aList];
     [_localTaskLists removeObject:aList];
 }
 
@@ -512,6 +509,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
     // 如果未登陆 则登陆
     // 
     [self authorizeWithResultBlock:^(GDataEngine *engine, id result) {
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
         dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         dispatch_async(queue, ^{
             
@@ -651,100 +649,9 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             }
      
             
-            
-                
-//            return;
-//            
-//            // Download ServerList
-//            NSError *error = nil;
-//            NSArray *serverLists =  [self fetchServerListsWithError:&error];
-//            if (error) {
-//                NIF_INFO(@"%@", error);
-//            } else {
-//                
-//                // 对比服务器与本地的List 如果服务器不存在 而本地存在 则说明被服务器删掉 此时需要清理本地list
-//                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SUBQUERY(%@, $list, SELF.serverListId == $list.serverListId ).@count == 0", serverLists];
-//                NSArray *deletedByServerLists = [_localTaskLists filteredArrayUsingPredicate:predicate];
-//                
-//                for (TaskList *item in deletedByServerLists) {
-//                    [self clearDeletedList:item];
-//                }
-//                
-//                // 如果本地 服务器都存在 则比较title有木有变化
-//                NSPredicate *predicate3 = [NSPredicate predicateWithFormat:@"SUBQUERY(%@, $list, SELF.serverListId == $list.serverListId AND SELF.title != $list.title).@count > 0", serverLists];
-//                NSArray *mayModifiedLists = [_localTaskLists filteredArrayUsingPredicate:predicate3];
-//                for(TaskList *list in mayModifiedLists) {
-//                    if ([list.localModifyTime timeIntervalSinceDate:list.serverModifyTime] > 0) {
-//                        // 取本地名字为最新
-//                        NSMutableURLRequest *request = [NSMutableURLRequest requestWithUpdateList:list];
-//                        [request setValue:[NSString stringWithFormat:@"OAuth %@",self.accessToken] forHTTPHeaderField:@"Authorization"];
-//                        NSError *error = nil;
-//                        NSURLResponse *response = nil;
-//                        NSData *responsingData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-//                        if (error) {
-//                            NIF_INFO(@"%@", error);
-//                        } else {
-//                            NSDictionary *json = [responsingData yajl_JSON];                            
-//                            NIF_INFO(@"%@", json);
-//                        }
-//                    } else {
-//                        // 更新数据库list title即可
-//                        NSPredicate *predicate4 = [NSPredicate predicateWithFormat:@"serverListId = %@", list.serverListId];
-//                        NSArray *filterArray = [serverLists filteredArrayUsingPredicate:predicate4];
-//                        if (filterArray && [filterArray count]) {
-//                            TaskList *serverList = [filterArray objectAtIndex:0];
-//                            [list setTitle:serverList.title updateDB:YES];
-//                        }
-//                    }
-//                }
-//                
-//                // 如果本地不存在这个list 则添加
-//                NSPredicate *predicate2 = [NSPredicate predicateWithFormat:@"SUBQUERY(%@, $list, SELF.serverListId == $list.serverListId ).@count == 0", _localTaskLists];
-//                NSArray *notAddedLists = [serverLists filteredArrayUsingPredicate:predicate2];
-//                [self insertLists:notAddedLists updateDB:YES];
-//                
-//                
-//                // update tasks 
-//
-//                NSHTTPURLResponse *response = nil;
-//                NSError *error = nil;
-//
-//                TaskList *aList = [[TaskList alloc] init];
-//                aList.serverListId = @"MTI4MTA3OTcwNjkxODkyNzIyNDQ6NjI3MDQyMzc0OjA";
-//
-//                BOOL clearSuccess = [aList clearServerCompletedTasks];
-//                NIF_INFO(@"%d", clearSuccess);
-//                    
-//                for (TaskList *list in _localTaskLists) {
-//
-////                    NSURLResponse *response = nil;
-////                    NSError *error = nil;
-////                    [list clearServerCompletedTasksWithResponse:&response error:&error];
-//                    
-//                    
-//                    
-////                    NSError *error = nil;
-////                    NSString *lastSyncTimeString = [list.lastestSyncTime RFC3339String];
-////                    NSDictionary *filters = [NSDictionary dictionaryWithObjectsAndKeys:
-////                                            lastSyncTimeString?lastSyncTimeString:@"",@"updatedMin",
-////                                             @"True",@"showDeleted",
-////                                            nil];
-////                    NSArray *serverTasks = [list fetchServerTasksSynchronouslyWithFilters:filters error:&error];
-////                    
-////                    for (Task *aTask in serverLists) {
-////
-////                    }
-//                    
-//                    
-//                    
-//                    
-//                    [list updateLastestSyncTime:[NSDate date]];
-//                    
-//                }
-                
-//            }
             dispatch_async(dispatch_get_main_queue(), ^{
-                handler(self,SyncStepListsUpdated);                
+                handler(self,SyncStepListsUpdated); 
+                [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
             });
         });
     

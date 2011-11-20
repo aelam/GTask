@@ -7,7 +7,7 @@
 //
 
 #import "RWAppDelegate.h"
-
+#import "FMDatabase+Update.h"
 @implementation RWAppDelegate
 
 @synthesize window = _window;
@@ -20,6 +20,9 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    
+    [FMDatabase defaultDatabaseUpdate];
+    
     // Override point for customization after application launch.
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         UISplitViewController *splitViewController = (UISplitViewController *)self.window.rootViewController;

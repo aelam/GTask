@@ -1,6 +1,6 @@
-PRAGMA foreign_keys = ON;
+--PRAGMA foreign_keys = ON;
 
-DROP TABLE IF EXISTS "task_lists";
+--DROP TABLE IF EXISTS "task_lists";
 CREATE TABLE task_lists (
     local_list_id           INTEGER PRIMARY KEY AUTOINCREMENT,
     server_list_id          TEXT UNIQUE,
@@ -19,13 +19,13 @@ CREATE TABLE task_lists (
     local_modify_timestamp  INTEGER DEFAULT 0
 );
 
-DROP TABLE IF EXISTS "tasks";
+--DROP TABLE IF EXISTS "tasks";
 CREATE TABLE tasks (
     local_task_id       INTEGER PRIMARY KEY AUTOINCREMENT,
     server_task_id      TEXT UNIQUE,
 
     local_list_id       INTEGER NOT NULL,
-    local_parent_id     INTEGER NOT NULL,
+    local_parent_id     INTEGER NOT NULL DEFAULT -1,
     display_order       INTEGER,
     is_moved             INTEGER DEFAULT 0,
     

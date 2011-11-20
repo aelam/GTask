@@ -50,7 +50,8 @@
 }
 
 #define NAME_AND_DUE      3
-#define DESCRIPTION_LEVEL NAME_AND_DUE
+#define IS_DELETED        4
+#define DESCRIPTION_LEVEL IS_DELETED
 
 - (NSString *)description {
 #if DESCRIPTION_LEVEL == 3
@@ -76,6 +77,12 @@
             title           : %@\
             due             : %@\
             ",self.localTaskId,self.title,self.due];
+#elif DESCRIPTION_LEVEL == IS_DELETED
+    return [NSString stringWithFormat:
+            @"localTaskId   : %d\
+            title           : %@\
+            is_deleted      : %d\
+            ",self.localTaskId,self.title,self.isDeleted];
     
 #endif
 

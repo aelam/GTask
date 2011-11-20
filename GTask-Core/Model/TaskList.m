@@ -149,6 +149,7 @@
 // 同步方法
 - (void)sync {
     
+    
     FMDatabase *db = [FMDatabase database];
     [db open];
     
@@ -162,18 +163,19 @@
         FMResultSet *set = [db executeQuery:@"SELECT * FROM tasks WHERE server_task_id = ?",task.serverTaskId];
         if (![set next]) {
             FMResultSet *localParentIdSet = [db executeQuery:@"SELECT * FROM tasks WHERE server_task_id = ?",task.serverParentId];
-            int localParentId = 0;
+            int localParentId = -1;
             if ([localParentIdSet next]) {
                 localParentId = [localParentIdSet intForColumn:@"local_task_id"];                
             }
             
             FMResultSet *localListIdSet = [db executeQuery:@"SELECT local_list_id FROM task_lists WHERE server_list_id = ?",self.serverListId];
-            int localListId_ = 0;
+            int localListId_ = -1;
             if ([localListIdSet next]) {
                 localListId_ = [localListIdSet intForColumn:@"local_list_id"];
             }
             
             if (!task.isDeleted) {
+                [db executeUpdate:@"UPDATE tasks SET display_order = display_order + 1 WHERE display_order >= ? AND local_list_id = ?",[NSNumber numberWithInt:displayOrder],[NSNumber numberWithInt:localListId_]];
                 [db executeUpdate:@"INSERT INTO tasks \
                  (local_list_id,server_task_id,local_parent_id, notes, title, due, server_modify_timestamp, \
                  local_modify_timestamp, is_completed, completed_timestamp,is_deleted,display_order) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",[NSNumber numberWithInt:localListId_],task.serverTaskId,[NSNumber numberWithInt:localParentId],task.notes,task.title,task.due,[NSDate date],[NSDate dateWithTimeIntervalSince1970:0],[NSNumber numberWithBool:task.isCompleted],task.completedDate,[NSNumber numberWithBool:task.isDeleted],[NSNumber numberWithInt:displayOrder]];   
@@ -181,20 +183,29 @@
             }
             
         } else {
+            displayOrder = [set intForColumn:@"display_order"];
+            
             if (task.isDeleted) {
-                [db executeUpdate:@"DELETE FROM tasks WHERE server_list_id = ?",task.serverTaskId];
+                
+                FMResultSet *localListIdSet = [db executeQuery:@"SELECT local_list_id FROM task_lists WHERE server_list_id = ?",self.serverListId];
+                int localListId_ = -1;
+                if ([localListIdSet next]) {
+                    localListId_ = [localListIdSet intForColumn:@"local_list_id"];
+                }
+
+                [db executeUpdate:@"DELETE FROM tasks WHERE server_task_id = ?",task.serverTaskId];
+                [db executeUpdate:@"UPDATE tasks SET display_order = display_order - 1 WHERE display_order >= ? AND local_list_id = ?",[NSNumber numberWithInt:displayOrder],[NSNumber numberWithInt:localListId_]];
             } else {
                 BOOL updateTask = [db executeUpdate:@"UPDATE tasks SET title = ?,due = ?,notes = ?,is_completed = ?, completed_timestamp = ? WHERE server_task_id = ? AND local_modify_timestamp < server_modify_timestamp",task.title,task.due,task.notes,[NSNumber numberWithBool:task.isCompleted],task.completedDate,task.serverTaskId];
                 NIF_INFO(@"updateTask success?:%d", updateTask);
                 
-                if([[task serverTaskId] isEqualToString:@"MTI4MTA3OTcwNjkxODkyNzIyNDQ6NjI3MDQyMzc0OjE1ODk2MDgyNDY"]) {
-                    NIF_INFO(@"---------------------------------------------");
-                }
             }
         }
     }
     
+    NIF_INFO(@"displayOrder = %d", displayOrder);
     
+    [self reloadLocalTasks];
     for(Task *task in _tasks) {
         if (!task.serverTaskId) {
             //!!! 上传task
@@ -468,7 +479,7 @@
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"localTaskId = %d",task.localParentId];
         NSArray *filteredParents = [_tasks filteredArrayUsingPredicate:predicate];
         if (filteredParents == nil || [filteredParents count] == 0) {
-            NIF_ERROR(@"THIS TASK SHOULD HAVE A PARENT!!");
+            //NIF_ERROR(@"THIS TASK SHOULD HAVE A PARENT!!");
             return nil;
         } else {
             return [filteredParents objectAtIndex:0];
@@ -786,7 +797,7 @@
         }
         
     } else if (level == TaskUpgradeLevelUpLevel) {
-        if (task.localParentId == -1) {
+        if (task.localParentId == -1 || task.localParentId == 0) {
             NIF_ERROR(@"YOU'VE ALREADY IN 1ST LEVEL!");
             return NO;
         } else {

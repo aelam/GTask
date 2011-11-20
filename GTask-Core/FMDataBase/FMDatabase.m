@@ -8,19 +8,16 @@
 
 // ADDED
 + (id)database {
-//#ifdef TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-	NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+	NSString *documentFolder = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+	NSString *realDBPath = [documentFolder stringByAppendingPathComponent:BUNDLE_DB_NAME];			
+	return [[[self alloc] initWithPath:realDBPath] autorelease];
+}
+
++ (id)defaultDatabase {
 	
 	NSString *documentFolder = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
 	NSString *realDBPath = [documentFolder stringByAppendingPathComponent:BUNDLE_DB_NAME];
-		
-	if (![fileManager fileExistsAtPath:realDBPath]) {
-		NSString *dbBundlePath = [[NSBundle mainBundle] pathForResource:@"GTask" ofType:@"sqlite"];
-		NSError *error = nil;
-		if (![fileManager copyItemAtPath:dbBundlePath toPath:realDBPath error:&error]) {
-			NIF_TRACE(@"%@",[error localizedDescription]);
-		} 
-	}
 	
 	return [[[self alloc] initWithPath:realDBPath] autorelease];
 }
@@ -65,36 +62,19 @@
 }
 
 - (int)userVersion {
-    static sqlite3_stmt *stmt_version;
-    int databaseVersion;
-    
-    if(sqlite3_prepare_v2(db, "PRAGMA user_version;", -1, &stmt_version, NULL) == SQLITE_OK) {
-        while(sqlite3_step(stmt_version) == SQLITE_ROW) {
-            databaseVersion = sqlite3_column_int(stmt_version, 0);
-            NSLog(@"%s: version %d", __FUNCTION__, databaseVersion);
-        }
-        NSLog(@"%s: the databaseVersion is: %d", __FUNCTION__, databaseVersion);
-    } else {
-        NSLog(@"%s: ERROR Preparing: , %s", __FUNCTION__, sqlite3_errmsg(db) );
-    }
-    sqlite3_finalize(stmt_version);
-    
-    return databaseVersion;
+    return [self pragmaValueForKey:@"user_version"];
 }
 
 - (void)setUserVersion:(int)version {
-    static sqlite3_stmt *stmt_version;
-    NSString *sql = [NSString stringWithFormat:@"PRAGMA user_version=%d;",version];
-    
-    if(sqlite3_prepare_v2(db, [sql UTF8String], -1, &stmt_version, NULL) == SQLITE_OK) {
-        while(sqlite3_step(stmt_version) == SQLITE_ROW) {
-            sqlite3_column_int(stmt_version, 0);
-            
-        }
-    } else {
-        NSLog(@"%s: ERROR Preparing: , %s", __FUNCTION__, sqlite3_errmsg(db) );
-    }
-    sqlite3_finalize(stmt_version);
+    [self setPragmaValue:version forKey:@"user_version"];
+}
+
+- (int)schemaVersion {
+    return [self pragmaValueForKey:@"schema_version"];
+}
+
+- (void)setSchemaVersion:(int)version {
+    [self setPragmaValue:version forKey:@"schema_version"];
 }
 
 - (int)pragmaValueForKey:(NSString *)key {
@@ -726,6 +706,23 @@
     va_end(args);
     return result;
 }
+
+- (BOOL)executeBatch:(NSString *)sql error:(NSError**)error
+{
+    char* errorOutput;
+    int responseCode = sqlite3_exec(db, [sql UTF8String], NULL, NULL, &errorOutput);
+    
+    if (errorOutput != nil)
+    {
+        *error = [NSError errorWithDomain:[NSString stringWithUTF8String:errorOutput]
+                                     code:responseCode 
+                                 userInfo:nil];
+        return false;
+    }
+    
+    return true;
+}
+
 
 - (BOOL)rollback {
     BOOL b = [self executeUpdate:@"ROLLBACK TRANSACTION;"];

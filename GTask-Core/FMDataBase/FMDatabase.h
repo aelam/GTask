@@ -19,6 +19,7 @@
 }
 
 + (id)database;
++ (id)defaultDatabase;
 
 + (id)databaseWithPath:(NSString*)inPath;
 - (id)initWithPath:(NSString*)inPath;
@@ -55,6 +56,9 @@
 - (FMResultSet *)executeQuery:(NSString*)sql, ...;
 - (FMResultSet *)executeQuery:(NSString *)sql withArgumentsInArray:(NSArray *)arguments;
 - (FMResultSet *)executeQuery:(NSString *)sql withArgumentsInArray:(NSArray*)arrayArgs orVAList:(va_list)args; // you shouldn't ever need to call this.  use the previous two instead.
+
+- (BOOL)executeBatch:(NSString*)sql error:(NSError**)error;
+
 
 - (BOOL)rollback;
 - (BOOL)commit;
@@ -93,6 +97,9 @@
 
 - (int)userVersion;
 - (void)setUserVersion:(int)version;
+
+- (int)schemaVersion;
+- (void)setSchemaVersion:(int)version;
 
 - (int)pragmaValueForKey:(NSString *)key;
 - (void)setPragmaValue:(int)value forKey:(NSString *)key;

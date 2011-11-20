@@ -11,6 +11,6 @@
 
 @interface FMDatabase (Update)
 
-+ (void)databaseUpdate;
++ (void)defaultDatabaseUpdate;
 	
 @end
