@@ -18,7 +18,6 @@
 	NSMutableSet *openResultSets;
 }
 
-+ (id)database;
 + (id)defaultDatabase;
 
 + (id)databaseWithPath:(NSString*)inPath;

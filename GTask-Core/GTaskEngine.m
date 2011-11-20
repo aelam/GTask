@@ -73,7 +73,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 - (void)insertLists:(NSArray *)taskLists updateDB:(BOOL)update {
     if(update && taskLists && [taskLists count]) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
@@ -93,7 +93,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 - (void)insertList:(TaskList *)taskList updateDB:(BOOL)update {
     if(update) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
@@ -109,7 +109,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)addNewLocalList:(TaskList *)taskList {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
     } else {
@@ -123,7 +123,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (void)deleteLocalList:(TaskList *)aList {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NIF_ERROR(@"Could not open db.");            
     } else {
@@ -134,7 +134,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (void)clearDeletedList:(TaskList *)aList {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NIF_ERROR(@"Could not open db.");            
     } else {
@@ -149,7 +149,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 - (void)clearDeletedLists {
 
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NIF_ERROR(@"Could not open db.");            
     } else {
@@ -160,7 +160,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (void)updateLocalList:(TaskList *)aList {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NIF_ERROR(@"Could not open db.");            
     } else {
@@ -209,7 +209,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 
 - (BOOL)_saveTaskListsFromJSON:(NSDictionary *)json {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
 		return NO;
@@ -241,7 +241,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (BOOL)_saveTasksForTaskList:(TaskList *)aList fromJSON:(NSDictionary *)json {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
 		return NO;
@@ -314,7 +314,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (BOOL)_syncParentIdWithItems:(NSArray *)items {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
 		return NO;
@@ -338,7 +338,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (void)reloadLocalLists {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
     } else {
@@ -369,7 +369,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (void)reloadDeletedLists {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
     } else {
@@ -397,7 +397,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (NSArray *)_deletingLists {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
@@ -428,7 +428,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 }
 
 - (NSArray *)_addingLists {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
@@ -515,7 +515,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //// 删除
-            FMDatabase *db = [FMDatabase database];
+            FMDatabase *db = [FMDatabase defaultDatabase];
             if (![db open]) {
                 NSLog(@"Could not open db.");
                 //return nil;
@@ -710,7 +710,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
 
 
 - (void)clearServerTasksDeletedByLocalWithError:(NSError **)error {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
     } else {

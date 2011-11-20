@@ -5,15 +5,7 @@
 
 #define BUNDLE_DB_NAME @"GTask.sqlite"
 
-
-// ADDED
-+ (id)database {
-    
-	NSString *documentFolder = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
-	NSString *realDBPath = [documentFolder stringByAppendingPathComponent:BUNDLE_DB_NAME];			
-	return [[[self alloc] initWithPath:realDBPath] autorelease];
-}
-
+// TODO many it works under both iPhone And Mac OS 
 + (id)defaultDatabase {
 	
 	NSString *documentFolder = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];

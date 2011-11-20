@@ -139,7 +139,7 @@
 
 - (void)setDisplayOrder:(NSInteger)order updateDB:(BOOL)update {
     if (update) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
@@ -156,7 +156,7 @@
 - (void)setIsMoved:(BOOL)isMoved updateDB:(BOOL)update {
     self.isMoved = isMoved;
     if (update) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
@@ -171,7 +171,7 @@
 
 - (void)setLocalParentId:(NSInteger)aParentId updateDB:(BOOL)update {
     if (update) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
@@ -186,7 +186,7 @@
 
 - (void)setIsCompleted:(BOOL)isCompleted updateDB:(BOOL)update {
     if (update) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
@@ -202,7 +202,7 @@
 
 - (void)setGenerationLevel:(NSInteger)aLevel updateDB:(BOOL)update {
     if (update) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
@@ -217,7 +217,7 @@
 
 - (void)setList:(TaskList *)aList updateDB:(BOOL)update {
     if (update) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");            
         } else {
@@ -230,7 +230,7 @@
 }
 
 - (void)update {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NIF_ERROR(@"Could not open db.");            
     } else {

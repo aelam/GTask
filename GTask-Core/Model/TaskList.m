@@ -75,7 +75,7 @@
 }
 
 - (void)reloadLocalTasks {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
     } else {
@@ -110,7 +110,7 @@
 }
 
 - (NSMutableArray *)localTasks {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
@@ -150,7 +150,7 @@
 - (void)sync {
     
     
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     [db open];
     
     NSString *updatedMin = self.lastestSyncTime?[self.lastestSyncTime RFC3339String]:[NSDate RFC3339Of1970];
@@ -377,7 +377,7 @@
 
 - (void)setServerModifyTime:(NSDate *)serverModifyTime updateDB:(BOOL)update {
     if (update) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
@@ -394,7 +394,7 @@
 
 - (void)setServerListId:(NSString *)serverListId updateDB:(BOOL)update {
     if (update) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
@@ -408,7 +408,7 @@
 
 - (void)setTitle:(NSString *)title updateDB:(BOOL)update {
     if (update) {
-        FMDatabase *db = [FMDatabase database];
+        FMDatabase *db = [FMDatabase defaultDatabase];
         if (![db open]) {
             NSLog(@"Could not open db.");
         } else {
@@ -423,7 +423,7 @@
 }
 
 - (void)updateLastestSyncTime:(NSDate *)date {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
     } else {
@@ -434,7 +434,7 @@
 }
 
 - (void)localUpdate {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
     } else {
@@ -627,7 +627,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)insertTask:(Task *)aTask {
     [_tasks insertObject:aTask atIndex:0];
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
 		return NO;
@@ -655,7 +655,7 @@
 }
 
 - (BOOL)deleteTask:(Task *)aTask {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
 		return NO;
@@ -852,7 +852,7 @@
 }
 
 - (void)updateListIdAndOrders {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NIF_ERROR(@"Could not open db.");            
     } else {
@@ -870,7 +870,7 @@
 }
 
 - (void)deleteLocal {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NIF_ERROR(@"Could not open db.");            
     } else {
@@ -888,7 +888,7 @@
 }
 
 - (void)updateLocal {
-    FMDatabase *db = [FMDatabase database];
+    FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NIF_ERROR(@"Could not open db.");            
     } else {
