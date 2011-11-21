@@ -430,17 +430,14 @@
     
     Task *task = [[Task alloc] init];
     task.displayOrder = 0;
-    task.list = self.taskList;
+//    task.list = self.taskList;
+    task.localListId = self.taskList.localListId;
     task.isUpdated = NO;
     task.isCompleted = NO;
     task.localModifyTime = [NSDate date];
     task.localParentId = -1;
     task.title = text;
     
-    for (int i = 0; i < [self.tasks count]; i++) {
-        Task *e = [self.tasks objectAtIndex:i];
-         [e setDisplayOrder:i+1];
-    }
     
     [self.taskList insertTask:task];
     [task release];

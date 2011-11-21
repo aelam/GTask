@@ -177,10 +177,23 @@
             }
             
             if (!task.isDeleted) {
-                [db executeUpdate:@"UPDATE tasks SET display_order = display_order + 1 WHERE display_order >= ? AND local_list_id = ?",[NSNumber numberWithInt:displayOrder],[NSNumber numberWithInt:localListId_]];
-                [db executeUpdate:@"INSERT INTO tasks \
+//                [db executeUpdate:@"UPDATE tasks SET display_order = display_order + 1 WHERE display_order >= ? AND local_list_id = ?",[NSNumber numberWithInt:displayOrder],[NSNumber numberWithInt:localListId_]];
+                BOOL rs = [db executeUpdate:@"INSERT INTO tasks \
                  (local_list_id,server_task_id,local_parent_id, notes, title, due, server_modify_timestamp, \
-                 local_modify_timestamp, is_completed, completed_timestamp,is_deleted,display_order) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",[NSNumber numberWithInt:localListId_],task.serverTaskId,[NSNumber numberWithInt:localParentId],task.notes,task.title,task.due,[NSDate date],[NSDate dateWithTimeIntervalSince1970:0],[NSNumber numberWithBool:task.isCompleted],task.completedDate,[NSNumber numberWithBool:task.isDeleted],[NSNumber numberWithInt:displayOrder]];   
+                 local_modify_timestamp, is_completed, completed_timestamp,is_deleted,display_order) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)", 
+                           [NSNumber numberWithInt:localListId_],
+                           task.serverTaskId,
+                           [NSNumber numberWithInt:localParentId],
+                           task.notes,
+                           task.title,
+                           task.due,
+                           [NSDate date],
+                           [NSDate dateWithTimeIntervalSince1970:0],
+                           [NSNumber numberWithBool:task.isCompleted],
+                           task.completedDate,
+                           [NSNumber numberWithBool:task.isDeleted],
+                           [NSNumber numberWithInt:displayOrder]];   
+                NIF_INFO(@"insert success ? %d", rs);
                 displayOrder++;
             }
             
@@ -641,14 +654,17 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)insertTask:(Task *)aTask {
     [_tasks insertObject:aTask atIndex:0];
+        
     FMDatabase *db = [FMDatabase defaultDatabase];
     if (![db open]) {
         NSLog(@"Could not open db.");
 		return NO;
-    } else {
+    } else {        
+        [db executeUpdate:@"UPDATE tasks SET display_order = display_order +1 WHERE display_order >=? AND local_list_id = ?",[NSNumber numberWithInt:aTask.displayOrder],[NSNumber numberWithInt:aTask.localListId]];
+        
         BOOL rs = [db executeUpdate:
                    @"INSERT INTO tasks (local_list_id,local_parent_id,notes,self_link,title,due,is_updated,display_order,is_completed,completed_timestamp,local_modify_timestamp) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                   [NSNumber numberWithInt:aTask.list.localListId],
+                   [NSNumber numberWithInt:aTask.localListId],
                    [NSNumber numberWithInt:aTask.localParentId],
                    aTask.notes,
                    aTask.link,
@@ -664,6 +680,12 @@
         aTask.localTaskId = [db lastInsertRowId];
         
         [db close];        
+        
+        for (int i = 0; i < [self.tasks count]; i++) {
+            Task *e = [self.tasks objectAtIndex:i];
+            [e setDisplayOrder:i+1];
+        }
+
         return rs;
     }
 }
