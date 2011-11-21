@@ -5,13 +5,20 @@
 
 #define BUNDLE_DB_NAME @"GTask.sqlite"
 
+
+#define PRAMGA_FOREIGN_KEYS_ON 1
+
+
 // TODO many it works under both iPhone And Mac OS 
 + (id)defaultDatabase {
 	
 	NSString *documentFolder = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
 	NSString *realDBPath = [documentFolder stringByAppendingPathComponent:BUNDLE_DB_NAME];
 	
-	return [[[self alloc] initWithPath:realDBPath] autorelease];
+    FMDatabase *db = [[[self alloc] initWithPath:realDBPath] autorelease];
+    [db setLogsErrors:YES];
+
+    return db;
 }
 
 
@@ -116,7 +123,9 @@
 
 - (BOOL)open {
 	if (db) {
+#ifdef PRAMGA_FOREIGN_KEYS_ON
         [self setPragmaValue:1 forKey:@"foreign_keys"];
+#endif
 		return YES;
 	}
 	

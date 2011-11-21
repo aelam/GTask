@@ -116,9 +116,11 @@
         return nil;
     } else {
         NSMutableArray *localTasks = [NSMutableArray array];
-        [_tasks removeAllObjects];
+//        [_tasks removeAllObjects];
         
-        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d AND is_deleted = 0 ORDER BY display_order",_localListId]];
+//        [db executeUpdate:@"DELETE FROM tasks where local_list_id = ? AND is_deleted = 1 AND server_task_id is null",[NSNumber numberWithInt:_localListId]];
+        
+        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM tasks WHERE local_list_id = %d ORDER BY display_order",_localListId]];
         while ([rs next]) {
             Task *task = [[Task alloc] init];
             task.localTaskId = [rs intForColumn:@"local_task_id"];
@@ -196,17 +198,19 @@
                 [db executeUpdate:@"DELETE FROM tasks WHERE server_task_id = ?",task.serverTaskId];
                 [db executeUpdate:@"UPDATE tasks SET display_order = display_order - 1 WHERE display_order >= ? AND local_list_id = ?",[NSNumber numberWithInt:displayOrder],[NSNumber numberWithInt:localListId_]];
             } else {
-                BOOL updateTask = [db executeUpdate:@"UPDATE tasks SET title = ?,due = ?,notes = ?,is_completed = ?, completed_timestamp = ? WHERE server_task_id = ? AND local_modify_timestamp < server_modify_timestamp",task.title,task.due,task.notes,[NSNumber numberWithBool:task.isCompleted],task.completedDate,task.serverTaskId];
-                NIF_INFO(@"updateTask success?:%d", updateTask);
+//                BOOL updateTask = [db executeUpdate:@"UPDATE tasks SET title = ?,due = ?,notes = ?,is_completed = ?, completed_timestamp = ? WHERE server_task_id = ? AND local_modify_timestamp < server_modify_timestamp",task.title,task.due,task.notes,[NSNumber numberWithBool:task.isCompleted],task.completedDate,task.serverTaskId];
+//                NIF_INFO(@"updateTask success?:%d", updateTask);
                 
             }
-        }
+        } 
     }
     
     NIF_INFO(@"displayOrder = %d", displayOrder);
     
-    [self reloadLocalTasks];
-    for(Task *task in _tasks) {
+    //    [self reloadLocalTasks];
+    NSMutableArray *allTasks = [self localTasks];
+    for(Task *task in allTasks) {
+        
         if (!task.serverTaskId) {
             //!!! 上传task
             Task * parent = [self parentOfTask:task];
@@ -244,6 +248,10 @@
                 [postParameters setValue:task.notes forKey:@"notes"];
             }
             
+            if (task.isDeleted) {
+                [postParameters setValue:@"true" forKey:@"deleted"];
+            }
+            
             NSString *url = [NSString stringWithFormat:@"https://www.googleapis.com/tasks/v1/lists/%@/tasks%@",self.serverListId,query?[NSString stringWithFormat:@"?%@",query]:@""];
             
             NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
@@ -261,7 +269,9 @@
             if (error) {
                 
             } else {
-                
+                NSDictionary *json = [responsingData yajl_JSON];
+                NSString *serverTaskId = [json objectForKey:@"id"];
+                [db executeUpdate:@"UPDATE tasks SET server_task_id = ? server_modify_timestamp = ? WHERE local_task_id = ?",serverTaskId,[NSDate date],[NSNumber numberWithInt:task.localTaskId]];
             }
         } else {
             if ([task.localModifyTime timeIntervalSinceDate:task.serverModifyTime] > 0) {
@@ -283,6 +293,10 @@
                 
                 if (task.notes) {
                     [postParameters setValue:task.notes forKey:@"notes"];
+                }
+
+                if (task.isDeleted) {
+                    [postParameters setValue:@"true" forKey:@"deleted"];
                 }
                 
                 [postParameters setValue:task.serverTaskId forKey:@"id"];
@@ -660,13 +674,7 @@
         NSLog(@"Could not open db.");
 		return NO;
     } else {
-        NSString *sql = [NSString stringWithFormat:@"UPDATE tasks SET is_deleted = 1 WHERE local_task_id = %d",aTask.localTaskId];
-      NIF_INFO(@"save to DB sql : %@", sql);
-        NSError *error = nil;
-        BOOL rs = [db executeUpdate:sql error:&error withArgumentsInArray:nil orVAList:nil];
-        if (error) {
-            NIF_INFO(@"%@", error);
-        }
+        BOOL rs = [db executeUpdate:@"UPDATE tasks SET is_deleted = 1,display_order = -1,local_modify_timestamp = ? WHERE local_task_id = ?",[NSDate date],[NSNumber numberWithInt:aTask.localTaskId]];
         [db close];        
         [_tasks removeObject:aTask];
         

@@ -143,7 +143,7 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
-            BOOL update = [db executeUpdate:@"UPDATE tasks SET moved = 1,display_order = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:order],[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET is_moved = 1,display_order = ?,local_modify_timestamp = ? WHERE local_task_id = ?",[NSNumber numberWithInt:order],[NSDate date],[NSNumber numberWithInt:self.localTaskId]];
             NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
             [db close];
         }        
@@ -160,7 +160,7 @@
         if (![db open]) {
             NIF_ERROR(@"Could not open db.");
         } else {
-            BOOL update = [db executeUpdate:@"UPDATE tasks SET moved = 1 WHERE local_task_id = ?",[NSNumber numberWithInt:self.localTaskId]];
+            BOOL update = [db executeUpdate:@"UPDATE tasks SET is_moved = 1 WHERE local_task_id = ?",[NSNumber numberWithInt:self.localTaskId]];
             NIF_INFO(@"UPDATE DISPLAYORDER SUCCESS ? : %d", update);
             [db close];
         }        

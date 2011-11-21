@@ -46,3 +46,33 @@ CREATE TABLE tasks (
     
     FOREIGN KEY(local_list_id) REFERENCES task_lists(local_list_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+/*
+-- TRIGGER
+CREATE TRIGGER "task_delete_trigger"
+ BEFORE DELETE ON tasks
+--FOR EACH ROW
+WHEN EXISTS (SELECT 1 FROM tasks WHERE display_order >= old.display_order AND local_list_id = old.local_list_id)
+BEGIN
+	UPDATE tasks set display_order = display_order - 1 WHERE display_order >= old.display_order AND local_list_id = old.local_list_id;
+END;
+
+
+CREATE TRIGGER "task_mark_as_deleted_trigger"
+BEFORE UPDATE ON tasks
+WHEN EXISTS (SELECT 1 FROM tasks WHERE display_order >= old.display_order AND local_list_id = old.local_list_id AND old.is_deleted = 0 AND new.is_deleted = 1)
+BEGIN
+	UPDATE tasks set display_order = display_order - 1 WHERE display_order >= old.display_order AND local_list_id = old.local_list_id AND local_task_id != old.local_task_id;
+END;
+
+
+
+CREATE TRIGGER "task_insert_trigger"
+ BEFORE INSERT ON tasks
+WHEN EXISTS (SELECT 1 FROM tasks WHERE display_order >= new.display_order AND local_list_id = new.local_list_id)
+BEGIN
+	UPDATE tasks set display_order = display_order + 1 WHERE display_order >= new.display_order AND local_list_id = new.local_list_id;
+END;
+
+*/
+

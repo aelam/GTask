@@ -141,19 +141,8 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
- //   NSArray *tasks = self.taskList.tasks;
-//    if (tasks && [tasks count]) {
     [self.taskList reloadLocalTasks];
     self.tasks = self.taskList.tasks;
-
-//    }
-//    else {
-//        [[GTaskEngine engine] fetchServerTasksForList:self.taskList resultHander:^(GTaskEngine *engine, NSMutableArray *result) {
-//            [self.tasks removeAllObjects];            
-//            [self.tasks addObjectsFromArray:result];
-//            [self.tableView reloadData];
-//        }];
-//    }
     
     [self.tableView reloadData];
     
@@ -351,8 +340,10 @@
         
         for (int i = indexPath.row; i < [self.tasks count]; i++) {
             Task *e = [self.tasks objectAtIndex:i];
-            [e setDisplayOrder:i updateDB:YES];
+//            [e setDisplayOrder:i updateDB:YES];
+            e.displayOrder = i;
         }
+        
         [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.5];
         [deletingTask release];
 
@@ -448,7 +439,7 @@
     
     for (int i = 0; i < [self.tasks count]; i++) {
         Task *e = [self.tasks objectAtIndex:i];
-         [e setDisplayOrder:i+1 updateDB:YES];
+         [e setDisplayOrder:i+1];
     }
     
     [self.taskList insertTask:task];

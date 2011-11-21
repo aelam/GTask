@@ -225,7 +225,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
             double timeStamp = [[NSDate date] timeIntervalSince1970];
             NIF_TRACE(@"timeStamp : %0.0f", timeStamp);
             
-            FMResultSet *set = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM task_lists WHERE server_list_id = '%@'",_id]];
+            FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists WHERE server_list_id = ?",_id];
             if ([set next]) {
                 NIF_INFO(@"已经存在记录了");
             } else {
@@ -586,7 +586,7 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                     
                     [serverListIds addObject:serverListId];
                     
-                    FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists WHERE server_list_id = %@",serverListId];
+                    FMResultSet *set = [db executeQuery:@"SELECT * FROM task_lists WHERE server_list_id = ?",serverListId];
                     if ([set next]) {
                         NSDate *localModifyDate = [set dateForColumn:@"local_modify_timestamp"];
                         NSDate *serverModifyDate = [set dateForColumn:@"server_modify_timestamp"];
@@ -609,10 +609,10 @@ static NSString *kTasksURLFormat = @"https://www.googleapis.com/tasks/v1/lists/%
                             } else {
                                 NSDictionary *json = [responsingData yajl_JSON];                            
                                 NIF_INFO(@"%@", json);
-                                [db executeUpdate:@"UPDATE task_lists SET server_modify_timestamp = ?",[NSDate date]];
+                                [db executeUpdate:@"UPDATE task_lists SET server_modify_timestamp = ? WHERE server_list_id = ?",[NSDate date],serverListId];
                             }
                         } else {
-                            [db executeUpdate:@"UPDATE task_lists SET title = ?",serverTitle];
+                            [db executeUpdate:@"UPDATE task_lists SET title = ? WHERE server_list_id = ?",serverTitle,serverListId];
                         }                        
                     } else { 
                         // 本地不存在 则insert 这条记录
