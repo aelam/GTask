@@ -4,6 +4,7 @@
 @implementation FMDatabase
 
 #define BUNDLE_DB_NAME @"GTask.sqlite"
+#define PRAGMA_FOREIGN_KEY_ON   1
 
 // TODO many it works under both iPhone And Mac OS 
 + (id)defaultDatabase {
@@ -29,6 +30,10 @@
         logsErrors          = 0x00;
         crashOnErrors       = 0x00;
         busyRetryTimeout    = 0x00;
+        
+#ifdef DEBUG
+        logsErrors          = YES;
+#endif
     }
 	
 	return self;
@@ -116,7 +121,9 @@
 
 - (BOOL)open {
 	if (db) {
+#if PRAGMA_FOREIGN_KEY_ON == 1
         [self setPragmaValue:1 forKey:@"foreign_keys"];
+#endif
 		return YES;
 	}
 	

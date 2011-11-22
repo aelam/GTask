@@ -353,6 +353,7 @@
             Task *e = [self.tasks objectAtIndex:i];
             [e setDisplayOrder:i updateDB:YES];
         }
+        
         [self performSelector:@selector(reloadRowsAtIndexPaths:) withObject:[tableView indexPathsForVisibleRows] afterDelay:0.5];
         [deletingTask release];
 
@@ -445,11 +446,12 @@
     task.localModifyTime = [NSDate date];
     task.localParentId = -1;
     task.title = text;
+    task.localListId = self.taskList.localListId;
     
-    for (int i = 0; i < [self.tasks count]; i++) {
-        Task *e = [self.tasks objectAtIndex:i];
-         [e setDisplayOrder:i+1 updateDB:YES];
-    }
+//    for (int i = 0; i < [self.tasks count]; i++) {
+//        Task *e = [self.tasks objectAtIndex:i];
+//         [e setDisplayOrder:i+1 updateDB:YES];
+//    }
     
     [self.taskList insertTask:task];
     [task release];
